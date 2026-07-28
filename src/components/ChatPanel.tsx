@@ -7,18 +7,15 @@
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
-const SUGGESTIONS = [
-  "What should I drink today?",
-  "What food do you have?",
-  "Do you deliver?",
-  "What's new this season?",
-];
-
-const TOOL_LABELS: Record<string, string> = {
-  get_weather: "Checking the weather",
-  get_menu: "Checking the menu",
-  get_specials: "Checking the specials",
-};
+// Everything tenant-specific arrives as props now; tool labels come down the SSE stream
+// with each `tool` event, so this file knows nothing about which tools exist.
+export interface ChatPanelProps {
+  embedKey: string;
+  title?: string;
+  subtitle?: string;
+  placeholder?: string;
+  suggestions?: string[];
+}
 
 interface ToolCall {
   label: string;
@@ -35,12 +32,20 @@ interface Turn {
 
 let nextId = 1;
 
-export function ChatPanel() {
+export function ChatPanel({
+  embedKey,
+  title = "Chat with us",
+  subtitle = "Ask about the menu, the weather, or what to try. Answers come from live data.",
+  placeholder = "Send a message…",
+  suggestions = [],
+}: ChatPanelProps) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const conversationRef = useRef<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Keyed by embed key so two tenants sharing an origin never see each other's session.
+  const sessionStorageKey = `michi.session.${embedKey}`;
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -67,16 +72,28 @@ export function ChatPanel() {
     ]);
 
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      const anonId = localStorage.getItem("michi.anonId");
-      if (anonId) headers["X-Anon-Id"] = anonId;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        "X-Embed-Key": embedKey,
+      };
+      // Server-issued, unlike the anon id it replaced. Scoped to one tenant and revocable.
+      const session = localStorage.getItem(sessionStorageKey);
+      if (session) headers["X-Michi-Session"] = session;
 
       const response = await fetch("/api/chat", {
         method: "POST",
         headers,
         body: JSON.stringify({ message, conversationId: conversationRef.current }),
       });
-      if (!response.ok || !response.body) throw new Error(`chat failed (${response.status})`);
+      if (!response.ok || !response.body) {
+        // Read the JSON reason (bad key, disallowed origin, daily cap) instead of showing
+        // a generic failure. This is why the API attaches CORS headers to its errors.
+        const reason = await response
+          .json()
+          .then((b) => (typeof b?.error === "string" ? b.error : null))
+          .catch(() => null);
+        throw new Error(reason ?? `chat failed (${response.status})`);
+      }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -102,13 +119,16 @@ export function ChatPanel() {
           if (eventType === "tool") {
             patchLast((t) => ({
               ...t,
-              tools: [...t.tools, { label: TOOL_LABELS[payload.name] ?? payload.name }],
+              tools: [...t.tools, { label: payload.label ?? payload.name }],
             }));
           } else if (eventType === "delta") {
             patchLast((t) => ({ ...t, phase: "answering", text: t.text + payload.text }));
           } else if (eventType === "done") {
             conversationRef.current = payload.conversationId;
-            localStorage.setItem("michi.anonId", payload.anonId);
+            // Only sent on the turn that minted the session.
+            if (payload.sessionToken) {
+              localStorage.setItem(sessionStorageKey, payload.sessionToken);
+            }
             patchLast((t) => ({
               ...t,
               phase: "done",
@@ -140,10 +160,10 @@ export function ChatPanel() {
             <div className="empty-mark" aria-hidden>
               ●
             </div>
-            <h2>Chat with Mugshot</h2>
-            <p>Ask about the menu, the weather, or what to try. Answers come from live data.</p>
+            <h2>{title}</h2>
+            <p>{subtitle}</p>
             <div className="suggestions">
-              {SUGGESTIONS.map((s) => (
+              {suggestions.map((s) => (
                 <button key={s} className="suggestion" onClick={() => void send(s)}>
                   {s}
                 </button>
@@ -222,7 +242,7 @@ export function ChatPanel() {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Message Mugshot…"
+          placeholder={placeholder}
           aria-label="Your message"
           disabled={busy}
           autoFocus

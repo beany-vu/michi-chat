@@ -2,16 +2,18 @@
 // as each tool starts) → `delta` (answer text) → `done` (ids + usage). The tool loop is
 // hand-rolled and visible: send tools JSON, execute what the model asks for, resend,
 // repeat until it answers in plain text. ~40 lines, no framework magic.
+//
+// Multi-tenant: the caller presents a public embed key, which resolves to a tenant whose
+// persona, tools and model come from the database. See src/lib/tenant.ts.
 
-import { desc, eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
-import { db } from "@/db";
-import { conversations, messages } from "@/db/schema";
-import { executeTool, PERSONA, toolDefinitions } from "@/lib/tools";
+import { forTenant } from "@/db/tenant-db";
+import { buildSystemPrompt, wrapToolResult } from "@/lib/prompt";
+import { corsHeaders, corsJson, isOriginRegistered, normalizeOrigin, resolveTenant } from "@/lib/tenant";
+import { buildTenantTools } from "@/lib/tools";
 
 const MAX_ROUNDS = 6;
-const HISTORY_WINDOW = 12;
 // App Router route handlers have NO built-in body limit, and the user turn is written to
 // the DB before the model ever sees it. History is replayed every turn, so one oversized
 // message would poison every later turn in that conversation. Cap it at both ends.
@@ -24,27 +26,62 @@ const openai = new OpenAI({
   apiKey: process.env.LITELLM_API_KEY ?? "sk-michi-dev",
 });
 
+/**
+ * Preflight. It carries no embed key, only an Origin, so it can only approve the origin;
+ * the POST enforces that the key and the origin belong to the SAME tenant.
+ */
+export async function OPTIONS(request: NextRequest) {
+  const origin = normalizeOrigin(request.headers.get("origin") ?? "");
+  if (!origin || !(await isOriginRegistered(origin))) {
+    return new Response(null, { status: 403, headers: { Vary: "Origin" } });
+  }
+  return new Response(null, {
+    status: 204,
+    headers: {
+      ...corsHeaders(origin),
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "content-type, x-embed-key, x-michi-session",
+      "Access-Control-Max-Age": "86400",
+    },
+  });
+}
+
 export async function POST(request: NextRequest) {
   // Everything up to the ReadableStream can still fail with a normal status code. Once we
   // return the stream we have committed to a 200, so all validation belongs here.
+  const resolution = await resolveTenant(request);
+  if (!resolution.ok) {
+    const origin = resolution.corsOk ? normalizeOrigin(request.headers.get("origin") ?? "") : null;
+    return corsJson({ error: resolution.error }, resolution.status, origin);
+  }
+  const { tenant, apiKeyId, sessionId, issuedSessionToken, origin } = resolution;
+  const db = forTenant(tenant.id);
+
   if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) {
-    return Response.json({ error: "request body is too large" }, { status: 413 });
+    return corsJson({ error: "request body is too large" }, 413, origin);
   }
 
   let body: { message?: unknown; conversationId?: unknown };
   try {
     body = await request.json();
   } catch {
-    return Response.json({ error: "invalid JSON body" }, { status: 400 });
+    return corsJson({ error: "invalid JSON body" }, 400, origin);
   }
 
   const userText = typeof body.message === "string" ? body.message.trim() : "";
-  if (!userText) return Response.json({ error: "message is required" }, { status: 400 });
+  if (!userText) return corsJson({ error: "message is required" }, 400, origin);
   if (userText.length > MAX_MESSAGE_CHARS) {
-    return Response.json(
+    return corsJson(
       { error: `message must be ${MAX_MESSAGE_CHARS} characters or fewer` },
-      { status: 413 },
+      413,
+      origin,
     );
+  }
+
+  // The daily cap is the only control that holds against someone who has the embed key,
+  // since the key is public and Origin is forgeable off-browser. It protects the bill.
+  if ((await db.userMessagesToday()) >= tenant.dailyMessageCap) {
+    return corsJson({ error: "daily message limit reached" }, 429, origin);
   }
 
   // A malformed id would reach a uuid column and make Postgres throw, so treat anything
@@ -54,44 +91,38 @@ export async function POST(request: NextRequest) {
       ? body.conversationId
       : null;
 
-  const anonId = request.headers.get("x-anon-id") ?? crypto.randomUUID().replaceAll("-", "");
-
-  let conversation: typeof conversations.$inferSelect;
-  let history: (typeof messages.$inferSelect)[];
+  let conversation: Awaited<ReturnType<typeof db.createConversation>>;
+  let history: Awaited<ReturnType<typeof db.recentMessages>>;
   try {
-    // Load or start the conversation; the anon id must match (one visitor cannot
-    // continue another visitor's thread).
-    const existing = requestedId
-      ? ((await db.query.conversations.findFirst({
-          where: (c, { and: allOf, eq: equals }) =>
-            allOf(equals(c.id, requestedId), equals(c.anonId, anonId)),
-        })) ?? null)
-      : null;
-    conversation = existing ?? (await db.insert(conversations).values({ anonId }).returning())[0];
+    // Scoped by tenant AND session, both server-controlled, so a leaked conversationId is
+    // not on its own enough to resume someone else's thread.
+    const existing = requestedId ? await db.findConversation(requestedId, sessionId) : null;
+    conversation =
+      existing ??
+      (await db.createConversation({
+        sessionId,
+        apiKeyId,
+        originHost: origin,
+      }));
 
-    // Memory is rebuilt, not remembered: newest N user/assistant turns, chronological.
-    history = (
-      await db
-        .select()
-        .from(messages)
-        .where(eq(messages.conversationId, conversation.id))
-        .orderBy(desc(messages.createdAt))
-        .limit(HISTORY_WINDOW)
-    ).reverse();
+    history = await db.recentMessages(conversation.id);
 
     // Persist the user turn BEFORE the LLM call — a crash cannot lose what was asked.
-    await db.insert(messages).values({
+    await db.appendMessage({
       conversationId: conversation.id,
       role: "user",
       content: userText,
     });
   } catch (error) {
     console.error("chat preamble failed", error);
-    return Response.json({ error: "Chat is unavailable right now." }, { status: 503 });
+    return corsJson({ error: "Chat is unavailable right now." }, 503, origin);
   }
 
+  const tools = buildTenantTools(tenant.toolConfig);
+  const model = tenant.model ?? process.env.CHAT_MODEL ?? "michi";
+
   const turn: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-    { role: "system", content: PERSONA },
+    { role: "system", content: buildSystemPrompt(tenant.persona) },
     ...history.map((m) => ({ role: m.role, content: m.content }) as const),
     { role: "user", content: userText },
   ];
@@ -115,9 +146,9 @@ export async function POST(request: NextRequest) {
         let answer = "";
         for (let round = 0; round < MAX_ROUNDS; round++) {
           const completion = await openai.chat.completions.create({
-            model: process.env.CHAT_MODEL ?? "michi",
+            model,
             messages: turn,
-            tools: toolDefinitions,
+            ...(tools.definitions.length > 0 ? { tools: tools.definitions } : {}),
           });
           tokensIn += completion.usage?.prompt_tokens ?? 0;
           tokensOut += completion.usage?.completion_tokens ?? 0;
@@ -131,10 +162,22 @@ export async function POST(request: NextRequest) {
 
           turn.push(choice);
           for (const call of toolCalls) {
-            emit("tool", { name: call.function.name, arguments: call.function.arguments });
-            const result = await executeTool(call.function.name, call.function.arguments);
-            toolLog.push({ name: call.function.name, arguments: call.function.arguments, result });
-            turn.push({ role: "tool", tool_call_id: call.id, content: result });
+            emit("tool", {
+              name: call.function.name,
+              label: tools.labelFor(call.function.name),
+              arguments: call.function.arguments,
+            });
+            const result = await tools.execute(call.function.name, call.function.arguments);
+            toolLog.push({
+              name: call.function.name,
+              arguments: call.function.arguments,
+              // Cap what we store too: this column holds full upstream response bodies.
+              result: result.slice(0, 8192),
+            });
+            // Tool output stays in a role:"tool" message and is never folded into the
+            // system prompt. That separation is the one structural defence against a
+            // compromised upstream injecting instructions.
+            turn.push({ role: "tool", tool_call_id: call.id, content: wrapToolResult(result) });
           }
         }
 
@@ -156,24 +199,22 @@ export async function POST(request: NextRequest) {
         }
 
         const latencyMs = Date.now() - started;
-        await db.insert(messages).values({
+        await db.appendMessage({
           conversationId: conversation.id,
           role: "assistant",
           content: answer,
           toolCalls: toolLog.length > 0 ? toolLog : null,
-          model: process.env.CHAT_MODEL ?? "michi",
+          model,
           tokensIn,
           tokensOut,
           latencyMs,
         });
-        await db
-          .update(conversations)
-          .set({ lastMessageAt: new Date() })
-          .where(eq(conversations.id, conversation.id));
+        await db.touchConversation(conversation.id);
 
         emit("done", {
           conversationId: conversation.id,
-          anonId,
+          // Only present on the turn that minted it; the client stores it and replays it.
+          sessionToken: issuedSessionToken,
           usage: { inTokens: tokensIn, outTokens: tokensOut },
           latencyMs,
         });
@@ -188,8 +229,11 @@ export async function POST(request: NextRequest) {
 
   return new Response(stream, {
     headers: {
+      ...corsHeaders(origin),
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
+      // Stops nginx and friends buffering the whole stream into one blob.
+      "X-Accel-Buffering": "no",
     },
   });
 }
