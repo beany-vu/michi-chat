@@ -1,0 +1,59 @@
+services:
+  # Next.js app (UI + API routes in one). Dev server with HMR; drizzle-kit push
+  # syncs the schema before boot so a fresh clone works with one command.
+  app:
+    image: node:22-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+      - app_node_modules:/app/node_modules
+    environment:
+      DATABASE_URL: "postgres://michi@db:5432/michichat"
+      # The app speaks plain OpenAI SDK to LiteLLM; LiteLLM decides the real provider.
+      LITELLM_BASE_URL: "http://litellm:4000/v1"
+      LITELLM_API_KEY: "${MICHI_CHAT_LITELLM_KEY:-sk-michi-dev}"
+      CHAT_MODEL: "michi"
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "127.0.0.1:${MICHI_CHAT_PORT:-3001}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      litellm:
+        condition: service_started
+
+  # LiteLLM proxy: one OpenAI-compatible door in front of any provider. Dev routes
+  # to Ollama in this WSL distro; swapping to DashScope/OpenAI later = config, not code.
+  litellm:
+    image: ghcr.io/berriai/litellm:main-stable
+    volumes:
+      - ./litellm/config.yaml:/app/config.yaml:ro
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    environment:
+      # Docker reaches this WSL distro's own eth0 IP (NOT host.docker.internal — that
+      # only reaches Windows). Re-check with `ip addr show eth0` after a WSL restart.
+      OLLAMA_API_BASE: "http://${MICHI_OLLAMA_HOST}:11434"
+      LITELLM_MASTER_KEY: "${MICHI_CHAT_LITELLM_KEY:-sk-michi-dev}"
+    ports:
+      - "127.0.0.1:${MICHI_CHAT_LITELLM_PORT:-4000}:4000"
+
+  # pgvector image so the RAG knowledge base needs no image migration later.
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: michi
+      POSTGRES_DB: michichat
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "127.0.0.1:${MICHI_CHAT_DB_PORT:-5435}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U michi -d michichat"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
+  app_node_modules:

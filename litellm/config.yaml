@@ -1,0 +1,16 @@
+# LiteLLM model routing. The app only ever asks for the ALIASES on the left;
+# what actually serves them is config here — the whole point of the proxy.
+model_list:
+  - model_name: michi
+    litellm_params:
+      model: ollama_chat/qwen3.5:4b
+      api_base: os.environ/OLLAMA_API_BASE
+
+  # A second, different model for judging/evals later (never grade your own homework).
+  - model_name: judge
+    litellm_params:
+      model: ollama_chat/qwen2.5:7b
+      api_base: os.environ/OLLAMA_API_BASE
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
