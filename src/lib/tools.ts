@@ -41,7 +41,13 @@ export const toolDefinitions: OpenAI.Chat.Completions.ChatCompletionTool[] = [
 ];
 
 async function getJson(url: string): Promise<unknown> {
-  const response = await fetch(url, { headers: UA, signal: AbortSignal.timeout(15_000) });
+  // redirect: "manual" on purpose. Following redirects would let a 302 walk past any URL
+  // check we add later, which is how SSRF guards usually get bypassed.
+  const response = await fetch(url, {
+    headers: UA,
+    redirect: "manual",
+    signal: AbortSignal.timeout(15_000),
+  });
   if (!response.ok) throw new Error(`${url} -> ${response.status}`);
   return response.json();
 }
