@@ -10,3 +10,6 @@ import * as schema from "./schema";
 const client = postgres(process.env.DATABASE_URL ?? "postgres://michi@localhost:5435/michichat");
 
 export const dbRoot = drizzle(client, { schema });
+
+/** Only for scripts and tests: the pool keeps the process alive otherwise. */
+export const closeDb = () => client.end({ timeout: 5 });
