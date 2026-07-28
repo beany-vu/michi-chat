@@ -13,6 +13,8 @@ services:
       LITELLM_BASE_URL: "http://litellm:4000/v1"
       LITELLM_API_KEY: "${MICHI_CHAT_LITELLM_KEY:-sk-michi-dev}"
       CHAT_MODEL: "michi"
+      ADMIN_PASSWORD: "${MICHI_ADMIN_PASSWORD:-michi-admin-dev}"
+      DEFAULT_TENANT_SLUG: "${MICHI_DEFAULT_TENANT:-mugshot}"
     command: sh -c "npm install && npm run dev"
     ports:
       - "127.0.0.1:${MICHI_CHAT_PORT:-3001}:3000"

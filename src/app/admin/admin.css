@@ -1,0 +1,288 @@
+/* Admin styling. Deliberately plain: dense tables, one column, no component library. */
+
+.admin {
+  --bg: #ffffff;
+  --fg: #16130f;
+  --muted: #6b6155;
+  --line: #e6e0d8;
+  --accent: #8a5a2b;
+  --soft: #faf7f3;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--fg);
+  font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  .admin {
+    --bg: #16130f;
+    --fg: #f2ece4;
+    --muted: #a2968a;
+    --line: #322b23;
+    --accent: #d0a06a;
+    --soft: #1e1a15;
+  }
+}
+
+.admin-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-bar nav {
+  display: flex;
+  gap: 18px;
+}
+
+.admin a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.admin a:hover {
+  text-decoration: underline;
+}
+
+.admin-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 24px 80px;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.head h1 {
+  font-size: 22px;
+  font-weight: 600;
+}
+.head-links {
+  display: flex;
+  gap: 16px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.admin table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 28px;
+}
+.admin th,
+.admin td {
+  text-align: left;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+.admin th {
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.admin .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.admin code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  background: var(--soft);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.pill {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+.pill.active {
+  color: #2f7a3f;
+  border-color: #2f7a3f55;
+}
+.pill.disabled {
+  color: var(--muted);
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 20px;
+  background: var(--soft);
+}
+.card h2 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.admin label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 12px 0 4px;
+}
+.admin input,
+.admin textarea,
+.admin select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+}
+.admin textarea {
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+}
+.admin small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+.admin button {
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.admin button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.admin button.ghost {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--line);
+}
+
+.row-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.row-form > div {
+  flex: 1 1 200px;
+}
+.row-form label {
+  margin-top: 0;
+}
+
+.editor {
+  display: grid;
+  gap: 20px;
+}
+.editor fieldset {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 4px 20px 20px;
+}
+.editor legend {
+  padding: 0 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.pack {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  margin-top: 14px;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--fg);
+  margin-bottom: 4px;
+}
+.check input {
+  width: auto;
+}
+.actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.error {
+  color: #b3261e;
+}
+.ok {
+  color: #2f7a3f;
+}
+.note {
+  color: var(--muted);
+  margin-bottom: 20px;
+  max-width: 70ch;
+}
+
+.login {
+  max-width: 320px;
+  margin: 15vh auto;
+  padding: 0 24px;
+}
+.login h1 {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+.login button {
+  margin-top: 16px;
+  width: 100%;
+}
+
+.transcript {
+  display: grid;
+  gap: 14px;
+}
+.turn {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+.turn.user {
+  background: var(--soft);
+}
+.turn header {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+/* Plain text on purpose: never render stored message content as markdown or HTML here. */
+.turn pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font: inherit;
+}
+.turn details pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  background: var(--soft);
+  padding: 10px;
+  border-radius: 7px;
+  overflow-x: auto;
+  margin-top: 8px;
+}
