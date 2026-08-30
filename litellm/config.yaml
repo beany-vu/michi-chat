@@ -12,6 +12,13 @@ model_list:
       model: ollama_chat/qwen2.5:7b
       api_base: os.environ/OLLAMA_API_BASE
 
+  # Trial alias: point a tenant's "Model alias" field at this to A/B a different chat
+  # model with zero code changes. Currently Gemma 3 4B.
+  - model_name: gemma
+    litellm_params:
+      model: ollama_chat/gemma3:4b
+      api_base: os.environ/OLLAMA_API_BASE
+
   # Embeddings for the RAG knowledge base. 768 dimensions — kb_chunks.embedding is sized
   # to this, so swapping the model here also means a migration plus re-embedding.
   - model_name: embed
