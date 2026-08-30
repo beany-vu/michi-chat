@@ -17,6 +17,8 @@ export interface ChatPanelProps {
   suggestions?: string[];
   /** Privacy/scope notice rendered under the composer; hidden when empty. */
   disclaimer?: string;
+  /** Model alias shown in the footer ("AI model: …"); hidden when empty. */
+  modelLabel?: string;
 }
 
 interface ToolCall {
@@ -41,12 +43,14 @@ export function ChatPanel({
   placeholder = "Send a message…",
   suggestions = [],
   disclaimer,
+  modelLabel,
 }: ChatPanelProps) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const conversationRef = useRef<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const chipsRef = useRef<HTMLDivElement>(null);
   // Keyed by embed key so two tenants sharing an origin never see each other's session.
   const sessionStorageKey = `michi.session.${embedKey}`;
 
@@ -235,6 +239,36 @@ export function ChatPanel({
         )}
       </div>
 
+      {!empty && suggestions.length > 0 && (
+        // The chips return after the first message as an arrowed carousel, so a visitor
+        // is never stranded wondering what else they can ask.
+        <div className="chips-carousel">
+          <button
+            type="button"
+            className="chips-arrow"
+            aria-label="Scroll suggestions left"
+            onClick={() => chipsRef.current?.scrollBy({ left: -180, behavior: "smooth" })}
+          >
+            ‹
+          </button>
+          <div className="suggestions suggestions-compact" ref={chipsRef}>
+            {suggestions.map((s) => (
+              <button key={s} className="suggestion" onClick={() => void send(s)} disabled={busy}>
+                {s}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="chips-arrow"
+            aria-label="Scroll suggestions right"
+            onClick={() => chipsRef.current?.scrollBy({ left: 180, behavior: "smooth" })}
+          >
+            ›
+          </button>
+        </div>
+      )}
+
       <form
         className="composer"
         onSubmit={(e) => {
@@ -259,6 +293,12 @@ export function ChatPanel({
           {disclaimer}
         </p>
       )}
+      <p className="credit">
+        <a href="https://beany-vu.github.io/michi-chat/" target="_blank" rel="noopener noreferrer">
+          Powered by michi-chat
+        </a>
+        {modelLabel && <> · AI model: {modelLabel}</>}
+      </p>
     </div>
   );
 }

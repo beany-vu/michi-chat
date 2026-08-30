@@ -41,11 +41,17 @@ docker compose up -d --force-recreate litellm
 
 ## Trying a different model on one tenant
 
-Add a trial alias in the yaml (say, `gemma` → `ollama_chat/gemma3:4b`), restart the litellm
-container, and set one tenant's **Model alias** field to `gemma` in the admin UI. That tenant
-now runs the new model while every other tenant is untouched — A/B testing as configuration:
+Add a trial alias in the yaml (say, `gemma` → `ollama_chat/gemma3:4b`, or the bundled
+`michi-mini` → `gemma3:1b` economy tier), restart the litellm container, and set one tenant's
+**Model alias** field to it in the admin UI. That tenant now runs the new model while every
+other tenant is untouched — A/B testing as configuration. The alias in use is shown to
+visitors in the chat footer ("AI model: …").
 
-![A test tenant answering through the gemma alias](/screenshots/gemma-testcafe.png)
+![A test tenant answering through a trial alias](/screenshots/gemma-testcafe.png)
+
+Smaller-model honesty: a ~1B model answers roughly 3x faster than a 4B one, but tool-calling
+reliability degrades. Before switching a real tenant down a size, run `kb:eval` and a handful
+of real tool questions against it.
 
 ## The embedding caveat
 

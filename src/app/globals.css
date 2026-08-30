@@ -281,3 +281,38 @@ body {
   color: var(--ink-soft);
   text-align: center;
 }
+
+/* Tenant logo in the topbar; replaces the accent dot when set. */
+.brand-logo { height: 28px; width: 28px; border-radius: 6px; object-fit: cover; }
+
+/* Attribution, deliberately quiet. */
+.topbar { display: flex; align-items: center; justify-content: space-between; }
+.powered-by { font-size: 0.7rem; color: var(--ink-soft); text-decoration: none; }
+.powered-by:hover { text-decoration: underline; }
+
+/* The suggestion chips after the conversation has started: one compact row. */
+.suggestions-compact {
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 0.4rem 1rem 0;
+  scrollbar-width: none;
+}
+.suggestions-compact .suggestion { font-size: 0.75rem; padding: 0.3rem 0.7rem; flex: 0 0 auto; }
+
+.model-note { display: block; margin-top: 0.15rem; opacity: 0.8; }
+
+/* Suggestion carousel after the conversation starts. */
+.chips-carousel { display: flex; align-items: center; gap: 0.25rem; padding: 0.4rem 0.5rem 0; }
+.chips-carousel .suggestions-compact { padding: 0; flex: 1 1 auto; }
+.chips-arrow {
+  flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%;
+  border: 1px solid var(--line, #d8dcd0); background: transparent;
+  color: var(--ink-soft); font-size: 0.9rem; line-height: 1; cursor: pointer;
+}
+.chips-arrow:hover { color: var(--ink); }
+
+/* Product credit + model, quiet, at the very bottom. */
+.credit { margin: 0.15rem 1rem 0.6rem; font-size: 0.65rem; text-align: center; color: var(--ink-soft); opacity: 0.85; }
+.credit a { color: inherit; text-decoration: none; }
+.credit a:hover { text-decoration: underline; }

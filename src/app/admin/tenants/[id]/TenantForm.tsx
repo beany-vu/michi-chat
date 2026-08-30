@@ -89,6 +89,18 @@ export function TenantForm({
         <label htmlFor="brand-accent">Accent colour</label>
         <input id="brand-accent" name="brand.accent" defaultValue={branding.accent ?? ""} />
 
+        <label htmlFor="brand-logo">Logo URL</label>
+        <input
+          id="brand-logo"
+          name="brand.logoUrl"
+          defaultValue={branding.logoUrl ?? ""}
+          placeholder="https://www.example.com/logo.png"
+        />
+        <small>
+          Shown in the chat header instead of the coloured dot. Must be https; loaded by the
+          visitor&apos;s browser, never by this server. Square images look best.
+        </small>
+
         <label htmlFor="brand-suggestions">Suggestion chips</label>
         <textarea
           id="brand-suggestions"
@@ -104,7 +116,7 @@ export function TenantForm({
           name="brand.disclaimer"
           rows={3}
           defaultValue={branding.disclaimer ?? ""}
-          placeholder="Please don't share personal or sensitive information here. I can only help with questions about our cafe."
+          placeholder="Please don't share personal or sensitive information here. I can only help with questions about our cafe. We never ask for payment in this chat."
         />
         <small>
           Shown under the message box on every visit: ask visitors not to share sensitive

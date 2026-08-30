@@ -25,9 +25,13 @@ Click your business to open its settings page. Work top to bottom:
 - **Persona** — describe who the assistant is, in plain words: your business name, location,
   what you sell, the tone to use ("warm and brief", "playful"). This is its personality, not
   its knowledge — facts come next.
-- **Branding** — the title, greeting, colors and suggested questions visitors see.
-- **Visitor notice** — the "please don't share sensitive information" text under the message
-  box. A good default is suggested; adjust it to your voice.
+- **Branding** — the title, greeting, colors, your logo (paste an https image URL) and the
+  suggested questions visitors see. The suggestions stay available during the conversation as
+  a small arrowed carousel above the message box.
+- **Visitor notice** — the text under the message box. Use it for three things: ask visitors
+  not to share sensitive information, say what the assistant covers, and state that you never
+  ask for payment in chat (and where payment actually happens). That last line is real
+  protection against impersonation scams.
 - **Tools** — switches for live abilities (like reading your current menu from your website).
   Turn on **search_kb** so the assistant can use the knowledge you add in the next step.
 - **Daily message cap** — the safety valve. Once a day's messages hit this number, the

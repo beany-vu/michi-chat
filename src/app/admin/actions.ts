@@ -153,6 +153,20 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
     disclaimer: String(formData.get("brand.disclaimer") ?? "").trim() || undefined,
   };
 
+  // Browser-rendered only (img src in the visitor's page), so unlike tool base URLs this
+  // needs no internal-host blocking — but it must be https and carry no credentials.
+  const rawLogo = String(formData.get("brand.logoUrl") ?? "").trim();
+  if (rawLogo) {
+    try {
+      const url = new URL(rawLogo);
+      if (url.protocol !== "https:") throw new Error("must be https");
+      if (url.username || url.password) throw new Error("credentials are not allowed");
+      branding.logoUrl = url.toString();
+    } catch (error) {
+      return { error: `Logo URL: ${error instanceof Error ? error.message : "invalid"}` };
+    }
+  }
+
   await dbRoot
     .update(tenants)
     .set({

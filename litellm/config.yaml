@@ -19,6 +19,14 @@ model_list:
       model: ollama_chat/gemma3:4b
       api_base: os.environ/OLLAMA_API_BASE
 
+  # The economy tier: ~4x smaller and faster than michi. Honest caveat, measured not
+  # assumed: tool-calling reliability degrades below ~4B, so run kb:eval and real tool
+  # questions against any tenant before switching it here.
+  - model_name: michi-mini
+    litellm_params:
+      model: ollama_chat/gemma3:1b
+      api_base: os.environ/OLLAMA_API_BASE
+
   # Embeddings for the RAG knowledge base. 768 dimensions — kb_chunks.embedding is sized
   # to this, so swapping the model here also means a migration plus re-embedding.
   - model_name: embed

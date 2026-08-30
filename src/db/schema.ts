@@ -30,6 +30,10 @@ export interface Branding {
   /** Visitor-facing notice under the composer: privacy ("don't share sensitive info")
    *  and scope ("I only answer questions about this business"). Admin-composed. */
   disclaimer?: string;
+  /** https URL of the tenant's logo, shown in the chat header. Rendered by the
+   *  visitor's browser only — this server never fetches it, so the no-tenant-URLs
+   *  (SSRF) rule does not apply. */
+  logoUrl?: string;
 }
 
 // One row per cafe. Everything that used to be a constant in the code (persona, tool

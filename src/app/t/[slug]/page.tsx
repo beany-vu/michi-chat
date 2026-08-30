@@ -12,16 +12,26 @@ export default async function TenantChatPage({ params }: { params: Promise<{ slu
 
   const { tenant, embedKey } = loaded;
   const branding = tenant.branding ?? {};
+  const brandName = branding.title || tenant.name;
 
   return (
     <div className="app">
       <header className="topbar">
         <div className="brand">
-          <span className="brand-mark" aria-hidden style={{ color: branding.accent }}>
-            ●
-          </span>
-          <span className="brand-name">{branding.title ?? tenant.name}</span>
-          <span className="brand-sub">{tenant.name}</span>
+          {branding.logoUrl ? (
+            // Rendered by the visitor's browser, never fetched by this server, so the
+            // no-tenant-URLs rule (an SSRF rule) does not apply. Validated https on save.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="brand-logo" src={branding.logoUrl} alt="" />
+          ) : (
+            <span className="brand-mark" aria-hidden style={{ color: branding.accent }}>
+              ●
+            </span>
+          )}
+          <span className="brand-name">{brandName}</span>
+          {branding.title && branding.title !== tenant.name && (
+            <span className="brand-sub">{tenant.name}</span>
+          )}
         </div>
       </header>
       <ChatPanel
@@ -31,6 +41,7 @@ export default async function TenantChatPage({ params }: { params: Promise<{ slu
         placeholder={branding.placeholder}
         suggestions={branding.suggestions ?? []}
         disclaimer={branding.disclaimer}
+        modelLabel={tenant.model ?? process.env.CHAT_MODEL ?? "michi"}
       />
     </div>
   );
