@@ -367,11 +367,13 @@ Grouped by where they bite. You will know most; the value is in the specific got
   Wiring `stream: true` through a tool loop is genuinely instructive: you must buffer enough of
   each round to tell a tool call from an answer.
 - **RLS**, pending a `NOSUPERUSER` role.
-- **The answers eval shipped** (`eval:answers`, judge alias = qwen3:8b after calibrating away
-  a 7B grader's false negatives; baseline 10/10 with the semantic cache in the loop). The
-  kb/mugshot documents now carry real facts harvested from the live site. What remains from
-  the original roadmap is only the production widget embed (built on a mugshotcoffee branch,
-  waiting on the server deploy in ai-docs/michi-chat/deploy/).
+- **The whole roadmap shipped and LAUNCHED.** RAG, the answers eval (`eval:answers`, judge
+  = qwen3:8b), and the production widget are all live: chat.mugshotmnl.com serves two tenants
+  (mugshot + a personal beany bot) on the published image, embedded on the real cafe site.
+  Day 12 of the ai-docs course covers the launch-day hardening (safety from real attacks,
+  hallucination control, latency, the ops lessons). What is genuinely left is polish, not the
+  arc: real streaming (below), RLS (below), and per-tenant custom metrics if a second vertical
+  ever needs them.
 - **LiteLLM's own database**, and with it virtual keys and budgets. Deferred because spend is
   genuinely $0 on local Ollama. The trigger to revisit is written down: the day
   `litellm/config.yaml` points at a paid provider, virtual keys buy a hard budget ceiling
