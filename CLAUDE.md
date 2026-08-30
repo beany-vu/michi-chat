@@ -13,6 +13,9 @@ carry over 1:1.
 ## Rules
 
 - **Commit messages: never mention AI assistance.** No Co-Authored-By trailers, no tool names.
+- **Commit convention: `type - scope: summary`** (scope optional: `type: summary`). Types:
+  feature, fix, docs, refactor, test, build, ci, chore. Summary imperative, lowercase,
+  ≤60 chars. Body only when the why is not obvious, wrapped at 72.
 - **Everything runs via docker**: `docker compose up -d` (app :3001, LiteLLM :4000, Postgres :5435).
   Never run the app or db directly on the host.
 - Ollama must be running in this WSL distro (`ollama serve`); `MICHI_OLLAMA_HOST` in `.env` is the
@@ -82,7 +85,8 @@ migrations via drizzle-orm's programmatic migrator, then starts the server) and 
 GHCR by `.github/workflows/docker-publish.yml` on `v*` tags. Outsiders run it via the three
 files in `examples/quickstart/` — that compose pins LiteLLM by digest and requires passwords
 instead of dev defaults. GHCR packages start private: flip to public once after the first
-publish. The `ghcr.io/OWNER/michi-chat` placeholder needs the real GitHub owner before tagging.
+publish. The image is `ghcr.io/beany-vu/michi-chat`; the workflow runs on a self-hosted runner,
+which must be registered on the repo before pushing a tag.
 
 ## Roadmap
 
