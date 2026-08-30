@@ -6,10 +6,11 @@ model_list:
       model: ollama_chat/qwen3.5:4b
       api_base: os.environ/OLLAMA_API_BASE
 
-  # A second, different model for judging/evals later (never grade your own homework).
+  # A second, different model for judging/evals (never grade your own homework).
+  # qwen3:8b after qwen2.5:7b proved too erratic on compound rubric facts.
   - model_name: judge
     litellm_params:
-      model: ollama_chat/qwen2.5:7b
+      model: ollama_chat/qwen3:8b
       api_base: os.environ/OLLAMA_API_BASE
 
   # Trial alias: point a tenant's "Model alias" field at this to A/B a different chat

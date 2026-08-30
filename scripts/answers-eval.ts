@@ -66,10 +66,11 @@ async function judge(testCase: GoldenCase, answer: string): Promise<Verdict> {
       {
         role: "system",
         content:
-          "You grade a cafe chatbot's answer. Judge MEANING, not wording. Reply with ONLY " +
+          "You grade a cafe chatbot's answer. Judge MEANING, not wording; currency symbols and " +
+          "spellings are equivalent (\u20b199 = P99 = PHP 99). Reply with ONLY " +
           'a JSON object: {"pass": boolean, "missing": string[], "violations": string[], "note": string}. ' +
           '"missing" lists required facts the answer failed to convey. "violations" lists ' +
-          "forbidden claims the answer made. pass is true only when missing and violations are both empty.",
+          "forbidden claims the answer made. pass is true only when missing and violations are both empty. /no_think",
       },
       {
         role: "user",
@@ -83,7 +84,8 @@ async function judge(testCase: GoldenCase, answer: string): Promise<Verdict> {
     ],
   });
   const text = completion.choices[0].message.content ?? "";
-  const match = text.match(/\{[\s\S]*\}/);
+  const cleaned = text.replace(/<think>[\s\S]*?<\/think>/g, "");
+  const match = cleaned.match(/\{[\s\S]*\}/);
   if (!match) return { pass: false, missing: [], violations: [], note: `unparseable verdict: ${text.slice(0, 120)}` };
   try {
     const parsed = JSON.parse(match[0]) as Verdict;
