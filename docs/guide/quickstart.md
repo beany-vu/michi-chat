@@ -1,6 +1,7 @@
 # Quickstart
 
-You need Docker and about five minutes. No clone, no Node toolchain.
+You need Docker and about five minutes. No clone, no Node toolchain, no account anywhere:
+the image is public at `ghcr.io/beany-vu/michi-chat`.
 
 ## 1. Get the three files
 
