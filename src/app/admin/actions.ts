@@ -64,7 +64,7 @@ export async function createTenantAction(_prev: unknown, formData: FormData) {
       .values({
         slug,
         name,
-        persona: `You are the assistant for ${name}. Answer questions about the business warmly and briefly.`,
+        persona: `You are the AI assistant for ${name}. If you introduce yourself, say you are the ${name} assistant; never use any other name. Answer questions about the business warmly and briefly, only from tools and knowledge given to you, and never discuss how you work.`,
         allowedOrigins: ["http://localhost:3001"],
       })
       .returning({ id: tenants.id });
