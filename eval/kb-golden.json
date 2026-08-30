@@ -1,0 +1,23 @@
+{
+  "_comment": "Golden set for recall@k. Each entry: a question a real visitor would type, and the TITLE of the document whose chunks should be retrieved. Grows with the KB; keep questions in visitor voice, typos and all.",
+  "cases": [
+    { "question": "what time do you open", "expectDoc": "Hours and location" },
+    { "question": "are you open on monday?", "expectDoc": "Hours and location" },
+    { "question": "until what time can I order food", "expectDoc": "Hours and location" },
+    { "question": "where exactly are you located", "expectDoc": "Hours and location" },
+    { "question": "is there parking nearby", "expectDoc": "Hours and location" },
+    { "question": "how do I get there by train", "expectDoc": "Hours and location" },
+    { "question": "how much is a latte", "expectDoc": "Frequently asked questions" },
+    { "question": "do you deliver to makati", "expectDoc": "Frequently asked questions" },
+    { "question": "can I reserve a table for 8 people", "expectDoc": "Frequently asked questions" },
+    { "question": "do u have wifi", "expectDoc": "Frequently asked questions" },
+    { "question": "can I bring my dog", "expectDoc": "Frequently asked questions" },
+    { "question": "any vegan food?", "expectDoc": "Frequently asked questions" },
+    { "question": "can we rent the cafe for a birthday", "expectDoc": "Frequently asked questions" },
+    { "question": "what beans do you use for espresso", "expectDoc": "Coffee program and retail beans" },
+    { "question": "do you sell coffee beans to take home", "expectDoc": "Coffee program and retail beans" },
+    { "question": "do you have oat milk", "expectDoc": "Coffee program and retail beans" },
+    { "question": "is there decaf", "expectDoc": "Coffee program and retail beans" },
+    { "question": "do you do pour over", "expectDoc": "Coffee program and retail beans" }
+  ]
+}

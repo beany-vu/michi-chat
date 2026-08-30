@@ -9,11 +9,13 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/lib/prompt.test.ts src/lib/tenant.test.ts src/lib/tools/tools.test.ts",
-    "test:isolation": "tsx --test src/db/isolation.test.ts"
+    "test": "tsx --test src/lib/prompt.test.ts src/lib/tenant.test.ts src/lib/tools/tools.test.ts src/lib/rag/chunk.test.ts src/lib/slack.test.ts",
+    "test:isolation": "tsx --test src/db/isolation.test.ts",
+    "kb:ingest": "tsx scripts/kb-ingest.ts",
+    "kb:eval": "tsx scripts/kb-eval.ts"
   },
   "dependencies": {
-    "drizzle-orm": "^0.44.0",
+    "drizzle-orm": "^0.45.2",
     "next": "^15.3.0",
     "openai": "^5.0.0",
     "postgres": "^3.4.5",

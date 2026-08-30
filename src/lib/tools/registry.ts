@@ -28,6 +28,11 @@ export interface ToolConfigField {
   required?: boolean;
 }
 
+/** Supplied by the platform per call, never by tenant config. */
+export interface ToolContext {
+  tenantId: string;
+}
+
 export interface ToolPack {
   id: string;
   /** Shown to the model. */
@@ -36,7 +41,7 @@ export interface ToolPack {
   label: string;
   /** Drives the admin form, so adding a pack grows the UI automatically. */
   configFields: ToolConfigField[];
-  run(config: Record<string, string>, args: string): Promise<string>;
+  run(config: Record<string, string>, args: string, ctx: ToolContext): Promise<string>;
 }
 
 export const USER_AGENT = { "User-Agent": "michi-chat/0.1" };

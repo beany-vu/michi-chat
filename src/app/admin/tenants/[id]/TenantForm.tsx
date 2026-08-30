@@ -136,6 +136,22 @@ export function TenantForm({
       </fieldset>
 
       <fieldset>
+        <legend>Notifications</legend>
+        <label htmlFor="slackWebhookUrl">Slack incoming webhook</label>
+        <input
+          id="slackWebhookUrl"
+          name="slackWebhookUrl"
+          defaultValue={tenant.slackWebhookUrl ?? ""}
+          placeholder="https://hooks.slack.com/services/T…/B…/…"
+        />
+        <small>
+          Notifies this tenant&apos;s Slack when a new conversation starts and when the daily
+          cap is reached. Must be exactly a hooks.slack.com/services/ URL; nothing else is
+          accepted. Leave blank to disable.
+        </small>
+      </fieldset>
+
+      <fieldset>
         <legend>Allowed origins</legend>
         <textarea
           id="allowedOrigins"

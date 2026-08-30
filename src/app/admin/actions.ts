@@ -15,6 +15,8 @@ import { dbRoot } from "@/db";
 import { apiKeys, tenants, type Branding, type ToolConfig } from "@/db/schema";
 import { login, logout, requireAdmin } from "@/lib/admin-auth";
 import { MAX_PERSONA_CHARS } from "@/lib/prompt";
+import { deleteDocument, ingestDocument } from "@/lib/rag";
+import { validateSlackWebhookUrl } from "@/lib/slack";
 import { normalizeOrigin } from "@/lib/tenant";
 import { TOOL_PACKS } from "@/lib/tools";
 
@@ -129,6 +131,18 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
     return { error: error instanceof Error ? error.message : "Invalid tool config." };
   }
 
+  // The one tenant-supplied URL, allowed only because validation pins it to exactly
+  // https://hooks.slack.com/services/… (see src/lib/slack.ts for the SSRF reasoning).
+  let slackWebhookUrl: string | null = null;
+  const rawWebhook = String(formData.get("slackWebhookUrl") ?? "").trim();
+  if (rawWebhook) {
+    try {
+      slackWebhookUrl = validateSlackWebhookUrl(rawWebhook);
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : "Invalid Slack webhook." };
+    }
+  }
+
   const branding: Branding = {
     title: String(formData.get("brand.title") ?? "").trim() || undefined,
     subtitle: String(formData.get("brand.subtitle") ?? "").trim() || undefined,
@@ -149,6 +163,7 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
       branding,
       toolConfig,
       allowedOrigins: origins,
+      slackWebhookUrl,
       updatedAt: new Date(),
     })
     .where(eq(tenants.id, tenantId));
@@ -167,6 +182,38 @@ export async function createKeyAction(tenantId: string, formData: FormData) {
     publicKey: `pk_${randomBytes(18).toString("base64url")}`,
   });
   revalidatePath(`/admin/tenants/${tenantId}/keys`);
+}
+
+const MAX_KB_DOC_CHARS = 100_000;
+
+export async function saveKbDocumentAction(tenantId: string, _prev: unknown, formData: FormData) {
+  await requireAdmin();
+  const title = String(formData.get("title") ?? "").trim();
+  const content = String(formData.get("content") ?? "").trim();
+  if (!title) return { error: "Title is required." };
+  if (!content) return { error: "Content is required." };
+  if (content.length > MAX_KB_DOC_CHARS) {
+    return { error: `Content must be ${MAX_KB_DOC_CHARS} characters or fewer.` };
+  }
+
+  try {
+    const chunks = await ingestDocument({ tenantId, title, content });
+    revalidatePath(`/admin/tenants/${tenantId}/kb`);
+    return {
+      ok: true as const,
+      info: chunks === -1 ? "Unchanged, nothing re-embedded." : `Embedded ${chunks} chunks.`,
+    };
+  } catch (error) {
+    console.error("kb ingest failed", error);
+    // The embedding service being down is the realistic failure; say that, not a stack.
+    return { error: "Ingestion failed. Is the embedding model reachable through LiteLLM?" };
+  }
+}
+
+export async function deleteKbDocumentAction(tenantId: string, documentId: string) {
+  await requireAdmin();
+  await deleteDocument(tenantId, documentId);
+  revalidatePath(`/admin/tenants/${tenantId}/kb`);
 }
 
 export async function revokeKeyAction(tenantId: string, keyId: string) {

@@ -2,11 +2,12 @@
 // definitions to offer the model, the labels to show the visitor, and one executor.
 
 import type { ToolConfig } from "@/db/schema";
+import { KB_PACKS } from "./kb";
 import { MUGSHOT_PACKS } from "./mugshot";
 import type { ToolPack } from "./registry";
 
 export const TOOL_PACKS: Record<string, ToolPack> = Object.fromEntries(
-  [...MUGSHOT_PACKS].map((pack) => [pack.id, pack]),
+  [...MUGSHOT_PACKS, ...KB_PACKS].map((pack) => [pack.id, pack]),
 );
 
 export interface TenantTools {
@@ -15,7 +16,7 @@ export interface TenantTools {
   execute(name: string, args: string): Promise<string>;
 }
 
-export function buildTenantTools(toolConfig: ToolConfig): TenantTools {
+export function buildTenantTools(toolConfig: ToolConfig, tenantId: string): TenantTools {
   const enabled = Object.entries(toolConfig ?? {}).filter(
     ([id, config]) => config?.enabled && TOOL_PACKS[id],
   );
@@ -36,7 +37,7 @@ export function buildTenantTools(toolConfig: ToolConfig): TenantTools {
         Object.entries(rawConfig).map(([k, v]) => [k, typeof v === "string" ? v : ""]),
       );
       try {
-        return await TOOL_PACKS[id].run(config, args);
+        return await TOOL_PACKS[id].run(config, args, { tenantId });
       } catch (error) {
         // Errors go back to the MODEL as JSON, so a dead upstream becomes an apology
         // rather than a failed turn.
@@ -48,4 +49,4 @@ export function buildTenantTools(toolConfig: ToolConfig): TenantTools {
   };
 }
 
-export type { ToolPack, ToolConfigField } from "./registry";
+export type { ToolPack, ToolConfigField, ToolContext } from "./registry";

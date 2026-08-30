@@ -10,6 +10,7 @@ import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { forTenant } from "@/db/tenant-db";
 import { buildSystemPrompt, wrapToolResult } from "@/lib/prompt";
+import { notifySlack } from "@/lib/slack";
 import { corsHeaders, corsJson, isOriginRegistered, normalizeOrigin, resolveTenant } from "@/lib/tenant";
 import { buildTenantTools } from "@/lib/tools";
 
@@ -80,8 +81,17 @@ export async function POST(request: NextRequest) {
 
   // The daily cap is the only control that holds against someone who has the embed key,
   // since the key is public and Origin is forgeable off-browser. It protects the bill.
-  if ((await db.userMessagesToday()) >= tenant.dailyMessageCap) {
+  const usedToday = await db.userMessagesToday();
+  if (usedToday >= tenant.dailyMessageCap) {
     return corsJson({ error: "daily message limit reached" }, 429, origin);
+  }
+  // This turn consumes the last slot of the day, and rejected turns are never stored, so
+  // this condition is true exactly once per day: the natural "notify once" point.
+  if (usedToday + 1 === tenant.dailyMessageCap) {
+    void notifySlack(
+      tenant.slackWebhookUrl,
+      `:warning: ${tenant.name}: daily message cap (${tenant.dailyMessageCap}) reached. The bot will decline further messages until midnight.`,
+    );
   }
 
   // A malformed id would reach a uuid column and make Postgres throw, so treat anything
@@ -104,6 +114,14 @@ export async function POST(request: NextRequest) {
         apiKeyId,
         originHost: origin,
       }));
+    if (!existing) {
+      // Fire-and-forget by design: notifySlack never throws and never blocks the turn.
+      // Only a snippet of the first message goes out; the transcript stays in the DB.
+      void notifySlack(
+        tenant.slackWebhookUrl,
+        `:speech_balloon: New conversation for ${tenant.name}${origin ? ` from ${origin}` : ""}: "${userText.slice(0, 140)}"`,
+      );
+    }
 
     history = await db.recentMessages(conversation.id);
 
@@ -118,7 +136,7 @@ export async function POST(request: NextRequest) {
     return corsJson({ error: "Chat is unavailable right now." }, 503, origin);
   }
 
-  const tools = buildTenantTools(tenant.toolConfig);
+  const tools = buildTenantTools(tenant.toolConfig, tenant.id);
   const model = tenant.model ?? process.env.CHAT_MODEL ?? "michi";
 
   const turn: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [

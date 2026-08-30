@@ -14,6 +14,7 @@ import {
   timestamp,
   unique,
   uuid,
+  vector,
 } from "drizzle-orm/pg-core";
 
 /** Per-pack settings, e.g. { get_menu: { enabled: true, baseUrl: "https://..." } }. */
@@ -46,6 +47,11 @@ export const tenants = pgTable("tenants", {
   // Browser-enforced scoping for the embed, stored as "scheme://host[:port]", lowercased.
   allowedOrigins: text("allowed_origins").array().notNull().default([]),
   dailyMessageCap: integer("daily_message_cap").notNull().default(500),
+  // The ONE tenant-supplied URL in the system, and only because it is pinned to a single
+  // host: validation (src/lib/slack.ts) accepts exactly https://hooks.slack.com/services/…,
+  // so it cannot be aimed at Ollama, the DB, or LiteLLM. Notifies on new conversations
+  // and on the day's cap being reached.
+  slackWebhookUrl: text("slack_webhook_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -169,9 +175,9 @@ export const rateBuckets = pgTable(
   (t) => [primaryKey({ columns: [t.bucketKey, t.windowStart] })],
 );
 
-// --- The RAG seam -----------------------------------------------------------------
-// Not created yet, but the shape is decided so retrieval is tenant-scoped from its first
-// line rather than retrofitted. Two rules that are expensive to change later:
+// --- The RAG tables -----------------------------------------------------------------
+// Two rules that were decided before these existed, because they are expensive to
+// change later:
 //
 //   1. tenantId goes DIRECTLY on kb_chunks, not reached through kb_documents. Retrieval
 //      is `where tenant_id = $1 order by embedding <=> $2 limit k` — a leaf scan with no
@@ -183,8 +189,60 @@ export const rateBuckets = pgTable(
 //      that, pgvector 0.8.4 (already on the image) has hnsw.iterative_scan, which is the
 //      real fix.
 //
-// export const kbDocuments = pgTable("kb_documents", { id, tenantId, title, sourceUrl,
-//   contentHash, updatedAt }, (t) => [unique().on(t.tenantId, t.id)]);
-// export const kbChunks = pgTable("kb_chunks", { id, tenantId, documentId, heading,
-//   content, embedding: vector("embedding", { dimensions: 768 }) },
-//   (t) => [foreignKey({ columns: [t.tenantId, t.documentId], ... })]);
+// 768 dimensions = nomic-embed-text, served through the LiteLLM alias `embed`. Changing
+// the embedding model means a migration AND re-embedding every chunk; the dimension
+// lives here so that fact is impossible to miss.
+
+export const EMBEDDING_DIMENSIONS = 768;
+
+// The source of truth a tenant's operator edits: full markdown, stored verbatim so
+// chunks can always be rebuilt (re-chunk, re-embed) without asking for the text again.
+export const kbDocuments = pgTable(
+  "kb_documents",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    content: text("content").notNull(),
+    // sha256 of content; lets ingestion skip the embedding pass when nothing changed.
+    contentHash: text("content_hash").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    // Target of the composite FK on kb_chunks, same pattern as conversations/messages.
+    unique("kb_documents_tenant_id_key").on(t.tenantId, t.id),
+    unique("kb_documents_tenant_title_key").on(t.tenantId, t.title),
+  ],
+);
+
+export const kbChunks = pgTable(
+  "kb_chunks",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    documentId: uuid("document_id").notNull(),
+    // Heading breadcrumb ("Menu > Espresso drinks"), prepended at retrieval time so the
+    // model sees where a chunk came from.
+    heading: text("heading").notNull().default(""),
+    content: text("content").notNull(),
+    position: integer("position").notNull().default(0),
+    embedding: vector("embedding", { dimensions: EMBEDDING_DIMENSIONS }).notNull(),
+  },
+  (t) => [
+    // Same isolation guarantee as messages: a chunk physically cannot point at another
+    // tenant's document.
+    foreignKey({
+      columns: [t.tenantId, t.documentId],
+      foreignColumns: [kbDocuments.tenantId, kbDocuments.id],
+      name: "kb_chunks_tenant_document_fk",
+    }).onDelete("cascade"),
+    // The btree that makes the exact scan cheap. Deliberately NO vector index: see above.
+    index("kb_chunks_tenant_idx").on(t.tenantId),
+    index("kb_chunks_document_idx").on(t.documentId),
+  ],
+);
