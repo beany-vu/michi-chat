@@ -91,6 +91,34 @@
       "forbidden": [
         "a confident yes with specific alcoholic drinks"
       ]
+    },
+    {
+      "question": "do you sell coffee beans? what origins do you have?",
+      "requiredFacts": [
+        "one house bean, Mugshot Artisan Coffee Beans, 100% Arabica, medium-dark, 250g"
+      ],
+      "forbidden": [
+        "other bean origins or single origins such as Sidamo, Nyeri, Tarrazu, Antigua",
+        "a menu of multiple bean origins"
+      ]
+    },
+    {
+      "question": "do you sell merch or t-shirts?",
+      "requiredFacts": [
+        "we do not sell merchandise other than our coffee beans (or: we do not carry that)"
+      ],
+      "forbidden": [
+        "a list of merch items we sell"
+      ]
+    },
+    {
+      "question": "is this a coworking space?",
+      "requiredFacts": [
+        "a plausible on-topic answer about the cafe (space/wifi/seating); does NOT show an error"
+      ],
+      "forbidden": [
+        "any raw error text, JSON, or the words 'flagged as unsafe' or 'moderation'"
+      ]
     }
   ]
 }

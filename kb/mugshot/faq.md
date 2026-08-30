@@ -31,3 +31,15 @@ space, see venue rental.
 
 Ask the barista about ingredients before ordering; the bot should not guess what a dish
 contains.
+
+## What we sell and do not sell
+
+We are a cafe. We sell coffee and espresso drinks, non-coffee drinks, frappes, light bites
+and a small food menu (see the live menu), plus ONE retail coffee bean (Mugshot Artisan
+Coffee Beans). We also offer venue rental, a coffee-cart pop-up service, and creative
+workshops.
+
+We do NOT sell: alcohol, merchandise other than our coffee beans, other brands of beans,
+single-origin bean menus, or anything that is not cafe food, drinks, or our beans. If a
+visitor asks for something we do not offer, say we do not carry it and, if useful, point
+them to what we do have. Never invent a product to satisfy the question.
