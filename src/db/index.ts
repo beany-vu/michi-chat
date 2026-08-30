@@ -7,7 +7,16 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-const client = postgres(process.env.DATABASE_URL ?? "postgres://michi@localhost:5435/michichat");
+// Dev-only singleton: Next's HMR re-evaluates this module on every recompile, and each
+// evaluation would otherwise leak a whole connection pool. After a long editing session
+// that ends in Postgres' "sorry, too many clients already". In production the module
+// loads once and the global is never touched.
+const globalForDb = globalThis as unknown as { __michiPgClient?: ReturnType<typeof postgres> };
+
+const client =
+  globalForDb.__michiPgClient ??
+  postgres(process.env.DATABASE_URL ?? "postgres://michi@localhost:5435/michichat");
+if (process.env.NODE_ENV !== "production") globalForDb.__michiPgClient = client;
 
 export const dbRoot = drizzle(client, { schema });
 

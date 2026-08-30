@@ -17,7 +17,8 @@ const K = 5;
 
 interface GoldenCase {
   question: string;
-  expectDoc: string;
+  /** One title, or several when the fact legitimately lives in more than one document. */
+  expectDoc: string | string[];
 }
 
 async function main() {
@@ -43,12 +44,13 @@ async function main() {
 
   for (const testCase of cases) {
     const hits = await searchKb(tenant.id, testCase.question, K);
+    const expected = Array.isArray(testCase.expectDoc) ? testCase.expectDoc : [testCase.expectDoc];
     // path[0] of the heading breadcrumb is always the document title.
-    const rank = hits.findIndex((hit) => hit.heading.split(" > ")[0] === testCase.expectDoc);
+    const rank = hits.findIndex((hit) => expected.includes(hit.heading.split(" > ")[0]));
     ranks.push(rank === -1 ? Infinity : rank + 1);
 
     if (rank === -1) {
-      console.log(`MISS  "${testCase.question}" wanted [${testCase.expectDoc}]`);
+      console.log(`MISS  "${testCase.question}" wanted [${expected.join(" | ")}]`);
       for (const hit of hits) {
         console.log(`        ${hit.distance.toFixed(3)}  ${hit.heading}`);
       }

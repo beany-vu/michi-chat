@@ -1,31 +1,27 @@
 # Hours and location
 
-PLACEHOLDER CONTENT: replace every fact in this file with the real ones before launch.
-
 ## Opening hours
 
-We are open Tuesday to Sunday, 8:00 AM to 8:00 PM. We are closed on Mondays.
+We are open every day from 10:00 AM to 10:00 PM.
 
-On public holidays we usually keep Sunday hours, but check our Instagram for
-announcements before making the trip.
-
-Last orders for food are taken 30 minutes before closing. Drinks can be ordered
-until closing time.
+On public holidays we usually keep normal hours, but check our Instagram or Facebook for
+announcements before making a special trip.
 
 ## Location
 
-Mugshot Artisan Cafe is in Manila. The exact street address should go here, including
-the barangay and the nearest landmark, so the bot can give directions.
+Mugshot Artisan Cafe is at Greenwoods Executive Village, Greenwoods Ave, Pasig,
+1900 Metro Manila, Philippines.
 
-The nearest parking is described here. If street parking is limited, say so honestly
-and suggest the closest paid lot.
+A cozy neighborhood coffee shop serving artisanal drinks and hosting community events.
 
-## Getting here
+## Parking and Wi-Fi
 
-Describe the nearest public transport stops here: jeepney routes, the closest LRT or
-MRT station, and roughly how long the walk is from each.
+Free parking is available, and the cafe has fast Wi-Fi for customers.
 
 ## Contact
 
-For orders and inquiries, visitors can message our Facebook page or Instagram, or
-visit the counter. The bot should never promise a phone callback.
+- Phone: +63 2 8570 3155
+- Email: mugshotcoffeeph@gmail.com
+- Website: https://mugshotmnl.com (menu, events, and a contact form)
+
+The bot should never promise a phone callback; for anything urgent, call or visit.

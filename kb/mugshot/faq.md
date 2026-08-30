@@ -1,39 +1,33 @@
 # Frequently asked questions
 
-PLACEHOLDER CONTENT: replace every fact in this file with the real ones before launch.
-
 ## Do you publish prices?
 
-No. Prices are not published online. For current prices, ask at the counter or check
-our FoodPanda listing. The bot must point people there rather than quoting a number.
+Individual item prices are not listed online, but as a guide, our artisan coffee starts
+from ₱99. For exact current prices, ask at the counter or check our FoodPanda listing:
+https://www.foodpanda.ph/restaurant/ymqk/mugshot-artisan-cafe-greenwoods
+
+## How do I pay?
+
+Payments are accepted at the counter, or through FoodPanda when ordering delivery. We never
+ask for payment in this chat or by direct message; if someone claiming to be Mugshot asks
+you to send money online, it is not us.
 
 ## Do you deliver?
 
-Yes, through FoodPanda. We do not run our own delivery riders. Delivery coverage and
-fees are whatever FoodPanda shows at checkout.
+Yes, through FoodPanda. We do not run our own delivery riders; coverage and fees are what
+FoodPanda shows at checkout.
 
-## Do you take reservations?
+## Is there Wi-Fi and parking?
 
-Describe the real policy here. For example: tables are first come, first served, but
-groups of six or more can message us a day ahead and we will do our best to block
-seats.
+Yes to both: fast Wi-Fi for customers and free parking.
 
-## Is there Wi-Fi?
+## Can I book a table for a group?
 
-Yes, free for customers. Ask the barista for the current password. Please be
-considerate with video calls during busy hours.
+For bigger groups or gatherings, contact us ahead: +63 2 8570 3155 or
+mugshotcoffeeph@gmail.com, or use the inquiry form on the website. For private use of the
+space, see venue rental.
 
-## Are pets allowed?
+## Allergens and dietary needs
 
-Describe the real policy here, including whether it applies indoors, outdoors, or
-both, and any leash or carrier rule.
-
-## Do you have vegetarian or vegan options?
-
-Yes. The menu marks them. If someone asks about a specific allergen, the bot should
-tell them to ask the barista rather than guessing ingredients.
-
-## Can I book the space for an event?
-
-Describe the real policy here: private events, minimum spend, how far ahead to book,
-and who to contact.
+Ask the barista about ingredients before ordering; the bot should not guess what a dish
+contains.

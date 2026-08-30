@@ -95,6 +95,9 @@ decisions — tenantId directly on `kb_chunks`, no ANN index at first — are ex
 `src/db/schema.ts`) → eval harness for ANSWERS (golden set + judge via the `judge` alias; the
 recall eval only grades retrieval) → widget embed for mugshotmnl.com.
 
-The kb/mugshot docs are PLACEHOLDERS: every fact must be replaced with real ones before launch.
+The kb/mugshot docs carry REAL facts harvested from mugshotmnl.com's live APIs on 2026-08-30
+(hours, address, contacts, beans, events, venue-rental channels, the from-₱99 price line);
+verify with the owner before launch, and prefer live tools over KB for anything that changes
+(events and specials already are).
 Editing config.yaml needs `docker compose up -d --force-recreate litellm` (plain restart dies on
 the stale single-file bind mount under Docker Desktop/WSL).

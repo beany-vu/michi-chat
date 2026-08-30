@@ -21,12 +21,18 @@ const weather: ToolPack = {
     { key: "baseUrl", label: "Site base URL", type: "url", required: true },
   ],
   async run(config) {
-    const data = (await getJson(`${config.baseUrl}/api/weather/`)) as Record<string, unknown>;
+    // The site's CMS-to-Postgres migration moved this from /api/weather/ and changed
+    // the shape; `today` is what matters for "what should I drink" questions.
+    const data = (await getJson(`${config.baseUrl}/api/weather/forecast/`)) as {
+      today?: Record<string, unknown>;
+    };
+    const today = data.today ?? {};
     return JSON.stringify({
-      temperatureC: data.temperature,
-      feelsLikeC: data.feelsLike,
-      condition: data.condition,
-      weatherTag: data.weatherTag,
+      temperatureC: today.temp,
+      feelsLikeC: today.feels_like,
+      condition: today.description,
+      rainChancePct: today.rain_chance,
+      goodDayForACafeVisit: today.is_good_day,
     });
   },
 };
@@ -108,4 +114,40 @@ const specials: ToolPack = {
   },
 };
 
-export const MUGSHOT_PACKS = [weather, menu, specials];
+const events: ToolPack = {
+  id: "get_events",
+  label: "Checking upcoming events",
+  definition: {
+    type: "function",
+    function: {
+      name: "get_events",
+      description:
+        "Upcoming and recent events at the cafe (community days, collabs, workshops) " +
+        "with dates, times and capacity. Use it for any question about events, " +
+        "what's happening, or joining something.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  configFields: [
+    { key: "baseUrl", label: "Site base URL", type: "url", required: true },
+  ],
+  async run(config) {
+    const payload = (await getJson(`${config.baseUrl}/api/events/`)) as Record<
+      string,
+      unknown
+    >[];
+    return JSON.stringify(
+      payload.slice(0, 10).map((event) => ({
+        title: event.title,
+        date: event.date,
+        startTime: event.startTime,
+        endTime: event.endTime,
+        type: event.type,
+        description: typeof event.description === "string" ? event.description.slice(0, 200) : undefined,
+        capacity: event.capacity,
+      })),
+    );
+  },
+};
+
+export const MUGSHOT_PACKS = [weather, menu, specials, events];

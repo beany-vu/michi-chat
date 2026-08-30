@@ -47,10 +47,30 @@ export function ChatPanel({
 }: ChatPanelProps) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
+  // The notice shows in full by default (it exists to be read once), but stays
+  // collapsible because three lines is a lot inside a 560px-tall embed.
+  const [noticeOpen, setNoticeOpen] = useState(true);
   const [busy, setBusy] = useState(false);
   const conversationRef = useRef<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const chipsRef = useRef<HTMLDivElement>(null);
+  // Which carousel arrows are useful right now; an arrow that cannot scroll is hidden
+  // (visibility, not display, so the row never jumps).
+  const [chipNav, setChipNav] = useState({ left: false, right: false });
+  const updateChipNav = () => {
+    const el = chipsRef.current;
+    if (!el) return;
+    setChipNav({
+      left: el.scrollLeft > 4,
+      right: el.scrollLeft + el.clientWidth < el.scrollWidth - 4,
+    });
+  };
+  useEffect(() => {
+    updateChipNav();
+    window.addEventListener("resize", updateChipNav);
+    return () => window.removeEventListener("resize", updateChipNav);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turns.length === 0, suggestions.length]);
   // Keyed by embed key so two tenants sharing an origin never see each other's session.
   const sessionStorageKey = `michi.session.${embedKey}`;
 
@@ -161,6 +181,22 @@ export function ChatPanel({
 
   return (
     <div className="panel">
+      {!empty && (
+        <div className="chat-actions">
+          <button
+            type="button"
+            className="new-chat"
+            onClick={() => {
+              // Client-side reset only: the session token stays, the old conversation
+              // stays readable in the admin, the visitor just gets a clean slate.
+              setTurns([]);
+              conversationRef.current = null;
+            }}
+          >
+            ↺ New chat
+          </button>
+        </div>
+      )}
       <div className="messages" ref={scrollRef}>
         {empty && (
           <div className="empty">
@@ -245,13 +281,17 @@ export function ChatPanel({
         <div className="chips-carousel">
           <button
             type="button"
-            className="chips-arrow"
+            className={`chips-arrow${chipNav.left ? "" : " chips-arrow-hidden"}`}
             aria-label="Scroll suggestions left"
             onClick={() => chipsRef.current?.scrollBy({ left: -180, behavior: "smooth" })}
           >
             ‹
           </button>
-          <div className="suggestions suggestions-compact" ref={chipsRef}>
+          <div
+            className="suggestions suggestions-compact"
+            ref={chipsRef}
+            onScroll={updateChipNav}
+          >
             {suggestions.map((s) => (
               <button key={s} className="suggestion" onClick={() => void send(s)} disabled={busy}>
                 {s}
@@ -260,7 +300,7 @@ export function ChatPanel({
           </div>
           <button
             type="button"
-            className="chips-arrow"
+            className={`chips-arrow${chipNav.right ? "" : " chips-arrow-hidden"}`}
             aria-label="Scroll suggestions right"
             onClick={() => chipsRef.current?.scrollBy({ left: 180, behavior: "smooth" })}
           >
@@ -289,9 +329,19 @@ export function ChatPanel({
         </button>
       </form>
       {disclaimer && (
-        <p className="disclaimer" role="note">
-          {disclaimer}
-        </p>
+        <div className="disclaimer-row">
+          <p className={`disclaimer${noticeOpen ? "" : " disclaimer-collapsed"}`} role="note">
+            {disclaimer}
+          </p>
+          <button
+            type="button"
+            className="disclaimer-toggle"
+            aria-expanded={noticeOpen}
+            onClick={() => setNoticeOpen((v) => !v)}
+          >
+            {noticeOpen ? "Hide" : "More"}
+          </button>
+        </div>
       )}
       <p className="credit">
         <a href="https://beany-vu.github.io/michi-chat/" target="_blank" rel="noopener noreferrer">

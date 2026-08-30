@@ -14,8 +14,20 @@ export default async function TenantChatPage({ params }: { params: Promise<{ slu
   const branding = tenant.branding ?? {};
   const brandName = branding.title || tenant.name;
 
+  // The tenant's accent recolors the whole widget (send button, bubbles, chips) by
+  // overriding the CSS custom properties; the soft tint is derived so one admin field
+  // stays the single source of the theme.
+  const themeStyle = branding.accent
+    ? ({
+        "--accent": branding.accent,
+        "--accent-soft": `color-mix(in srgb, ${branding.accent} 16%, transparent)`,
+        "--bubble-user": branding.accent,
+        "--bubble-user-ink": "#ffffff",
+      } as React.CSSProperties)
+    : undefined;
+
   return (
-    <div className="app">
+    <div className="app" style={themeStyle}>
       <header className="topbar">
         <div className="brand">
           {branding.logoUrl ? (
