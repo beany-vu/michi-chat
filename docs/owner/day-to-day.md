@@ -2,6 +2,22 @@
 
 Ten minutes a week, honestly.
 
+## See what matters at a glance
+
+**Tenant → Analytics** turns the raw data into decisions: messages per day, which
+capabilities visitors reach for, the exact knowledge-base searches they triggered (a
+frequent query with a weak answer is your next document to write), busy hours, and where
+conversations come from. Country-level location appears when the platform runs behind
+Cloudflare — IPs are never stored.
+
+![The analytics page](/screenshots/analytics.png)
+
+## Let staff help
+
+**Accounts** (owner only) creates staff logins: staff can read conversations and usage and
+maintain the knowledge base, but cannot touch tenants, embed keys, or settings. The
+day-to-day loop below is exactly what staff accounts are for.
+
 ## Read what customers ask
 
 **Conversations** shows every chat, newest first. This is the most valuable page in the

@@ -122,12 +122,16 @@ export async function POST(request: NextRequest) {
       // Scoped by tenant AND session, both server-controlled, so a leaked conversationId
       // is not on its own enough to resume someone else's thread.
       const existing = requestedId ? await db.findConversation(requestedId, sessionId) : null;
+      // Country only, from Cloudflare's edge when the platform runs behind it. Never
+      // the IP: country-level is analytics, an IP at rest is a liability.
+      const cfCountry = request.headers.get("cf-ipcountry")?.toUpperCase() ?? null;
       conversation =
         existing ??
         (await db.createConversation({
           sessionId,
           apiKeyId,
           originHost: origin,
+          country: cfCountry && /^[A-Z]{2}$/.test(cfCountry) ? cfCountry : null,
         }));
       if (!existing) {
         // Fire-and-forget by design: notifySlack never throws and never blocks the turn.

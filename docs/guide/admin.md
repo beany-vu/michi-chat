@@ -31,6 +31,17 @@ Tools are **code packs**: the platform owns the code, a tenant enables a pack an
 
 **Tenant → Embed keys.** Public keys ship in a customer's page source, so they're shown in full — they select a tenant, they don't authorize anything. Rotation: create a new key, deploy it, revoke the old one (revoked keys stay visible so stray traffic can be noticed).
 
-## Conversations and usage
+## Conversations, usage, analytics
 
-**Admin → Conversations** shows every transcript (rendered as plain text deliberately). **Admin → Usage** aggregates messages, tokens and latency per tenant per day.
+**Admin → Conversations** shows every transcript (rendered as plain text deliberately);
+owners can export any transcript as JSON or delete it outright. **Admin → Usage** aggregates
+messages, tokens and latency per tenant per day. **Tenant → Analytics** breaks down the last
+30 days: volume, tool mix, the actual knowledge-base queries visitors triggered, busy hours,
+origins, and (behind Cloudflare) country-level location — never IPs.
+
+## Roles and privacy
+
+**Accounts** (owner only) adds staff logins: conversations/usage reading plus knowledge-base
+editing, nothing else. The env `ADMIN_PASSWORD` stays a break-glass owner login. Each tenant
+also has a **Store conversations** switch — off means nothing is written to the database at
+all, at the cost of multi-turn memory (the daily cap still applies via a separate counter).

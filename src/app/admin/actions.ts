@@ -155,6 +155,8 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
     suggestions: lines(formData.get("brand.suggestions")),
     disclaimer: String(formData.get("brand.disclaimer") ?? "").trim() || undefined,
   };
+  const theme = String(formData.get("brand.theme") ?? "");
+  if (theme === "light" || theme === "dark") branding.theme = theme;
 
   // Browser-rendered only (img src in the visitor's page), so unlike tool base URLs this
   // needs no internal-host blocking — but it must be https and carry no credentials.

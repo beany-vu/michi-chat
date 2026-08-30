@@ -35,6 +35,8 @@ export interface Branding {
    *  visitor's browser only — this server never fetches it, so the no-tenant-URLs
    *  (SSRF) rule does not apply. */
   logoUrl?: string;
+  /** Widget theme: absent = follow the visitor's system; "light"/"dark" pin it. */
+  theme?: "light" | "dark";
 }
 
 // One row per cafe. Everything that used to be a constant in the code (persona, tool
@@ -124,6 +126,9 @@ export const conversations = pgTable(
     apiKeyId: uuid("api_key_id").references(() => apiKeys.id, { onDelete: "set null" }),
     // Which site the turn came from. Forensics only; Origin is trivially forged off-browser.
     originHost: text("origin_host"),
+    // ISO country code from Cloudflare's cf-ipcountry header when the platform runs
+    // behind it; deliberately NOT the IP. Country-level is analytics, an IP is a liability.
+    country: text("country"),
     startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
     lastMessageAt: timestamp("last_message_at", { withTimezone: true }).notNull().defaultNow(),
   },

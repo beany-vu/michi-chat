@@ -27,7 +27,7 @@ export default async function TenantChatPage({ params }: { params: Promise<{ slu
     : undefined;
 
   return (
-    <div className="app" style={themeStyle}>
+    <div className="app" style={themeStyle} data-theme={branding.theme}>
       <header className="topbar">
         <div className="brand">
           {branding.logoUrl ? (

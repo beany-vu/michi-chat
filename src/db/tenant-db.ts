@@ -38,6 +38,7 @@ export function forTenant(tenantId: string) {
       sessionId: string | null;
       apiKeyId: string | null;
       originHost: string | null;
+      country: string | null;
     }) {
       const [row] = await dbRoot
         .insert(conversations)

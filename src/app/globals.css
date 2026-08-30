@@ -335,3 +335,22 @@ body {
 .new-chat:hover { color: var(--accent); border-color: var(--accent); }
 
 .chips-arrow-hidden { visibility: hidden; }
+
+/* Per-tenant theme override (branding.theme): "auto" (absent) follows the visitor's
+   system via the media query above; explicit light/dark pin the token set regardless. */
+.app[data-theme="light"] {
+  --ground: #f7f8f4; --panel: #ffffff; --ink: #232820; --ink-soft: #5b6354;
+  --line: #dde1d5; --accent: #3d6b35; --accent-ink: #ffffff; --accent-soft: #e7efe3;
+  --bubble-user: #3d6b35; --bubble-user-ink: #f4f7f1; --bubble-bot: #ffffff;
+  --error: #a04545; --error-soft: #f7e9e9;
+  --shadow: 0 1px 2px rgb(35 40 32 / 0.06), 0 4px 16px rgb(35 40 32 / 0.05);
+  background: var(--ground); color: var(--ink);
+}
+.app[data-theme="dark"] {
+  --ground: #14170f; --panel: #1d2118; --ink: #e6e9df; --ink-soft: #9aa38e;
+  --line: #313827; --accent: #8fbe7c; --accent-ink: #16200f; --accent-soft: #26301f;
+  --bubble-user: #37502c; --bubble-user-ink: #e9f1e3; --bubble-bot: #232819;
+  --error: #d99090; --error-soft: #3a2626;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
+  background: var(--ground); color: var(--ink);
+}

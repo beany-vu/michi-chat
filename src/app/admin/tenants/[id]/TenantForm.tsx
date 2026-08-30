@@ -103,6 +103,13 @@ export function TenantForm({
         <label htmlFor="brand-accent">Accent colour</label>
         <input id="brand-accent" name="brand.accent" defaultValue={branding.accent ?? ""} />
 
+        <label htmlFor="brand-theme">Theme</label>
+        <select id="brand-theme" name="brand.theme" defaultValue={branding.theme ?? ""}>
+          <option value="">auto (follow the visitor&apos;s system)</option>
+          <option value="light">light, always</option>
+          <option value="dark">dark, always</option>
+        </select>
+
         <label htmlFor="brand-logo">Logo URL</label>
         <input
           id="brand-logo"
