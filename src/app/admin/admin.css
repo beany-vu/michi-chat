@@ -156,8 +156,10 @@
   border-color: var(--fg);
   text-decoration: none;
 }
-.filter-active,
-.filter-active:hover {
+/* .admin prefix on purpose: it must outrank `.admin a`'s ink color, or the active chip
+   renders ink-on-ink. */
+.admin .filter-active,
+.admin .filter-active:hover {
   background: var(--fg);
   color: var(--bg);
   border-color: var(--fg);
@@ -551,3 +553,11 @@
   border-bottom: none;
 }
 .admin-guide:hover { color: var(--fg); }
+
+.pack-family {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin: 22px 0 2px;
+}

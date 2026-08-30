@@ -14,6 +14,8 @@ const MAX_DISTANCE = 0.55;
 
 const searchKbPack: ToolPack = {
   id: "search_kb",
+  family: "generic",
+  description: "Answers from this tenant's own Facts & knowledge documents. Fits every business; enable it once there are documents.",
   label: "Checking our info",
   definition: {
     type: "function",

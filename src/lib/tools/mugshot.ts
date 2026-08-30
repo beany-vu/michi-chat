@@ -6,6 +6,8 @@ import { getJson, type ToolPack } from "./registry";
 
 const weather: ToolPack = {
   id: "get_weather",
+  family: "mugshot-cms",
+  description: "Live weather at the cafe, for drink suggestions. Needs a site with the /api/weather/forecast endpoint.",
   label: "Checking the weather",
   definition: {
     type: "function",
@@ -39,6 +41,8 @@ const weather: ToolPack = {
 
 const menu: ToolPack = {
   id: "get_menu",
+  family: "mugshot-cms",
+  description: "The live standing menu. Needs a site exposing /api/menu/ in the Mugshot CMS shape.",
   label: "Checking the menu",
   definition: {
     type: "function",
@@ -82,6 +86,8 @@ const menu: ToolPack = {
 
 const specials: ToolPack = {
   id: "get_specials",
+  family: "mugshot-cms",
+  description: "Seasonal specials and retail products, live from /api/products/.",
   label: "Checking the specials",
   definition: {
     type: "function",
@@ -116,6 +122,8 @@ const specials: ToolPack = {
 
 const events: ToolPack = {
   id: "get_events",
+  family: "mugshot-cms",
+  description: "Upcoming events with dates and capacity, live from /api/events/.",
   label: "Checking upcoming events",
   definition: {
     type: "function",

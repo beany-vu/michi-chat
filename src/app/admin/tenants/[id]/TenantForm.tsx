@@ -7,9 +7,16 @@ import { saveTenantAction } from "../../actions";
 
 interface PackSummary {
   id: string;
+  family: "generic" | "mugshot-cms";
+  description: string;
   label: string;
   configFields: ToolConfigField[];
 }
+
+const FAMILY_LABELS: Record<PackSummary["family"], string> = {
+  generic: "For every business",
+  "mugshot-cms": "For sites on the Mugshot CMS API",
+};
 
 export function TenantForm({
   tenant,
@@ -170,34 +177,45 @@ export function TenantForm({
           leave the rest off; packs built for another site's API simply don't apply. URLs
           are always validated by the platform, never free-form.
         </small>
-        {packs.map((pack) => {
-          const config = (toolConfig[pack.id] ?? {}) as Record<string, unknown>;
-          return (
-            <div className="pack" key={pack.id}>
-              <label className="check">
-                <input
-                  type="checkbox"
-                  name={`tool.${pack.id}.enabled`}
-                  defaultChecked={Boolean(config.enabled)}
-                />
-                <span>
-                  {pack.label} <code>{pack.id}</code>
-                </span>
-              </label>
-              {pack.configFields.map((field) => (
-                <div key={field.key}>
-                  <label htmlFor={`tool-${pack.id}-${field.key}`}>{field.label}</label>
-                  <input
-                    id={`tool-${pack.id}-${field.key}`}
-                    name={`tool.${pack.id}.${field.key}`}
-                    defaultValue={String(config[field.key] ?? "")}
-                    placeholder={field.type === "url" ? "https://example.com" : ""}
-                  />
-                </div>
-              ))}
-            </div>
-          );
-        })}
+        {(["generic", "mugshot-cms"] as const).map((family) => (
+          <div key={family}>
+            <h3 className="pack-family">{FAMILY_LABELS[family]}</h3>
+            {packs
+              .filter((pack) => pack.family === family)
+              .map((pack) => {
+                const config = (toolConfig[pack.id] ?? {}) as Record<string, unknown>;
+                return (
+                  <div className="pack" key={pack.id}>
+                    <label className="check">
+                      <input
+                        type="checkbox"
+                        name={`tool.${pack.id}.enabled`}
+                        defaultChecked={Boolean(config.enabled)}
+                      />
+                      <span>
+                        {pack.label} <code>{pack.id}</code>
+                      </span>
+                    </label>
+                    <small>{pack.description}</small>
+                    {pack.configFields.map((field) => (
+                      <div key={field.key}>
+                        <label htmlFor={`tool-${pack.id}-${field.key}`}>{field.label}</label>
+                        <input
+                          id={`tool-${pack.id}-${field.key}`}
+                          name={`tool.${pack.id}.${field.key}`}
+                          defaultValue={String(config[field.key] ?? "")}
+                          placeholder={
+                            field.placeholder ?? (field.type === "url" ? "https://example.com" : "")
+                          }
+                        />
+                        {field.help && <small>{field.help}</small>}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+          </div>
+        ))}
       </fieldset>
 
       <fieldset>

@@ -2,12 +2,13 @@
 // definitions to offer the model, the labels to show the visitor, and one executor.
 
 import type { ToolConfig } from "@/db/schema";
+import { GENERIC_PACKS } from "./generic";
 import { KB_PACKS } from "./kb";
 import { MUGSHOT_PACKS } from "./mugshot";
 import type { ToolPack } from "./registry";
 
 export const TOOL_PACKS: Record<string, ToolPack> = Object.fromEntries(
-  [...MUGSHOT_PACKS, ...KB_PACKS].map((pack) => [pack.id, pack]),
+  [...MUGSHOT_PACKS, ...KB_PACKS, ...GENERIC_PACKS].map((pack) => [pack.id, pack]),
 );
 
 export interface TenantTools {
@@ -22,7 +23,14 @@ export function buildTenantTools(toolConfig: ToolConfig, tenantId: string): Tena
   );
 
   return {
-    definitions: enabled.map(([id]) => TOOL_PACKS[id].definition),
+    definitions: enabled.map(([id, rawConfig]) => {
+      const pack = TOOL_PACKS[id];
+      if (!pack.definitionFor) return pack.definition;
+      const config = Object.fromEntries(
+        Object.entries(rawConfig).map(([k, v]) => [k, typeof v === "string" ? v : ""]),
+      );
+      return pack.definitionFor(config);
+    }),
 
     labelFor: (name) => TOOL_PACKS[name]?.label ?? name,
 

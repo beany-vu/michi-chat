@@ -47,6 +47,14 @@ function validateBaseUrl(raw: string): string {
   return `${url.protocol}//${url.host}`;
 }
 
+/** A fixed endpoint path for the generic pack: absolute, no query, no traversal. */
+function validatePath(raw: string): string {
+  if (!/^\/[A-Za-z0-9\/_.-]*$/.test(raw) || raw.includes("..") || raw.includes("//")) {
+    throw new Error(`${raw}: path must look like /api/something/ with no query or ..`);
+  }
+  return raw;
+}
+
 export async function loginAction(_prev: unknown, formData: FormData) {
   const ok = await login(
     String(formData.get("email") ?? "").trim(),
@@ -128,7 +136,9 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
           if (enabled && field.required) throw new Error(`${pack.label}: ${field.label} is required`);
           continue;
         }
-        config[field.key] = field.type === "url" ? validateBaseUrl(value) : value;
+        if (field.type === "url") config[field.key] = validateBaseUrl(value);
+        else if (field.type === "path") config[field.key] = validatePath(value);
+        else config[field.key] = value;
       }
       toolConfig[pack.id] = config as ToolConfig[string];
     }

@@ -18,6 +18,8 @@ export default async function TenantEditor({ params }: { params: Promise<{ id: s
   // pack: adding a pack file grows this UI with no edit here.
   const packs = Object.values(TOOL_PACKS).map((pack) => ({
     id: pack.id,
+    family: pack.family,
+    description: pack.description,
     label: pack.label,
     configFields: pack.configFields,
   }));

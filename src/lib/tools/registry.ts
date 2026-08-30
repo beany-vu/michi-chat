@@ -23,9 +23,13 @@ import type OpenAI from "openai";
 export interface ToolConfigField {
   key: string;
   label: string;
-  type: "url" | "text";
+  /** "url" is validated hard on save (https, no ports, no internal hosts); "path" must
+   *  be a bare /segment/path; "text" is free-form. */
+  type: "url" | "text" | "path";
   placeholder?: string;
   required?: boolean;
+  /** Shown under the field in the admin form. */
+  help?: string;
 }
 
 /** Supplied by the platform per call, never by tenant config. */
@@ -35,8 +39,16 @@ export interface ToolContext {
 
 export interface ToolPack {
   id: string;
+  /** Groups the admin catalog: "generic" fits any business; others name the API shape
+   *  they were built for. */
+  family: "generic" | "mugshot-cms";
+  /** One admin-facing sentence: what this pack does and who it is for. */
+  description: string;
   /** Shown to the model. */
   definition: OpenAI.Chat.Completions.ChatCompletionTool;
+  /** Per-tenant definition override (e.g. the generic pack builds its model-facing
+   *  description from config). Falls back to `definition`. */
+  definitionFor?(config: Record<string, string>): OpenAI.Chat.Completions.ChatCompletionTool;
   /** Shown to the visitor as a live chip, e.g. "Checking the menu". */
   label: string;
   /** Drives the admin form, so adding a pack grows the UI automatically. */
