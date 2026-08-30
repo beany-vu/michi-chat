@@ -50,6 +50,27 @@ export async function OPTIONS(request: NextRequest) {
   });
 }
 
+const CANNED_REFUSAL =
+  "I can only help with questions about the business, like the menu, hours, or events. What can I help you find?";
+
+/** A fixed decline streamed as a normal turn (no model, no DB write). Same SSE shape a
+ *  real answer has, so the widget renders it as an ordinary reply. */
+function cannedRefusal(origin: string | null, sessionToken: string | null): Response {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    start(controller) {
+      const emit = (event: string, payload: unknown) =>
+        controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`));
+      emit("delta", { text: CANNED_REFUSAL });
+      emit("done", { conversationId: null, sessionToken, refused: true, usage: { inTokens: 0, outTokens: 0 } });
+      controller.close();
+    },
+  });
+  return new Response(stream, {
+    headers: { ...corsHeaders(origin), "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "X-Accel-Buffering": "no" },
+  });
+}
+
 export async function POST(request: NextRequest) {
   // Everything up to the ReadableStream can still fail with a normal status code. Once we
   // return the stream we have committed to a 200, so all validation belongs here.
@@ -82,9 +103,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Bait circuit breaker: explicit injection phrases earn the session strikes; past the
-  // threshold the session is refused for the rest of the window. The model's preamble
-  // handles the polite decline of the first few — this stops the persistent ones.
+  // Bait circuit breaker. This English-pattern check is a cheap FIRST filter, never the
+  // wall: an attack in another language slips past it to the model, which refuses anyway
+  // (the model is multilingual and nothing secret is ever in its context). What matching
+  // buys us is a deterministic, model-free refusal for the obvious cases — the strongest
+  // possible answer because no model runs, so there is nothing to talk around — plus a
+  // strike that cuts off a persistent baiter for the window.
   if (looksLikeBait(userText)) {
     const overStruck = await isRateLimited({
       key: `strike:${sessionId}`,
@@ -98,6 +122,8 @@ export async function POST(request: NextRequest) {
         origin,
       );
     }
+    // Detected but under the strike cap: hand back a fixed line without calling the model.
+    return cannedRefusal(origin, issuedSessionToken);
   }
 
   // The daily cap is the only control that holds against someone who has the embed key,
