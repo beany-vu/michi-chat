@@ -3,6 +3,10 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.7 - smoother chat
+
+Messages and chips now animate in, and image builds are much faster.
+
 ## v0.2.6 - faster, safer, more accurate
 
 Upgraded the framework to Next.js 16, which clears the outstanding security advisories.

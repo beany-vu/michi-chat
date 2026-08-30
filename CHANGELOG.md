@@ -3,6 +3,18 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.7 - 2026-08-30
+
+### Added
+
+- **Chat entrance animations.** Messages, tool chips and suggestion chips rise and fade in
+  as they appear (reduced-motion respected), so the widget feels alive instead of popping.
+
+### Changed
+
+- **Faster image builds.** The publish workflow builds amd64 only (arm64 was emulated and
+  cost ~80% of the time) and cancels superseded builds, so releases go out in minutes.
+
 ## v0.2.6 - 2026-08-30
 
 ### Fixed
