@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
   const model = tenant.model ?? process.env.CHAT_MODEL ?? "michi";
 
   const turn: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-    { role: "system", content: buildSystemPrompt(tenant.persona) },
+    { role: "system", content: buildSystemPrompt(tenant.persona, tenant.guardrails) },
     ...history.map((m) => ({ role: m.role, content: m.content }) as const),
     { role: "user", content: userText },
   ];

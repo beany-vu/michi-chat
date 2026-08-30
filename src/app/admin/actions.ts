@@ -16,7 +16,7 @@ import { adminUsers, apiKeys, conversations, tenants, type Branding, type ToolCo
 import { hashPassword, login, logout, requireAdmin, requireOwner } from "@/lib/admin-auth";
 import { logAudit } from "@/lib/audit";
 import { parseCsv } from "@/lib/csv";
-import { MAX_PERSONA_CHARS } from "@/lib/prompt";
+import { MAX_GUARDRAILS_CHARS, MAX_PERSONA_CHARS } from "@/lib/prompt";
 import { deleteDocument, ingestDocument } from "@/lib/rag";
 import { clearAnswerCache } from "@/lib/rag/answer-cache";
 import { validateSlackWebhookUrl } from "@/lib/slack";
@@ -92,6 +92,7 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
   if (persona.length > MAX_PERSONA_CHARS) {
     return { error: `Persona must be ${MAX_PERSONA_CHARS} characters or fewer.` };
   }
+  const guardrails = String(formData.get("guardrails") ?? "").trim().slice(0, MAX_GUARDRAILS_CHARS);
 
   const origins: string[] = [];
   for (const raw of lines(formData.get("allowedOrigins"))) {
@@ -177,6 +178,7 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
       model: String(formData.get("model") ?? "").trim() || null,
       dailyMessageCap: Math.max(1, Number(formData.get("dailyMessageCap")) || 500),
       persona,
+      guardrails,
       branding,
       toolConfig,
       allowedOrigins: origins,

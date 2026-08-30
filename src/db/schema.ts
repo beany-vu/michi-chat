@@ -54,6 +54,9 @@ export const tenants = pgTable("tenants", {
     .default("active"),
   // The L1 layer of the system prompt. Never the whole prompt: see src/lib/prompt.ts.
   persona: text("persona").notNull(),
+  // Owner-written protection rules ("never quote rental prices", "no stories"), a second
+  // delimited L1 block. Separate from persona so voice and policy edit independently.
+  guardrails: text("guardrails").notNull().default(""),
   // LiteLLM alias override; null means fall back to CHAT_MODEL.
   model: text("model"),
   branding: jsonb("branding").$type<Branding>().notNull().default({}),

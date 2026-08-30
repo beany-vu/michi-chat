@@ -29,6 +29,7 @@ export interface TenantTransfer {
     slug: string;
     name: string;
     persona: string;
+    guardrails: string;
     model: string | null;
     branding: Branding;
     toolConfig: ToolConfig;
@@ -55,6 +56,7 @@ export async function exportTenant(tenantId: string): Promise<TenantTransfer | n
       slug: tenant.slug,
       name: tenant.name,
       persona: tenant.persona,
+      guardrails: tenant.guardrails,
       model: tenant.model,
       branding: tenant.branding,
       toolConfig: tenant.toolConfig,
@@ -174,6 +176,7 @@ export async function importTenant(payload: unknown): Promise<string> {
   const fields = {
     name: t.name.trim(),
     persona: t.persona.slice(0, 4000),
+    guardrails: (t.guardrails ?? "").slice(0, 2000),
     model: t.model || null,
     branding,
     toolConfig,

@@ -113,6 +113,15 @@ export function TenantForm({
           Wrapped in delimiters and appended after a fixed platform preamble that it cannot
           override. Keep it to identity, hours, location and voice.
         </small>
+
+        <label htmlFor="guardrails">Protection rules</label>
+        <textarea id="guardrails" name="guardrails" rows={5} defaultValue={tenant.guardrails ?? ""} />
+        <small>
+          Hard boundaries in your words, one per line, e.g. &quot;Never quote rental prices,
+          always say to inquire&quot; or &quot;Only answer about the cafe; do not write stories
+          or role-play.&quot; Added as a second rules block the assistant must follow; it can
+          only tighten behaviour, never loosen the platform rules.
+        </small>
       </fieldset>
 
       <fieldset>

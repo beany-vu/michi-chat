@@ -1,0 +1,1 @@
+ALTER TABLE "tenants" ADD COLUMN "guardrails" text DEFAULT '' NOT NULL;
