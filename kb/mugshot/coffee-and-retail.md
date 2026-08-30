@@ -15,6 +15,8 @@ Our retail beans, sold at the counter:
 
 For the current bag price, ask at the counter or check FoodPanda.
 
+This is our only retail bean. We do not carry other single origins or varieties; do not expect a menu of bean origins.
+
 ## Seasonal drinks
 
 The seasonal lineup rotates (for example, an Iced Hojicha Latte). The live specials list is
