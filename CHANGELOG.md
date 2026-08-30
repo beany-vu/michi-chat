@@ -3,7 +3,7 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
-## v0.2.5 - 2026-08-30
+## v0.2.6 - 2026-08-30
 
 ### Fixed
 
@@ -29,6 +29,10 @@ This project is versioned by git tags (`v*`), which trigger the GHCR image build
 Safety hardening, driven by real production transcripts (67 visitor messages audited).
 
 ### Added
+
+- **Suggestion chips lead with revenue and brand topics** (events, workshops, venue rental)
+  instead of weather.
+- **Per-tenant browser tab title** shows the business name; the admin has its own title.
 
 - **Owner protection-rules field.** A per-tenant "Protection rules" box in plain words
   (e.g. "never quote rental prices", "no stories"), stored as a second delimited rules

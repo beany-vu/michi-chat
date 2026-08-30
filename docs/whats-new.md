@@ -3,7 +3,7 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
-## v0.2.5 - faster, safer, more accurate
+## v0.2.6 - faster, safer, more accurate
 
 Upgraded the framework to Next.js 16, which clears the outstanding security advisories.
 Faster tool answers (caching + parallel + shorter timeouts), no invented menu items or bean origins, and raw backend errors never shown to visitors.
