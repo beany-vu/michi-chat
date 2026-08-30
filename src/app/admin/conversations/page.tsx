@@ -26,6 +26,7 @@ export default async function ConversationsPage({
       tenantName: tenants.name,
       tenantSlug: tenants.slug,
       originHost: conversations.originHost,
+      country: conversations.country,
       startedAt: conversations.startedAt,
       lastMessageAt: conversations.lastMessageAt,
       messageCount: sql<number>`(
@@ -67,6 +68,11 @@ export default async function ConversationsPage({
         Reading these weekly is how the bot gets better: when you spot a bad answer, add
         the missing fact on that tenant&apos;s Facts &amp; knowledge page.
       </p>
+      <p className="note">
+        Conversations are kept only to improve the service. If a transcript contains personal
+        or sensitive information, consider deleting it (open it and use Delete). Location is
+        country-level only, from the network edge; visitor IP addresses are never stored.
+      </p>
 
       <table>
         <thead>
@@ -75,6 +81,7 @@ export default async function ConversationsPage({
             <th>Started</th>
             <th>Last message</th>
             <th className="num">Messages</th>
+            <th>Country</th>
             <th>Origin</th>
             <th />
           </tr>
@@ -86,6 +93,7 @@ export default async function ConversationsPage({
               <td>{row.startedAt.toLocaleString()}</td>
               <td>{row.lastMessageAt.toLocaleString()}</td>
               <td className="num">{row.messageCount}</td>
+              <td>{row.country ?? "-"}</td>
               <td>{row.originHost ?? "direct"}</td>
               <td>
                 <Link className="row-action" href={`/admin/conversations/${row.id}`}>View</Link>
