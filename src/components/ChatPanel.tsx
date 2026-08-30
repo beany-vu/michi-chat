@@ -348,6 +348,7 @@ export function ChatPanel({
           Powered by michi-chat
         </a>
         {modelLabel && <> · AI model: {modelLabel}</>}
+        <> · AI answers can contain mistakes</>
       </p>
     </div>
   );
