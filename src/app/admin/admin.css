@@ -11,6 +11,12 @@
   --danger: #b5342c;
   --okay: #3d6b35;
   --soft: #f4f1ec;
+  /* Spacing scale; the mobile breakpoint overrides these instead of re-declaring rules. */
+  --page-pad-y: 44px;
+  --page-pad-x: 32px;
+  --card-pad-y: 24px;
+  --card-pad-x: 28px;
+  --bar-label-w: 120px;
   min-height: 100vh;
   background: var(--bg);
   color: var(--fg);
@@ -81,39 +87,6 @@
   width: 100%;
 }
 
-/* Small screens: the rail folds back into a horizontal strip. No JS drawer to break. */
-@media (max-width: 780px) {
-  .admin-shell {
-    flex-direction: column;
-  }
-  .admin-side {
-    width: auto;
-    height: auto;
-    position: static;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border-right: none;
-    border-bottom: 1px solid var(--line);
-    overflow-x: auto;
-  }
-  .admin-side nav {
-    flex-direction: row;
-    gap: 2px;
-  }
-  .admin-side nav a {
-    white-space: nowrap;
-  }
-  .admin-side-foot {
-    margin-top: 0;
-    margin-left: auto;
-  }
-  .admin-side-foot button {
-    width: auto;
-  }
-}
-
 .admin a {
   color: var(--fg);
   text-decoration: none;
@@ -132,7 +105,7 @@
   min-width: 0;
   max-width: 1040px;
   margin: 0 auto;
-  padding: 44px 32px 96px;
+  padding: var(--page-pad-y) var(--page-pad-x) 96px;
 }
 
 /* Filter chips (e.g. per-tenant on Conversations): the active one is unmistakable. */
@@ -258,7 +231,7 @@
 .card {
   border: 1px solid var(--line);
   border-radius: 3px;
-  padding: 24px 28px;
+  padding: var(--card-pad-y) var(--card-pad-x);
   background: var(--surface);
   margin-bottom: 24px;
 }
@@ -355,7 +328,7 @@
 .editor fieldset {
   border: 1px solid var(--line);
   border-radius: 3px;
-  padding: 8px 28px 28px;
+  padding: 8px var(--card-pad-x) var(--card-pad-y);
   background: var(--surface);
 }
 .editor legend {
@@ -464,7 +437,7 @@
 }
 .bar-row {
   display: grid;
-  grid-template-columns: 120px 1fr 48px;
+  grid-template-columns: var(--bar-label-w) 1fr 48px;
   gap: 14px;
   align-items: center;
 }
@@ -561,4 +534,68 @@
   letter-spacing: 0.12em;
   color: var(--accent);
   margin: 22px 0 2px;
+}
+
+/* Small screens: the rail folds back into a horizontal strip. No JS drawer to break. */
+@media (max-width: 780px) {
+  .admin {
+    --page-pad-y: 20px;
+    --page-pad-x: 16px;
+    --card-pad-y: 16px;
+    --card-pad-x: 16px;
+    --bar-label-w: 88px;
+  }
+  .admin-shell {
+    flex-direction: column;
+  }
+  /* The desktop margin:0 auto is an auto CROSS-axis margin once the shell is a column,
+     which cancels flex stretch and sizes main to its content (the table's intrinsic
+     width). Plain margins restore stretch, so main is viewport-wide again. */
+  .admin-main {
+    margin: 0;
+    max-width: none;
+  }
+  /* Tables scroll inside themselves instead of dragging the whole page wide. display:block
+     keeps thead+tbody in one anonymous table box, so the columns stay aligned. */
+  .admin table {
+    display: block;
+    overflow-x: auto;
+  }
+  .admin th,
+  .admin td {
+    padding: 10px 12px;
+  }
+  .login {
+    margin: 10vh auto;
+    max-width: min(340px, calc(100vw - 32px));
+  }
+  .head h1 {
+    font-size: 22px;
+  }
+  .admin-side {
+    width: auto;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+  }
+  .admin-side nav {
+    flex-direction: row;
+    gap: 2px;
+  }
+  .admin-side nav a {
+    white-space: nowrap;
+  }
+  .admin-side-foot {
+    margin-top: 0;
+    margin-left: auto;
+  }
+  .admin-side-foot button {
+    width: auto;
+  }
 }
