@@ -54,7 +54,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # GHA cache persists the deps/build layers across runs; on an unchanged
-          # package-lock the npm ci layer is reused instead of reinstalled.
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # No cache-to: type=gha. GHA cache writes to GitHub's ACCOUNT-WIDE artifact
+          # storage quota, which a self-hosted runner does NOT bypass (it only frees
+          # compute). That quota is full, and the cache export failed the job even though
+          # the image published fine. The self-hosted runner's own Docker daemon keeps a
+          # local layer cache between builds, so cross-run caching still works for free.
