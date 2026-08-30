@@ -1,6 +1,10 @@
-# Build the VitePress docs and deploy to GitHub Pages on every docs change.
-# One-time setup in the repo: Settings → Pages → Source: "GitHub Actions".
-# Site: https://beany-vu.github.io/michi-chat/
+# Build the VitePress docs and push the static output to the gh-pages branch.
+# One-time setup in the repo: Settings → Pages → Source: "Deploy from a branch"
+# → Branch: gh-pages / (root).  Site: https://beany-vu.github.io/michi-chat/
+#
+# Deliberately NOT the upload-pages-artifact flow: artifacts live in GitHub's
+# account-wide storage quota (self-hosted runners don't change that), and this
+# account's quota is spoken for. A branch push stores nothing but git.
 
 name: deploy-docs
 
@@ -11,16 +15,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-deploy:
     # Self-hosted by policy; push-triggered only, never fork PRs.
     runs-on: self-hosted
     steps:
@@ -30,17 +32,8 @@ jobs:
           node-version: 22
       - run: npm ci --no-audit --no-fund
       - run: npm run docs:build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: peaceiris/actions-gh-pages@v4
         with:
-          path: docs/.vitepress/dist
-
-  deploy:
-    needs: build
-    runs-on: self-hosted
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/.vitepress/dist
+          force_orphan: true
