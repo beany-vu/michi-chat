@@ -8,7 +8,7 @@ Ten minutes a week, honestly.
 capabilities visitors reach for, the exact knowledge-base searches they triggered (a
 frequent query with a weak answer is your next document to write), busy hours, and where
 conversations come from. Country-level location appears when the platform runs behind
-Cloudflare — IPs are never stored.
+Cloudflare - IPs are never stored.
 
 ![The analytics page](/screenshots/analytics.png)
 
@@ -31,8 +31,8 @@ Open one to read the full exchange, including which lookups the assistant used:
 
 ## Fix a wrong or missing answer
 
-When you spot the assistant saying "I don't know" to something it *should* know — or being
-vague — the fix is always the same: open **Knowledge base**, add or sharpen the fact, save.
+When you spot the assistant saying "I don't know" to something it *should* know - or being
+vague - the fix is always the same: open **Knowledge base**, add or sharpen the fact, save.
 The very next question uses the new answer. No restarts, no waiting.
 
 ## Watch the numbers
@@ -48,7 +48,7 @@ hammered the chat, the cap did exactly its job.
 ## Get pinged when it matters
 
 With a Slack webhook configured, each new conversation lands in your Slack as it starts, with
-the visitor's first message — nice for hopping in personally during opening hours. You'll
+the visitor's first message - nice for hopping in personally during opening hours. You'll
 also get one alert if the daily cap is reached.
 
 ## The habit that compounds

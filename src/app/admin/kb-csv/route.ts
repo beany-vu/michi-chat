@@ -1,4 +1,4 @@
-// GET /admin/kb-csv?tenant=<id> — the tenant's knowledge base as a two-column CSV
+// GET /admin/kb-csv?tenant=<id> - the tenant's knowledge base as a two-column CSV
 // (title, content). Staff-accessible: the KB is staff territory, and the export contains
 // nothing a staff member can't already read on the KB page. Import is the matching
 // server action (importKbCsvAction); together they are backup and bulk-edit.

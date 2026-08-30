@@ -3,7 +3,7 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
-## v0.2.5 — 2026-08-30
+## v0.2.5 - 2026-08-30
 
 ### Fixed
 
@@ -24,7 +24,7 @@ This project is versioned by git tags (`v*`), which trigger the GHCR image build
   (npm audit --omit=dev: 0 high/critical). No behaviour change; verified with a clean
   build, typecheck, 29 tests, and a live smoke test.
 
-## v0.2.2 — 2026-08-30
+## v0.2.2 - 2026-08-30
 
 Safety hardening, driven by real production transcripts (67 visitor messages audited).
 
@@ -52,7 +52,7 @@ Safety hardening, driven by real production transcripts (67 visitor messages aud
 - **Per-tenant timezone.** The daily cap resets at the tenant's local midnight, and
   analytics day/busy-hours buckets are drawn in the tenant's zone.
 
-## v0.2.0 — 2026-08-30
+## v0.2.0 - 2026-08-30
 
 The admin grew up, and the platform went public.
 
@@ -75,7 +75,7 @@ The admin grew up, and the platform went public.
   tool pack so new tenants with their own API need no code.
 - **Published Docker image** on GHCR, a three-file quickstart, and a documentation site.
 
-## v0.1.0 — 2026-08-29
+## v0.1.0 - 2026-08-29
 
 First public release: multi-tenant chat platform with a hand-rolled tool loop, RAG
 knowledge base (pgvector, recall@k eval), per-tenant persona/branding/tools, embed-key

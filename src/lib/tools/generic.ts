@@ -5,7 +5,7 @@
 // the code, while keeping every rule that makes packs safe:
 //   - the base URL passes the same hard validation as every pack (https, no ports, no
 //     internal hosts), and only an owner can set it;
-//   - the path is a fixed, validated /segment/path — the model cannot steer the URL;
+//   - the path is a fixed, validated /segment/path - the model cannot steer the URL;
 //   - the response is PROJECTED through an explicit field allowlist, so a huge or
 //     hostile upstream payload never reaches the model;
 //   - the model-facing description comes from config, so the operator says when to use it.

@@ -1,15 +1,15 @@
 // System prompt assembly, with the trust levels made visible because they are the whole
 // point:
 //
-//   L0  platform preamble  — compile-time constant. Not editable by anyone, including the
+//   L0  platform preamble  - compile-time constant. Not editable by anyone, including the
 //                            admin UI. Always first.
-//   L1  tenant persona     — a DB column, so semi-trusted. Delimited and escaped.
-//   L2  tool results       — fully untrusted. NEVER folded in here; they stay in
+//   L1  tenant persona     - a DB column, so semi-trusted. Delimited and escaped.
+//   L2  tool results       - fully untrusted. NEVER folded in here; they stay in
 //                            role:"tool" messages, which is what the chat route already does.
 //
 // The honest limit: none of this is a security boundary. A 4B model will follow a clever
 // injection eventually. The invariant that actually holds is that nothing whose disclosure
-// matters ever enters the model context — no keys, no internal hostnames, no other
+// matters ever enters the model context - no keys, no internal hostnames, no other
 // tenant's data. Assume the full prompt is public, because effectively it is.
 
 export const MAX_PERSONA_CHARS = 4000;

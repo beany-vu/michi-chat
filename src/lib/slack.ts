@@ -2,7 +2,7 @@
 //
 // This is the ONE deliberate exception to the "no tenant-supplied URLs" rule, and it is
 // only acceptable because the validator pins the URL to a single external host: exactly
-// https://hooks.slack.com/services/… — never an IP, never a port, never a redirect
+// https://hooks.slack.com/services/… - never an IP, never a port, never a redirect
 // followed. An SSRF needs a URL that can be aimed at Ollama, the DB, or LiteLLM; a URL
 // that can only ever be hooks.slack.com cannot be aimed anywhere.
 //

@@ -7,9 +7,9 @@ the image is public at `ghcr.io/beany-vu/michi-chat`.
 
 Download the contents of [`examples/quickstart/`](https://github.com/beany-vu/michi-chat/tree/master/examples/quickstart) into an empty directory:
 
-- `docker-compose.yml` — the app image, LiteLLM, and Postgres (pgvector)
-- `.env.example` — the settings template
-- `litellm.config.yaml` — which real models serve the app's model aliases
+- `docker-compose.yml` - the app image, LiteLLM, and Postgres (pgvector)
+- `.env.example` - the settings template
+- `litellm.config.yaml` - which real models serve the app's model aliases
 
 ## 2. Configure
 
@@ -25,7 +25,7 @@ Open `.env` and set the three required values (the stack refuses to start withou
 | `MICHI_CHAT_LITELLM_KEY` | Any long random string; shared between app and proxy |
 | `MICHI_DB_PASSWORD` | Any random string; the database is not exposed outside Docker |
 
-Then pick a model backend — local Ollama works out of the box if you pull three models; a hosted provider is a small yaml edit. See [Model backends](./models).
+Then pick a model backend - local Ollama works out of the box if you pull three models; a hosted provider is a small yaml edit. See [Model backends](./models).
 
 ## 3. Run
 
@@ -35,10 +35,10 @@ docker compose up -d
 
 Migrations run automatically on first boot. Then:
 
-- **<http://localhost:3001>** — the seeded **demo tenant** (Mugshot Artisan Cafe, sample data), so you can try the chat immediately
-- **<http://localhost:3001/admin>** — the operator UI: create your own tenant, write its persona, enable tools, add knowledge
+- **<http://localhost:3001>** - the seeded **demo tenant** (Mugshot Artisan Cafe, sample data), so you can try the chat immediately
+- **<http://localhost:3001/admin>** - the operator UI: create your own tenant, write its persona, enable tools, add knowledge
 
-The demo tenant is just that — a demo. Your real bot is a new tenant you create in the admin UI.
+The demo tenant is just that - a demo. Your real bot is a new tenant you create in the admin UI.
 
 ## Where things run
 
@@ -48,4 +48,4 @@ The demo tenant is just that — a demo. Your real bot is a new tenant you creat
 | litellm | pinned by digest | One OpenAI-compatible door to any provider |
 | db | `pgvector/pgvector:pg17` | Required: a migration enables the vector extension |
 
-Everything binds to `127.0.0.1` only. For anything public-facing, put a reverse proxy in front — see [Security model](./security).
+Everything binds to `127.0.0.1` only. For anything public-facing, put a reverse proxy in front - see [Security model](./security).

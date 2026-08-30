@@ -1,4 +1,4 @@
-// POST /api/chat — one chat turn as an SSE stream: `status` (thinking) → `tool` (live,
+// POST /api/chat - one chat turn as an SSE stream: `status` (thinking) → `tool` (live,
 // as each tool starts) → `delta` (answer text) → `done` (ids + usage). The tool loop is
 // hand-rolled and visible: send tools JSON, execute what the model asks for, resend,
 // repeat until it answers in plain text. ~40 lines, no framework magic.
@@ -108,8 +108,8 @@ export async function POST(request: NextRequest) {
   // Bait circuit breaker. This English-pattern check is a cheap FIRST filter, never the
   // wall: an attack in another language slips past it to the model, which refuses anyway
   // (the model is multilingual and nothing secret is ever in its context). What matching
-  // buys us is a deterministic, model-free refusal for the obvious cases — the strongest
-  // possible answer because no model runs, so there is nothing to talk around — plus a
+  // buys us is a deterministic, model-free refusal for the obvious cases - the strongest
+  // possible answer because no model runs, so there is nothing to talk around - plus a
   // strike that cuts off a persistent baiter for the window.
   if (looksLikeBait(userText)) {
     const overStruck = await isRateLimited({
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
 
       history = await db.recentMessages(conversation.id);
 
-      // Persist the user turn BEFORE the LLM call — a crash cannot lose what was asked.
+      // Persist the user turn BEFORE the LLM call - a crash cannot lose what was asked.
       await db.appendMessage({
         conversationId: conversation.id,
         role: "user",

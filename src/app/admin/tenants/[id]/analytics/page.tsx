@@ -144,7 +144,7 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ id: 
             {tokensInTotal.toLocaleString()}→{tokensOutTotal.toLocaleString()} tokens
           </>
         )}
-        . Countries appear once the platform runs behind Cloudflare (country only — IPs are
+        . Countries appear once the platform runs behind Cloudflare (country only - IPs are
         never stored).
       </p>
 
@@ -207,7 +207,7 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ id: 
             <div
               className="hour-cell"
               key={hour}
-              title={`${hour}:00 — ${count} messages`}
+              title={`${hour}:00 - ${count} messages`}
               style={{ opacity: maxHour > 0 ? 0.15 + 0.85 * (count / maxHour) : 0.15 }}
             />
           ))}

@@ -3,7 +3,7 @@
 //
 // Why not a generic "call this URL" tool, which is the obvious data-driven design:
 //
-//   1. SSRF. This process can reach the WSL host's Ollama on :11434 UNAUTHENTICATED — an
+//   1. SSRF. This process can reach the WSL host's Ollama on :11434 UNAUTHENTICATED - an
 //      API that includes pull (fill the disk), delete (destroy the model the platform
 //      runs on) and generate (unlimited free inference, bypassing every quota below). It
 //      can also reach db:5432, litellm:4000, and itself. Doing arbitrary URLs safely means
@@ -69,7 +69,7 @@ const TOOL_FETCH_TIMEOUT_MS = 6_000;
 const toolCache = new Map<string, { at: number; data: unknown }>();
 
 /**
- * Shared fetch for packs. redirect:"manual" is deliberate — following redirects would let
+ * Shared fetch for packs. redirect:"manual" is deliberate - following redirects would let
  * a 302 walk past the base-URL validation done when the operator saves the config.
  * Cached for TOOL_CACHE_TTL_MS keyed by URL.
  */

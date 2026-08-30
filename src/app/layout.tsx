@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Michi — chat",
-  description: "Mugshot Artisan Cafe's chat assistant",
+  title: "Chat assistant",
+  description: "Business chat assistant",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

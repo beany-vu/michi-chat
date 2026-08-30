@@ -59,7 +59,7 @@ export function normalizeOrigin(value: string): string | null {
 /**
  * Is this origin registered for ANY active tenant?
  *
- * Used by the preflight, which carries no embed key — only an Origin — so it cannot check
+ * Used by the preflight, which carries no embed key - only an Origin - so it cannot check
  * the key/origin pair. The POST does that. All this leaks is "some tenant uses this
  * origin", which the widget snippet on that page already announces.
  */
@@ -192,7 +192,7 @@ export async function resolveTenant(request: NextRequest): Promise<Resolved | Re
 /**
  * CORS headers for one response.
  *
- * Reflect the exact matched origin, never "*", and always send Vary: Origin — without it
+ * Reflect the exact matched origin, never "*", and always send Vary: Origin - without it
  * any cache in front of this serves tenant A's Allow-Origin header to tenant B.
  *
  * Allow-Credentials is deliberately absent: the session is a bearer header, not a cookie,

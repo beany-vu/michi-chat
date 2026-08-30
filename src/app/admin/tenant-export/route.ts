@@ -1,4 +1,4 @@
-// GET /admin/tenant-export?tenant=<id> — the whole tenant as one JSON file (settings +
+// GET /admin/tenant-export?tenant=<id> - the whole tenant as one JSON file (settings +
 // KB source text; embeddings never travel). Owner only: the file includes the Slack
 // webhook and the full tool config.
 

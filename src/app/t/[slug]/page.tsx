@@ -1,9 +1,21 @@
 // The tenant-facing chat page. Every tenant is reachable at /t/<slug>, which is what
 // makes tenant #2 testable in a browser long before a widget embed exists.
 
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ChatPanel } from "@/components/ChatPanel";
 import { loadTenantBySlug } from "@/lib/serve-tenant";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const loaded = await loadTenantBySlug(slug);
+  const name = loaded?.tenant.branding?.title || loaded?.tenant.name || "Chat";
+  return { title: name, description: `Chat with ${name}` };
+}
 
 export default async function TenantChatPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

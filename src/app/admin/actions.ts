@@ -157,7 +157,7 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
   if (theme === "light" || theme === "dark") branding.theme = theme;
 
   // Browser-rendered only (img src in the visitor's page), so unlike tool base URLs this
-  // needs no internal-host blocking — but it must be https and carry no credentials.
+  // needs no internal-host blocking - but it must be https and carry no credentials.
   const rawLogo = String(formData.get("brand.logoUrl") ?? "").trim();
   if (rawLogo) {
     try {

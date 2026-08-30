@@ -22,8 +22,8 @@ export function UserForm() {
 
           <label htmlFor="u-role">Role</label>
           <select id="u-role" name="role" defaultValue="staff">
-            <option value="staff">staff — conversations, usage, knowledge base</option>
-            <option value="owner">owner — everything, including this page</option>
+            <option value="staff">staff - conversations, usage, knowledge base</option>
+            <option value="owner">owner - everything, including this page</option>
           </select>
         </fieldset>
         <div className="actions">

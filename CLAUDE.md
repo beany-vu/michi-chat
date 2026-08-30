@@ -20,7 +20,7 @@ carry over 1:1.
   Never run the app or db directly on the host.
 - Ollama must be running in this WSL distro (`ollama serve`); `MICHI_OLLAMA_HOST` in `.env` is the
   distro's eth0 IP and can change after a WSL restart (`ip addr show eth0`).
-- Model routing lives in `litellm/config.yaml` — the app only knows the aliases `michi` and
+- Model routing lives in `litellm/config.yaml` - the app only knows the aliases `michi` and
   `judge`. Swapping providers (Ollama → DashScope/OpenAI) is config, never code.
 - Bot copy style: no em-dashes or en-dashes (enforced in the chat route, not just the persona).
 - The bot must never invent facts, prices, or availability: tools + honesty ("say so if you
@@ -34,7 +34,7 @@ carry over 1:1.
   fills in parameters. This process can reach an unauthenticated Ollama on the host, so a
   free-form URL field would be an SSRF hole. **One carve-out:** the per-tenant Slack webhook,
   allowed only because `validateSlackWebhookUrl()` pins it to exactly
-  `https://hooks.slack.com/services/…` (no other host, no port, no redirect following) — a URL
+  `https://hooks.slack.com/services/…` (no other host, no port, no redirect following) - a URL
   that can only ever be hooks.slack.com cannot be aimed at Ollama or the DB.
 - **The admin conversation viewer renders message content as plain text**, never markdown and
   never HTML. The visitor widget renders markdown, which is fine there; the operator's browser
@@ -50,30 +50,30 @@ carry over 1:1.
 
 ## Layout
 
-- `src/app/api/chat/route.ts` — SSE chat turn: hand-rolled tool loop (status/tool/delta/done)
-- `src/lib/tenant.ts` — embed-key resolution, origin allowlist, sessions, CORS helpers
-- `src/lib/prompt.ts` — system prompt assembly, three trust levels
-- `src/lib/tools/` — pack registry, the mugshot packs, the `search_kb` pack, and `index.ts`
+- `src/app/api/chat/route.ts` - SSE chat turn: hand-rolled tool loop (status/tool/delta/done)
+- `src/lib/tenant.ts` - embed-key resolution, origin allowlist, sessions, CORS helpers
+- `src/lib/prompt.ts` - system prompt assembly, three trust levels
+- `src/lib/tools/` - pack registry, the mugshot packs, the `search_kb` pack, and `index.ts`
   which turns a tenant's `toolConfig` into definitions + labels + one executor
-- `src/lib/rag/` — heading-aware chunker, embeddings (LiteLLM alias `embed`, 768 dims),
+- `src/lib/rag/` - heading-aware chunker, embeddings (LiteLLM alias `embed`, 768 dims),
   ingestion + the tenant-scoped leaf-scan retrieval
-- `src/lib/slack.ts` — webhook validator (the SSRF pin) + fire-and-forget notifier
-- `src/lib/guardrail.ts` — bait circuit breaker (3 strikes/session/hour, narrow patterns)
-- `src/lib/rag/answer-cache.ts` — semantic cache (first messages, 0.05 cutoff, 24h TTL,
+- `src/lib/slack.ts` - webhook validator (the SSRF pin) + fire-and-forget notifier
+- `src/lib/guardrail.ts` - bait circuit breaker (3 strikes/session/hour, narrow patterns)
+- `src/lib/rag/answer-cache.ts` - semantic cache (first messages, 0.05 cutoff, 24h TTL,
   invalidated by any KB/tenant change, off in privacy mode)
-- `src/lib/admin-auth.ts` + `src/lib/audit.ts` — owner/staff roles (env password stays
+- `src/lib/admin-auth.ts` + `src/lib/audit.ts` - owner/staff roles (env password stays
   break-glass owner) and the append-only audit trail every mutation writes to
-- `src/lib/csv.ts` + `src/app/admin/kb-csv/` — KB export/import as two-column CSV
-- `src/app/admin/tenants/[id]/analytics/` — per-tenant analytics (tool mix, literal
+- `src/lib/csv.ts` + `src/app/admin/kb-csv/` - KB export/import as two-column CSV
+- `src/app/admin/tenants/[id]/analytics/` - per-tenant analytics (tool mix, literal
   search_kb queries, busy hours in the tenant's timezone, country via cf-ipcountry)
-- `src/db/schema.ts` — tenants (incl. timezone, storeConversations), api_keys,
+- `src/db/schema.ts` - tenants (incl. timezone, storeConversations), api_keys,
   widget_sessions, conversations, messages, admin_users, admin_sessions, kb_documents,
   kb_chunks, answer_cache, audit_log, rate_buckets
-- `kb/<slug>/` — markdown source docs per tenant; `eval/kb-golden.json` — the recall golden set
-- `src/db/tenant-db.ts` — `forTenant()`, the tenant-scoped query helpers
-- `src/app/admin/` — the operator UI (server components + server actions)
-- `src/components/ChatPanel.tsx` — the chat UI, fully driven by props
-- `litellm/config.yaml` — model aliases → real providers
+- `kb/<slug>/` - markdown source docs per tenant; `eval/kb-golden.json` - the recall golden set
+- `src/db/tenant-db.ts` - `forTenant()`, the tenant-scoped query helpers
+- `src/app/admin/` - the operator UI (server components + server actions)
+- `src/components/ChatPanel.tsx` - the chat UI, fully driven by props
+- `litellm/config.yaml` - model aliases → real providers
 
 ## Commands
 
@@ -94,7 +94,7 @@ docker build -t michi-chat:local .                     # the publishable image (
 The publishable image is built by `Dockerfile` (Next standalone; `docker/entrypoint.mjs` runs
 migrations via drizzle-orm's programmatic migrator, then starts the server) and published to
 GHCR by `.github/workflows/docker-publish.yml` on `v*` tags. Outsiders run it via the three
-files in `examples/quickstart/` — that compose pins LiteLLM by digest and requires passwords
+files in `examples/quickstart/` - that compose pins LiteLLM by digest and requires passwords
 instead of dev defaults. GHCR packages start private: flip to public once after the first
 publish. The image is `ghcr.io/beany-vu/michi-chat`; the workflow runs on a self-hosted runner,
 which must be registered on the repo before pushing a tag.

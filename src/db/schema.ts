@@ -36,7 +36,7 @@ export interface Branding {
    *  and scope ("I only answer questions about this business"). Admin-composed. */
   disclaimer?: string;
   /** https URL of the tenant's logo, shown in the chat header. Rendered by the
-   *  visitor's browser only — this server never fetches it, so the no-tenant-URLs
+   *  visitor's browser only - this server never fetches it, so the no-tenant-URLs
    *  (SSRF) rule does not apply. */
   logoUrl?: string;
   /** Widget theme: absent = follow the visitor's system; "light"/"dark" pin it. */
@@ -65,7 +65,7 @@ export const tenants = pgTable("tenants", {
   allowedOrigins: text("allowed_origins").array().notNull().default([]),
   dailyMessageCap: integer("daily_message_cap").notNull().default(500),
   // IANA zone ("Asia/Manila"). Owns two boundaries: analytics day/hour buckets, and when
-  // the daily cap resets — a Manila cafe's cap must reset at Manila midnight, not the
+  // the daily cap resets - a Manila cafe's cap must reset at Manila midnight, not the
   // server's. Validated with Intl on save.
   timezone: text("timezone").notNull().default("UTC"),
   // Privacy switch: when false, no conversation or message rows are written at all.
@@ -86,7 +86,7 @@ export const tenants = pgTable("tenants", {
 // CREDENTIAL: every control downstream of it must hold against curl. It is stored in
 // plaintext for that reason. A secret key (server-to-server) is a real credential and is
 // stored only as a hash. /api/chat must reject kind="secret" and admin must reject
-// kind="public" — one lookup shared by both surfaces is the classic hole.
+// kind="public" - one lookup shared by both surfaces is the classic hole.
 export const apiKeys = pgTable(
   "api_keys",
   {
@@ -109,7 +109,7 @@ export const apiKeys = pgTable(
 );
 
 // Server-issued visitor identity. Replaces the old client-supplied anonId, which the
-// client minted itself and could therefore be anything — useless as an auth factor and
+// client minted itself and could therefore be anything - useless as an auth factor and
 // useless as a rate-limit key (infinite cardinality).
 export const widgetSessions = pgTable(
   "widget_sessions",
@@ -184,8 +184,8 @@ export const messages = pgTable(
 );
 
 // Operator accounts for /admin. Two roles:
-//   owner — everything: tenants, keys, origins, tools, users.
-//   staff — the day-to-day: read conversations/usage, manage knowledge-base documents.
+//   owner - everything: tenants, keys, origins, tools, users.
+//   staff - the day-to-day: read conversations/usage, manage knowledge-base documents.
 // The env ADMIN_PASSWORD remains a break-glass OWNER login (no row here), so a fresh
 // install works before any user exists and a forgotten password never locks the door.
 export const adminUsers = pgTable("admin_users", {
@@ -242,7 +242,7 @@ export const answerCache = pgTable(
 );
 
 // Append-only trail of who did what in the admin. Never updated, never joined for
-// authorization — purely forensic, so multi-user access has a memory. actorUserId is
+// authorization - purely forensic, so multi-user access has a memory. actorUserId is
 // null for the env-password (break-glass) owner; actorLabel keeps the row readable even
 // if the user is later deleted.
 export const auditLog = pgTable(
@@ -275,7 +275,7 @@ export const rateBuckets = pgTable(
 // change later:
 //
 //   1. tenantId goes DIRECTLY on kb_chunks, not reached through kb_documents. Retrieval
-//      is `where tenant_id = $1 order by embedding <=> $2 limit k` — a leaf scan with no
+//      is `where tenant_id = $1 order by embedding <=> $2 limit k` - a leaf scan with no
 //      join to hang the filter on.
 //   2. Do NOT add an HNSW/IVFFlat index at first. pgvector POST-filters: the index picks
 //      ef_search nearest rows globally, THEN applies tenant_id, so a small tenant can get

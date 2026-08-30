@@ -1,5 +1,5 @@
 // Account management, owner only. Staff hitting this URL are bounced by the page guard,
-// and every action on it re-checks with requireOwner() — the page guard is UX, the
+// and every action on it re-checks with requireOwner() - the page guard is UX, the
 // action guard is the security boundary, same rule as everywhere in /admin.
 
 import { desc } from "drizzle-orm";
@@ -25,7 +25,7 @@ export default async function UsersPage() {
 
       <p className="note">
         <strong>owner</strong> can do everything. <strong>staff</strong> can read
-        conversations and usage and manage knowledge-base documents — the day-to-day —
+        conversations and usage and manage knowledge-base documents - the day-to-day  - 
         but cannot touch tenants, embed keys, origins, tools, or this page. The operator
         password from the environment always works as a break-glass owner login.
       </p>

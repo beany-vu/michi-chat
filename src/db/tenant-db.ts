@@ -3,7 +3,7 @@
 // tenant predicate, so there is no convenient way to write a leaky query.
 //
 // This is defence in depth, not the guarantee. The guarantee is the composite foreign key
-// on messages (see schema.ts) — Postgres rejects a cross-tenant row outright. Row-Level
+// on messages (see schema.ts) - Postgres rejects a cross-tenant row outright. Row-Level
 // Security would be a third layer, but it is deliberately NOT here yet: the `michi` role
 // is a superuser, and superusers bypass RLS unconditionally (FORCE ROW LEVEL SECURITY
 // does not help). RLS without a NOSUPERUSER app role is theatre. See README.

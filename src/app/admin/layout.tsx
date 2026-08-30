@@ -2,10 +2,13 @@
 // redirect, but it does NOT protect server actions, which run before a layout re-renders.
 // The real guard is requireAdmin() at the top of each action in ./actions.ts.
 
+import type { Metadata } from "next";
 import { getAdminSession } from "@/lib/admin-auth";
 import { AdminNav } from "./AdminNav";
 import { logoutAction } from "./actions";
 import "./admin.css";
+
+export const metadata: Metadata = { title: "Admin console - michi-chat" };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getAdminSession();

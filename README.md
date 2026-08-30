@@ -1,6 +1,6 @@
 # michi-chat
 
-**Documentation: <https://beany-vu.github.io/michi-chat/>** — quickstart, admin guide, extending.
+**Documentation: <https://beany-vu.github.io/michi-chat/>** - quickstart, admin guide, extending.
 
 A small multi-tenant chat assistant platform. Next.js + OpenAI SDK, with LiteLLM routing to any
 model provider (Ollama by default) and Postgres (pgvector) holding tenants, conversations and the
@@ -27,7 +27,7 @@ docker compose up -d
 ```
 
 - Demo chat: <http://localhost:3001> (the seeded Mugshot demo tenant)
-- Admin: <http://localhost:3001/admin> — log in and create your own tenant; every form field
+- Admin: <http://localhost:3001/admin> - log in and create your own tenant; every form field
   (persona, branding, tools, origins, Slack webhook) is per tenant
 
 Migrations run automatically on boot. The database must be the pgvector image (the quickstart
@@ -35,26 +35,26 @@ compose already uses it); a migration runs `CREATE EXTENSION vector`.
 
 ### Pick a model backend
 
-**Path A — local Ollama (default).** On the machine running Docker:
+**Path A - local Ollama (default).** On the machine running Docker:
 
 ```bash
 ollama pull qwen3.5:4b && ollama pull qwen2.5:7b && ollama pull nomic-embed-text
 ```
 
-**Path B — hosted provider.** Put your API key in `.env` and repoint the aliases in
-`litellm.config.yaml` (header comment shows how). No app changes either way — that is the point
+**Path B - hosted provider.** Put your API key in `.env` and repoint the aliases in
+`litellm.config.yaml` (header comment shows how). No app changes either way - that is the point
 of the aliases. One caution: the `embed` alias is tied to a 768-dimension column; changing the
 embedding model means a migration plus re-embedding.
 
 ### Going beyond localhost
 
 The quickstart binds to `127.0.0.1` on purpose. Anything public-facing belongs behind a reverse
-proxy that terminates TLS and sets `x-real-ip` — per-IP rate limiting only works when a trusted
+proxy that terminates TLS and sets `x-real-ip` - per-IP rate limiting only works when a trusted
 proxy sets that header. The per-tenant daily message cap is what bounds the bill either way.
 
 ## Customizing and extending
 
-- **Customize (no code):** everything a tenant is lives in the admin UI — persona, branding,
+- **Customize (no code):** everything a tenant is lives in the admin UI - persona, branding,
   which tool packs are enabled, knowledge-base documents, allowed origins, Slack notifications.
   Model routing lives in `litellm.config.yaml`.
 - **Extend (fork + build):** a new capability is one file implementing the `ToolPack` interface
@@ -102,7 +102,7 @@ In descending order of how much they actually guarantee:
 3. **Row-Level Security: deliberately absent.** The `michi` role is a Postgres superuser, and
    superusers bypass RLS unconditionally (`FORCE ROW LEVEL SECURITY` does not help). Adding
    policies today would be inert. It needs a `NOSUPERUSER` application role first, plus every
-   scoped query inside a transaction that calls `set_config('app.tenant_id', …, true)` — because
+   scoped query inside a transaction that calls `set_config('app.tenant_id', …, true)` - because
    the connection pool would otherwise leak a bare `SET` to the next request.
 
 The public embed key is a tenant **selector**, not a credential: it ships in the customer's page
@@ -128,7 +128,7 @@ docker compose exec app npm run kb:eval -- mugshot     # recall@k over eval/kb-g
 The isolation suite asserts on the constraint *name*, so it proves the composite foreign key is
 what rejected the write rather than some incidental failure.
 
-Production image: `docker build -t michi-chat:local .` — multi-stage, Next standalone output,
+Production image: `docker build -t michi-chat:local .` - multi-stage, Next standalone output,
 migrations applied on boot by `docker/entrypoint.mjs` (drizzle-orm's programmatic migrator, same
 `__drizzle_migrations` table as drizzle-kit). Publishing happens from
 `.github/workflows/docker-publish.yml` on `v*` tags; GHCR packages start private, flip to public

@@ -13,14 +13,14 @@ export function TenantImport() {
         <input id="tenant-json" name="file" type="file" accept=".json,application/json" required />
         <small>
           The file an &quot;Export JSON&quot; produces on any michi-chat instance: settings,
-          branding, tools, origins and the knowledge base in one piece. Matched by slug —
+          branding, tools, origins and the knowledge base in one piece. Matched by slug  - 
           existing tenants are updated, new slugs are created. Knowledge is re-embedded here,
           so transfers work across different embedding models.
         </small>
         {state?.preview && (
           <>
             <p className="note" style={{ marginTop: 12 }}>
-              This tenant already exists here. The import would do the following — tick the
+              This tenant already exists here. The import would do the following - tick the
               box and press Import again (re-select the file if the browser cleared it):
             </p>
             <ul className="query-list">

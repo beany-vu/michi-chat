@@ -1,11 +1,11 @@
 // A strike-based circuit breaker for prompt-injection bait.
 //
 // Honest scope: this does NOT make the model injection-proof (nothing does; the real
-// invariant is that nothing sensitive ever enters the context — see prompt.ts). What it
+// invariant is that nothing sensitive ever enters the context - see prompt.ts). What it
 // does is stop PERSISTENT baiting cheaply: each message matching an explicit bait
 // pattern earns the session a strike, and past the threshold the session is refused for
-// the rest of the window. The patterns are deliberately narrow — phrases with no honest
-// reason to appear in a cafe chat — because a false positive here blocks a customer.
+// the rest of the window. The patterns are deliberately narrow - phrases with no honest
+// reason to appear in a cafe chat - because a false positive here blocks a customer.
 
 const BAIT_PATTERNS: RegExp[] = [
   /ignore (all|any|your|previous|prior|the) (instructions|rules|prompts?)/i,

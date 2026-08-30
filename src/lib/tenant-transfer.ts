@@ -1,7 +1,7 @@
 // Whole-tenant export/import: everything that makes a tenant a tenant (persona, branding,
 // tool config, origins, settings) plus its knowledge base, as one JSON file. The use case
 // is moving a configured tenant between instances (laptop → production), so import
-// RE-EMBEDS the KB through the destination's embed model — vectors never travel, because
+// RE-EMBEDS the KB through the destination's embed model - vectors never travel, because
 // embedding spaces don't transfer.
 //
 // Import validates as strictly as the admin form does: origins normalized, tool URLs

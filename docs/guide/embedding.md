@@ -1,6 +1,6 @@
 # Embedding on a website
 
-Every tenant is reachable at `/t/<slug>` — a full-page chat with the tenant's branding. Getting that chat *onto the business's own website* takes two pieces of configuration and one piece of HTML.
+Every tenant is reachable at `/t/<slug>` - a full-page chat with the tenant's branding. Getting that chat *onto the business's own website* takes two pieces of configuration and one piece of HTML.
 
 ## 1. Allow the origin
 
@@ -15,7 +15,7 @@ Scheme and host only, one per line, both `www` and bare variants if both exist. 
 
 ## 2. Use the embed key
 
-The tenant's public key (**Tenant → Embed keys**) identifies which bot to serve. It is a *selector, not a secret* — it is designed to appear in page source.
+The tenant's public key (**Tenant → Embed keys**) identifies which bot to serve. It is a *selector, not a secret* - it is designed to appear in page source.
 
 ## 3. Embed
 
@@ -30,12 +30,12 @@ The simplest embed today is an iframe pointing at the tenant page:
 </iframe>
 ```
 
-A floating-bubble widget script (`embed.js`) is on the roadmap; the API it needs — CORS per origin, the `x-embed-key` header, server-issued sessions — is already in place, so custom widgets can also talk to `POST /api/chat` directly today.
+A floating-bubble widget script (`embed.js`) is on the roadmap; the API it needs - CORS per origin, the `x-embed-key` header, server-issued sessions - is already in place, so custom widgets can also talk to `POST /api/chat` directly today.
 
 ## What keeps this safe
 
 - The **origin allowlist** stops other websites from embedding a bot that isn't theirs (browser-enforced scoping).
-- The **daily message cap** holds even against direct API calls with `curl` — origin checks don't apply off-browser, the cap does.
+- The **daily message cap** holds even against direct API calls with `curl` - origin checks don't apply off-browser, the cap does.
 - Visitor identity is a **server-minted session token**, not anything the page invents.
 
-For a bot on the public internet, also read [Security model](./security) — especially the reverse-proxy note.
+For a bot on the public internet, also read [Security model](./security) - especially the reverse-proxy note.

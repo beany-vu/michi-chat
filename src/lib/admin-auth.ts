@@ -1,7 +1,7 @@
 // Admin authentication with two roles.
 //
-//   owner — everything: tenants, keys, origins, tools, user management.
-//   staff — the day-to-day: read conversations/usage, manage knowledge-base documents.
+//   owner - everything: tenants, keys, origins, tools, user management.
+//   staff - the day-to-day: read conversations/usage, manage knowledge-base documents.
 //
 // Two ways in: a user account (admin_users, per-user scrypt hash), or the env
 // ADMIN_PASSWORD as a break-glass OWNER login. The env path is why a fresh install works

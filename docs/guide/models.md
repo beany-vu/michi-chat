@@ -8,7 +8,7 @@ The app never names a real model. It asks LiteLLM for three **aliases**:
 | `judge` | Grading eval answers (kept different from `michi` on purpose) |
 | `embed` | Knowledge-base embeddings |
 
-What actually serves each alias is decided in `litellm.config.yaml`. Swapping providers is an edit there — never a code change.
+What actually serves each alias is decided in `litellm.config.yaml`. Swapping providers is an edit there - never a code change.
 
 ## Path A: local Ollama (default)
 
@@ -44,7 +44,7 @@ docker compose up -d --force-recreate litellm
 Add a trial alias in the yaml (say, `gemma` → `ollama_chat/gemma3:4b`, or the bundled
 `michi-mini` → `gemma3:1b` economy tier), restart the litellm container, and set one tenant's
 **Model alias** field to it in the admin UI. That tenant now runs the new model while every
-other tenant is untouched — A/B testing as configuration. The alias in use is shown to
+other tenant is untouched - A/B testing as configuration. The alias in use is shown to
 visitors in the chat footer ("AI model: …").
 
 ![A test tenant answering through a trial alias](/screenshots/gemma-testcafe.png)

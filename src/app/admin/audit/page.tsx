@@ -1,4 +1,4 @@
-// The audit trail, owner only: who did what, newest first. Append-only by design —
+// The audit trail, owner only: who did what, newest first. Append-only by design  - 
 // there is no edit or delete here, because a trail you can prune is not a trail.
 
 import { desc } from "drizzle-orm";
@@ -22,7 +22,7 @@ export default async function AuditPage() {
 
       <p className="note">
         Every sign-in and every change, newest first: who did it, what they did, and to
-        what. This log is append-only — nobody, including the owner, can edit or delete
+        what. This log is append-only - nobody, including the owner, can edit or delete
         entries from here. If something looks wrong, disable the account on the Accounts
         page and the change trail stays intact.
       </p>

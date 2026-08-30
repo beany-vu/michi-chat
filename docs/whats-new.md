@@ -3,12 +3,12 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
-## v0.2.5 — faster, safer, more accurate
+## v0.2.5 - faster, safer, more accurate
 
 Upgraded the framework to Next.js 16, which clears the outstanding security advisories.
 Faster tool answers (caching + parallel + shorter timeouts), no invented menu items or bean origins, and raw backend errors never shown to visitors.
 
-## v0.2.2 — safety hardening
+## v0.2.2 - safety hardening
 
 Shaped by real questions people asked the live bot on launch day.
 
@@ -25,7 +25,7 @@ Shaped by real questions people asked the live bot on launch day.
 - **Instant refusal of obvious attacks**, with no model call, plus a multilingual model
   backstop for the rest.
 
-## v0.2.0 — the platform grew up
+## v0.2.0 - the platform grew up
 
 - **Roles and an audit trail.** Owner and staff logins; every change is recorded. See
   [Running it day to day](./owner/day-to-day).
@@ -36,7 +36,7 @@ Shaped by real questions people asked the live bot on launch day.
 - **Graded answer quality.** A second model checks the bot's answers for faithfulness.
 - **Branding**: your logo, accent colour, light/dark, and a visitor notice.
 
-## v0.1.0 — first release
+## v0.1.0 - first release
 
 The multi-tenant assistant: per-business persona, tools and knowledge base, an embeddable
 widget, and the operator admin.
