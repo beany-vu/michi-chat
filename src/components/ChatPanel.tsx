@@ -243,7 +243,7 @@ export function ChatPanel({
                   </div>
                 )}
                 {turn.phase === "thinking" && (
-                  <div className="bubble bot thinking" aria-label="Michi is thinking">
+                  <div className="bubble bot thinking" aria-label="Assistant is thinking">
                     <span className="dot" />
                     <span className="dot" />
                     <span className="dot" />

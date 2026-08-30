@@ -354,3 +354,23 @@ body {
   --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
   background: var(--ground); color: var(--ink);
 }
+
+/* Entrance motion: messages, tool chips and suggestions rise and fade in as they mount,
+   the small touch that makes the chat feel alive instead of popping. Each element animates
+   once on mount (rows are keyed by turn id, so streaming text does not re-trigger it). */
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.row { animation: riseIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.tool-chip { animation: riseIn 0.22s ease both; }
+.empty .suggestion { animation: riseIn 0.3s ease both; }
+.empty .suggestion:nth-child(2) { animation-delay: 0.04s; }
+.empty .suggestion:nth-child(3) { animation-delay: 0.08s; }
+.empty .suggestion:nth-child(4) { animation-delay: 0.12s; }
+/* The bot bubble gets a soft settle as its content resolves. */
+.bubble.bot { transition: box-shadow 0.2s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .row, .tool-chip, .empty .suggestion { animation: none; }
+}
