@@ -20,8 +20,12 @@ Free parking is available, and the cafe has fast Wi-Fi for customers.
 
 ## Contact
 
-- Phone: +63 2 8570 3155
-- Email: mugshotcoffeeph@gmail.com
-- Website: https://mugshotmnl.com (menu, events, and a contact form)
+For requests, inquiries and feedback, the best channels are:
 
-The bot should never promise a phone callback; for anything urgent, call or visit.
+- Website contact / inquiry form: https://mugshotmnl.com (preferred for venue and events)
+- Email: mugshotcoffeeph@gmail.com
+
+A phone line exists (+63 2 8570 3155), but it may not be answered right away, so for a
+reliable response prefer the form or email. If someone specifically asks for the number,
+you can share it and add that the form or email is the surer way to reach us. Never promise a
+phone callback.

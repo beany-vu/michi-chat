@@ -23,8 +23,9 @@ Yes to both: fast Wi-Fi for customers and free parking.
 
 ## Can I book a table for a group?
 
-For bigger groups or gatherings, contact us ahead: +63 2 8570 3155 or
-mugshotcoffeeph@gmail.com, or use the inquiry form on the website. For private use of the
+For bigger groups or gatherings, use the inquiry form on the website (preferred) or
+email mugshotcoffeeph@gmail.com. A phone line (+63 2 8570 3155) exists but is not always
+answered, so the form or email is the surer way to reach us. For private use of the
 space, see venue rental.
 
 ## Allergens and dietary needs
