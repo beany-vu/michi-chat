@@ -1,19 +1,24 @@
-// Admin authentication. One operator, one password, no users table and no auth library.
+// Admin authentication with two roles.
 //
-// NextAuth would bring an adapter, four tables and a catch-all route to serve a single
-// user with a single password, and would teach NextAuth rather than authentication. This
-// is scrypt + a random session token + a cookie, all from node:crypto.
+//   owner — everything: tenants, keys, origins, tools, user management.
+//   staff — the day-to-day: read conversations/usage, manage knowledge-base documents.
 //
-// The sessions ARE stored (see admin_sessions) rather than signed statelessly, because a
-// stateless token cannot be revoked, and the table costs nothing next to the DB we run.
+// Two ways in: a user account (admin_users, per-user scrypt hash), or the env
+// ADMIN_PASSWORD as a break-glass OWNER login. The env path is why a fresh install works
+// before any user exists and a forgotten password never locks the platform.
+//
+// Still no auth library: scrypt + a random session token + a cookie, all from
+// node:crypto. Sessions are stored (revocable), and the role is snapshotted at login;
+// user-backed sessions also re-check the user's status on every request, so disabling a
+// staff account takes effect immediately.
 
 import { randomBytes, scrypt as scryptCb, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
-import { adminSessions } from "@/db/schema";
+import { adminSessions, adminUsers } from "@/db/schema";
 import { isRateLimited } from "./rate-limit";
 import { hashToken } from "./tenant";
 
@@ -25,30 +30,45 @@ const scrypt = promisify(scryptCb) as (
 
 const COOKIE = "michi_admin";
 const SESSION_TTL_HOURS = 12;
-const SALT = "michi-admin-v1";
+const LEGACY_SALT = "michi-admin-v1";
 
-async function passwordMatches(candidate: string): Promise<boolean> {
+export type AdminRole = "owner" | "staff";
+export interface AdminSession {
+  role: AdminRole;
+  userId: string | null;
+}
+
+/** "scrypt:<saltHex>:<hashHex>" with a per-user random salt. */
+export async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16).toString("hex");
+  const hash = await scrypt(password, salt, 32);
+  return `scrypt:${salt}:${hash.toString("hex")}`;
+}
+
+async function verifyPassword(candidate: string, stored: string): Promise<boolean> {
+  const [scheme, salt, hex] = stored.split(":");
+  if (scheme !== "scrypt" || !salt || !hex) return false;
+  const hash = await scrypt(candidate, salt, 32);
+  const expected = Buffer.from(hex, "hex");
+  return hash.length === expected.length && timingSafeEqual(hash, expected);
+}
+
+async function envPasswordMatches(candidate: string): Promise<boolean> {
   const expected = process.env.ADMIN_PASSWORD;
   if (!expected) return false;
   // Hash both sides to fixed-length buffers first: timingSafeEqual throws on a length
   // mismatch, which would itself leak the password length.
-  const [a, b] = await Promise.all([scrypt(candidate, SALT, 32), scrypt(expected, SALT, 32)]);
+  const [a, b] = await Promise.all([
+    scrypt(candidate, LEGACY_SALT, 32),
+    scrypt(expected, LEGACY_SALT, 32),
+  ]);
   return timingSafeEqual(a, b);
 }
 
-export async function login(password: string): Promise<boolean> {
-  // Global (not per-IP) on purpose: client IP is spoofable without a trusted proxy, and
-  // a single operator never needs more than a handful of attempts. This turns an
-  // unthrottled brute force into ~14k guesses/day, which a strong password laughs at.
-  if (await isRateLimited({ key: "admin-login", windowSeconds: 60, max: 10 })) {
-    return false;
-  }
-  if (!(await passwordMatches(password))) return false;
-
+async function issueSession(role: AdminRole, userId: string | null): Promise<void> {
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_TTL_HOURS * 3_600_000);
-  await dbRoot.insert(adminSessions).values({ tokenHash: hashToken(token), expiresAt });
-
+  await dbRoot.insert(adminSessions).values({ tokenHash: hashToken(token), role, userId, expiresAt });
   const jar = await cookies();
   jar.set(COOKIE, token, {
     httpOnly: true,
@@ -57,6 +77,37 @@ export async function login(password: string): Promise<boolean> {
     path: "/",
     expires: expiresAt,
   });
+}
+
+/**
+ * Email empty = the break-glass owner (env ADMIN_PASSWORD). Email set = a user account.
+ */
+export async function login(email: string, password: string): Promise<boolean> {
+  // Global (not per-IP) on purpose: client IP is spoofable without a trusted proxy, and
+  // a handful of humans never need more than this. ~14k guesses/day at worst.
+  if (await isRateLimited({ key: "admin-login", windowSeconds: 60, max: 10 })) {
+    return false;
+  }
+
+  if (!email) {
+    if (!(await envPasswordMatches(password))) return false;
+    await issueSession("owner", null);
+    return true;
+  }
+
+  const [user] = await dbRoot
+    .select()
+    .from(adminUsers)
+    .where(and(eq(adminUsers.email, email.toLowerCase()), eq(adminUsers.status, "active")))
+    .limit(1);
+  if (!user || !(await verifyPassword(password, user.passwordHash))) return false;
+
+  await issueSession(user.role, user.id);
+  void dbRoot
+    .update(adminUsers)
+    .set({ lastLoginAt: new Date() })
+    .where(eq(adminUsers.id, user.id))
+    .catch(() => {});
   return true;
 }
 
@@ -69,15 +120,29 @@ export async function logout(): Promise<void> {
   jar.delete(COOKIE);
 }
 
-export async function isAuthenticated(): Promise<boolean> {
+/** The session, or null. User-backed sessions require the user to still be active. */
+export async function getAdminSession(): Promise<AdminSession | null> {
   const token = (await cookies()).get(COOKIE)?.value;
-  if (!token) return false;
+  if (!token) return null;
   const [row] = await dbRoot
-    .select({ id: adminSessions.id })
+    .select({
+      role: adminSessions.role,
+      userId: adminSessions.userId,
+      userStatus: adminUsers.status,
+    })
     .from(adminSessions)
-    .where(sql`${adminSessions.tokenHash} = ${hashToken(token)} and ${adminSessions.expiresAt} > now()`)
+    .leftJoin(adminUsers, eq(adminUsers.id, adminSessions.userId))
+    .where(
+      sql`${adminSessions.tokenHash} = ${hashToken(token)} and ${adminSessions.expiresAt} > now()`,
+    )
     .limit(1);
-  return Boolean(row);
+  if (!row) return null;
+  if (row.userId && row.userStatus !== "active") return null;
+  return { role: row.role, userId: row.userId };
+}
+
+export async function isAuthenticated(): Promise<boolean> {
+  return (await getAdminSession()) !== null;
 }
 
 /**
@@ -87,6 +152,15 @@ export async function isAuthenticated(): Promise<boolean> {
  * actions. Actions are posted to the page route and run BEFORE the layout re-renders, so
  * the layout's redirect fires too late to stop the mutation.
  */
-export async function requireAdmin(): Promise<void> {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+export async function requireAdmin(): Promise<AdminSession> {
+  const session = await getAdminSession();
+  if (!session) redirect("/admin/login");
+  return session;
+}
+
+/** For actions staff must never run: tenants, keys, origins, tools, users. */
+export async function requireOwner(): Promise<AdminSession> {
+  const session = await requireAdmin();
+  if (session.role !== "owner") redirect("/admin");
+  return session;
 }

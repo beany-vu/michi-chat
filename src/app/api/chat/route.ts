@@ -10,6 +10,7 @@ import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { forTenant } from "@/db/tenant-db";
 import { buildSystemPrompt, wrapToolResult } from "@/lib/prompt";
+import { isRateLimited } from "@/lib/rate-limit";
 import { notifySlack } from "@/lib/slack";
 import { corsHeaders, corsJson, isOriginRegistered, normalizeOrigin, resolveTenant } from "@/lib/tenant";
 import { buildTenantTools } from "@/lib/tools";
@@ -81,17 +82,30 @@ export async function POST(request: NextRequest) {
 
   // The daily cap is the only control that holds against someone who has the embed key,
   // since the key is public and Origin is forgeable off-browser. It protects the bill.
-  const usedToday = await db.userMessagesToday();
-  if (usedToday >= tenant.dailyMessageCap) {
+  const storing = tenant.storeConversations;
+  if (storing) {
+    const usedToday = await db.userMessagesToday();
+    if (usedToday >= tenant.dailyMessageCap) {
+      return corsJson({ error: "daily message limit reached" }, 429, origin);
+    }
+    // This turn consumes the last slot of the day, and rejected turns are never stored,
+    // so this condition is true exactly once per day: the natural "notify once" point.
+    if (usedToday + 1 === tenant.dailyMessageCap) {
+      void notifySlack(
+        tenant.slackWebhookUrl,
+        `:warning: ${tenant.name}: daily message cap (${tenant.dailyMessageCap}) reached. The bot will decline further messages until midnight.`,
+      );
+    }
+  } else if (
+    // Privacy mode stores no message rows, so the cap counts in rate_buckets instead.
+    // Same number, different ledger; the bill stays protected either way.
+    await isRateLimited({
+      key: `msgs:${tenant.id}`,
+      windowSeconds: 86_400,
+      max: tenant.dailyMessageCap,
+    })
+  ) {
     return corsJson({ error: "daily message limit reached" }, 429, origin);
-  }
-  // This turn consumes the last slot of the day, and rejected turns are never stored, so
-  // this condition is true exactly once per day: the natural "notify once" point.
-  if (usedToday + 1 === tenant.dailyMessageCap) {
-    void notifySlack(
-      tenant.slackWebhookUrl,
-      `:warning: ${tenant.name}: daily message cap (${tenant.dailyMessageCap}) reached. The bot will decline further messages until midnight.`,
-    );
   }
 
   // A malformed id would reach a uuid column and make Postgres throw, so treat anything
@@ -101,40 +115,44 @@ export async function POST(request: NextRequest) {
       ? body.conversationId
       : null;
 
-  let conversation: Awaited<ReturnType<typeof db.createConversation>>;
-  let history: Awaited<ReturnType<typeof db.recentMessages>>;
-  try {
-    // Scoped by tenant AND session, both server-controlled, so a leaked conversationId is
-    // not on its own enough to resume someone else's thread.
-    const existing = requestedId ? await db.findConversation(requestedId, sessionId) : null;
-    conversation =
-      existing ??
-      (await db.createConversation({
-        sessionId,
-        apiKeyId,
-        originHost: origin,
-      }));
-    if (!existing) {
-      // Fire-and-forget by design: notifySlack never throws and never blocks the turn.
-      // Only a snippet of the first message goes out; the transcript stays in the DB.
-      void notifySlack(
-        tenant.slackWebhookUrl,
-        `:speech_balloon: New conversation for ${tenant.name}${origin ? ` from ${origin}` : ""}: "${userText.slice(0, 140)}"`,
-      );
+  let conversation: Awaited<ReturnType<typeof db.createConversation>> | null = null;
+  let history: Awaited<ReturnType<typeof db.recentMessages>> = [];
+  if (storing) {
+    try {
+      // Scoped by tenant AND session, both server-controlled, so a leaked conversationId
+      // is not on its own enough to resume someone else's thread.
+      const existing = requestedId ? await db.findConversation(requestedId, sessionId) : null;
+      conversation =
+        existing ??
+        (await db.createConversation({
+          sessionId,
+          apiKeyId,
+          originHost: origin,
+        }));
+      if (!existing) {
+        // Fire-and-forget by design: notifySlack never throws and never blocks the turn.
+        // Only a snippet of the first message goes out; the transcript stays in the DB.
+        void notifySlack(
+          tenant.slackWebhookUrl,
+          `:speech_balloon: New conversation for ${tenant.name}${origin ? ` from ${origin}` : ""}: "${userText.slice(0, 140)}"`,
+        );
+      }
+
+      history = await db.recentMessages(conversation.id);
+
+      // Persist the user turn BEFORE the LLM call — a crash cannot lose what was asked.
+      await db.appendMessage({
+        conversationId: conversation.id,
+        role: "user",
+        content: userText,
+      });
+    } catch (error) {
+      console.error("chat preamble failed", error);
+      return corsJson({ error: "Chat is unavailable right now." }, 503, origin);
     }
-
-    history = await db.recentMessages(conversation.id);
-
-    // Persist the user turn BEFORE the LLM call — a crash cannot lose what was asked.
-    await db.appendMessage({
-      conversationId: conversation.id,
-      role: "user",
-      content: userText,
-    });
-  } catch (error) {
-    console.error("chat preamble failed", error);
-    return corsJson({ error: "Chat is unavailable right now." }, 503, origin);
   }
+  // Privacy mode: no rows at all, which also means no multi-turn memory. That trade-off
+  // is stated on the admin form where the switch lives.
 
   const tools = buildTenantTools(tenant.toolConfig, tenant.id);
   const model = tenant.model ?? process.env.CHAT_MODEL ?? "michi";
@@ -217,20 +235,22 @@ export async function POST(request: NextRequest) {
         }
 
         const latencyMs = Date.now() - started;
-        await db.appendMessage({
-          conversationId: conversation.id,
-          role: "assistant",
-          content: answer,
-          toolCalls: toolLog.length > 0 ? toolLog : null,
-          model,
-          tokensIn,
-          tokensOut,
-          latencyMs,
-        });
-        await db.touchConversation(conversation.id);
+        if (conversation) {
+          await db.appendMessage({
+            conversationId: conversation.id,
+            role: "assistant",
+            content: answer,
+            toolCalls: toolLog.length > 0 ? toolLog : null,
+            model,
+            tokensIn,
+            tokensOut,
+            latencyMs,
+          });
+          await db.touchConversation(conversation.id);
+        }
 
         emit("done", {
-          conversationId: conversation.id,
+          conversationId: conversation?.id ?? null,
           // Only present on the turn that minted it; the client stores it and replays it.
           sessionToken: issuedSessionToken,
           usage: { inTokens: tokensIn, outTokens: tokensOut },

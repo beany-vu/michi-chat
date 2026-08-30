@@ -4,6 +4,7 @@
 
 import { desc } from "drizzle-orm";
 import {
+  boolean,
   foreignKey,
   index,
   integer,
@@ -54,6 +55,11 @@ export const tenants = pgTable("tenants", {
   // Browser-enforced scoping for the embed, stored as "scheme://host[:port]", lowercased.
   allowedOrigins: text("allowed_origins").array().notNull().default([]),
   dailyMessageCap: integer("daily_message_cap").notNull().default(500),
+  // Privacy switch: when false, no conversation or message rows are written at all.
+  // Two consequences, both deliberate: the bot loses multi-turn memory (history is
+  // rebuilt from these rows), and the daily cap is enforced via rate_buckets instead
+  // of counting messages. See the chat route.
+  storeConversations: boolean("store_conversations").notNull().default(true),
   // The ONE tenant-supplied URL in the system, and only because it is pinned to a single
   // host: validation (src/lib/slack.ts) accepts exactly https://hooks.slack.com/services/…,
   // so it cannot be aimed at Ollama, the DB, or LiteLLM. Notifies on new conversations
@@ -161,11 +167,37 @@ export const messages = pgTable(
   ],
 );
 
-// Operator sessions for /admin. Single operator, so there is no users table: the password
-// hash lives in an env var and this only tracks issued sessions so they can be revoked.
+// Operator accounts for /admin. Two roles:
+//   owner — everything: tenants, keys, origins, tools, users.
+//   staff — the day-to-day: read conversations/usage, manage knowledge-base documents.
+// The env ADMIN_PASSWORD remains a break-glass OWNER login (no row here), so a fresh
+// install works before any user exists and a forgotten password never locks the door.
+export const adminUsers = pgTable("admin_users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  // Format "scrypt:<saltHex>:<hashHex>"; per-user random salt.
+  passwordHash: text("password_hash").notNull(),
+  role: text("role", { enum: ["owner", "staff"] })
+    .notNull()
+    .default("staff"),
+  status: text("status", { enum: ["active", "disabled"] })
+    .notNull()
+    .default("active"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
+});
+
+// Sessions for /admin. userId is null for env-password (break-glass owner) sessions;
+// the role is snapshotted at login so every request costs one lookup, and disabling a
+// user still bites within a session's 12h TTL via the join check in getAdminSession.
 export const adminSessions = pgTable("admin_sessions", {
   id: uuid("id").primaryKey().defaultRandom(),
   tokenHash: text("token_hash").notNull().unique(),
+  userId: uuid("user_id").references(() => adminUsers.id, { onDelete: "cascade" }),
+  role: text("role", { enum: ["owner", "staff"] })
+    .notNull()
+    .default("owner"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
 });

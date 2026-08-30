@@ -56,6 +56,20 @@ export function TenantForm({
           defaultValue={tenant.dailyMessageCap}
         />
         <small>The only limit that holds against someone who has the public embed key.</small>
+
+        <label className="check">
+          <input
+            type="checkbox"
+            name="storeConversations"
+            defaultChecked={tenant.storeConversations}
+          />
+          <span>Store conversations</span>
+        </label>
+        <small>
+          Off = privacy mode: nothing is written to the database, so there are no
+          transcripts to read or export, and the bot cannot remember earlier messages in
+          the same visit. The daily cap still applies.
+        </small>
       </fieldset>
 
       <fieldset>

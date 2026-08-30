@@ -1,0 +1,1 @@
+ALTER TABLE "tenants" ADD COLUMN "store_conversations" boolean DEFAULT true NOT NULL;

@@ -39,7 +39,8 @@ carry over 1:1.
 - **The admin conversation viewer renders message content as plain text**, never markdown and
   never HTML. The visitor widget renders markdown, which is fine there; the operator's browser
   holds the session that controls the whole platform.
-- **`requireAdmin()` is the first line of every server action.** A guard in `admin/layout.tsx`
+- **`requireAdmin()` (or `requireOwner()`) is the first line of every server action.** Roles:
+  owner = everything; staff = conversations/usage reading + knowledge-base editing only. A guard in `admin/layout.tsx`
   does not protect actions: they run before the layout re-renders.
 - **CORS is emitted by the chat route handler only**, never globally. A permissive Allow-Origin
   on an admin response would let any tenant page read admin JSON with the operator's cookie.

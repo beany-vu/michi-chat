@@ -12,8 +12,8 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
-import { apiKeys, tenants, type Branding, type ToolConfig } from "@/db/schema";
-import { login, logout, requireAdmin } from "@/lib/admin-auth";
+import { adminUsers, apiKeys, conversations, tenants, type Branding, type ToolConfig } from "@/db/schema";
+import { hashPassword, login, logout, requireAdmin, requireOwner } from "@/lib/admin-auth";
 import { MAX_PERSONA_CHARS } from "@/lib/prompt";
 import { deleteDocument, ingestDocument } from "@/lib/rag";
 import { validateSlackWebhookUrl } from "@/lib/slack";
@@ -47,8 +47,11 @@ function validateBaseUrl(raw: string): string {
 }
 
 export async function loginAction(_prev: unknown, formData: FormData) {
-  const ok = await login(String(formData.get("password") ?? ""));
-  if (!ok) return { error: "Wrong password." };
+  const ok = await login(
+    String(formData.get("email") ?? "").trim(),
+    String(formData.get("password") ?? ""),
+  );
+  if (!ok) return { error: "Wrong email or password." };
   redirect("/admin");
 }
 
@@ -59,7 +62,7 @@ export async function logoutAction() {
 }
 
 export async function createTenantAction(_prev: unknown, formData: FormData) {
-  await requireAdmin();
+  await requireOwner();
   const slug = String(formData.get("slug") ?? "")
     .trim()
     .toLowerCase();
@@ -96,7 +99,7 @@ export async function createTenantAction(_prev: unknown, formData: FormData) {
 }
 
 export async function saveTenantAction(tenantId: string, _prev: unknown, formData: FormData) {
-  await requireAdmin();
+  await requireOwner();
 
   const persona = String(formData.get("persona") ?? "").trim();
   if (persona.length > MAX_PERSONA_CHARS) {
@@ -178,6 +181,7 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
       branding,
       toolConfig,
       allowedOrigins: origins,
+      storeConversations: formData.get("storeConversations") === "on",
       slackWebhookUrl,
       updatedAt: new Date(),
     })
@@ -189,7 +193,7 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
 }
 
 export async function createKeyAction(tenantId: string, formData: FormData) {
-  await requireAdmin();
+  await requireOwner();
   await dbRoot.insert(apiKeys).values({
     tenantId,
     kind: "public",
@@ -232,7 +236,7 @@ export async function deleteKbDocumentAction(tenantId: string, documentId: strin
 }
 
 export async function revokeKeyAction(tenantId: string, keyId: string) {
-  await requireAdmin();
+  await requireOwner();
   // Soft revoke: conversations keep a valid foreign key, and traffic still arriving on a
   // dead key stays visible.
   await dbRoot
@@ -240,4 +244,51 @@ export async function revokeKeyAction(tenantId: string, keyId: string) {
     .set({ revokedAt: new Date() })
     .where(and(eq(apiKeys.id, keyId), eq(apiKeys.tenantId, tenantId)));
   revalidatePath(`/admin/tenants/${tenantId}/keys`);
+}
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export async function createAdminUserAction(_prev: unknown, formData: FormData) {
+  await requireOwner();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const name = String(formData.get("name") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  const role = formData.get("role") === "owner" ? ("owner" as const) : ("staff" as const);
+
+  if (!EMAIL_PATTERN.test(email)) return { error: "Not a valid email." };
+  if (!name) return { error: "Name is required." };
+  if (password.length < 10) return { error: "Password must be at least 10 characters." };
+
+  try {
+    await dbRoot.insert(adminUsers).values({
+      email,
+      name,
+      role,
+      passwordHash: await hashPassword(password),
+    });
+  } catch {
+    return { error: "That email already has an account." };
+  }
+  revalidatePath("/admin/users");
+  return { ok: true as const };
+}
+
+export async function setAdminUserStatusAction(userId: string, status: "active" | "disabled") {
+  await requireOwner();
+  // Disabling rather than deleting keeps the audit trail; a disabled user's sessions die
+  // on their next request (getAdminSession re-checks status).
+  await dbRoot
+    .update(adminUsers)
+    .set({ status: status === "disabled" ? "disabled" : "active" })
+    .where(eq(adminUsers.id, userId));
+  revalidatePath("/admin/users");
+}
+
+export async function deleteConversationAction(conversationId: string) {
+  await requireOwner();
+  // Messages go with it via the composite-FK cascade. Deletion is real and final;
+  // export first if the transcript matters.
+  await dbRoot.delete(conversations).where(eq(conversations.id, conversationId));
+  revalidatePath("/admin/conversations");
+  redirect("/admin/conversations");
 }

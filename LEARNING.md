@@ -93,7 +93,7 @@ assistant, made the same bet: it runs LiteLLM internally.)
 
 ## 2. Database design
 
-Nine tables. The interesting part is not the columns, it is **where isolation is enforced**.
+Eleven tables. The interesting part is not the columns, it is **where isolation is enforced**.
 
 ```text
 tenants ──┬──< api_keys           (public embed keys; secret keys hashed)
@@ -103,7 +103,8 @@ tenants ──┬──< api_keys           (public embed keys; secret keys hash
           ├──< kb_documents ───┐
           └──< kb_chunks ──────┘   same composite-FK pattern
 
-admin_sessions   (operator; no users table, one password in env)
+admin_users      (owner/staff roles; env password stays the break-glass owner)
+admin_sessions   (role snapshot per session; user status re-checked per request)
 rate_buckets     (fixed-window counters, (key, window_start) PK)
 ```
 
@@ -291,7 +292,7 @@ Read in this order; each depends only on what came before.
 | `src/lib/tools/registry.ts` | The pack interface, and a long comment on why there is no generic HTTP tool |
 | `src/lib/tools/mugshot.ts` | Three real executors. Note the projection and the CMS quirks |
 | `src/lib/tools/index.ts` | Turns `toolConfig` into definitions + labels + one executor |
-| `src/db/schema.ts` | Nine tables. The composite FK is the thing to study; kb_chunks repeats it |
+| `src/db/schema.ts` | Eleven tables. The composite FK is the thing to study; kb_chunks repeats it |
 | `src/db/tenant-db.ts` | `forTenant()`, and a comment on why RLS is absent |
 | `src/lib/rag/chunk.ts` | Heading-aware chunking, dependency-free and deterministic on purpose |
 | `src/lib/rag/index.ts` | Ingestion (embed before write) and the leaf-scan retrieval |

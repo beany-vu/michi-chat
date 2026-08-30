@@ -10,10 +10,12 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { conversations, messages, tenants } from "@/db/schema";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { getAdminSession } from "@/lib/admin-auth";
+import { deleteConversationAction } from "../../actions";
 
 export default async function TranscriptPage({ params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  const session = await getAdminSession();
+  if (!session) redirect("/admin/login");
   const { id } = await params;
 
   const [conversation] = await dbRoot
@@ -42,6 +44,16 @@ export default async function TranscriptPage({ params }: { params: Promise<{ id:
         <h1>{conversation.tenantName}</h1>
         <div className="head-links">
           <span>{conversation.originHost ?? "direct"}</span>
+          {session.role === "owner" && (
+            <>
+              <a href={`/admin/export?conversation=${conversation.id}`}>Export JSON</a>
+              <form action={deleteConversationAction.bind(null, conversation.id)}>
+                <button type="submit" className="ghost">
+                  Delete
+                </button>
+              </form>
+            </>
+          )}
           <Link href="/admin/conversations">Back</Link>
         </div>
       </div>

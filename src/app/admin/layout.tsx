@@ -3,15 +3,15 @@
 // The real guard is requireAdmin() at the top of each action in ./actions.ts.
 
 import Link from "next/link";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { getAdminSession } from "@/lib/admin-auth";
 import { logoutAction } from "./actions";
 import "./admin.css";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const authed = await isAuthenticated();
+  const session = await getAdminSession();
 
   // The login page renders inside this layout too, so it cannot require a session.
-  if (!authed) return <div className="admin">{children}</div>;
+  if (!session) return <div className="admin">{children}</div>;
 
   return (
     <div className="admin">
@@ -20,6 +20,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link href="/admin">Tenants</Link>
           <Link href="/admin/conversations">Conversations</Link>
           <Link href="/admin/usage">Usage</Link>
+          {/* Hiding the link is UX; the page and its actions enforce owner themselves. */}
+          {session.role === "owner" && <Link href="/admin/users">Accounts</Link>}
         </nav>
         <form action={logoutAction}>
           <button type="submit" className="ghost">
