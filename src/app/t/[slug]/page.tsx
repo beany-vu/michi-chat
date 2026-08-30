@@ -17,8 +17,17 @@ export async function generateMetadata({
   return { title: name, description: `Chat with ${name}` };
 }
 
-export default async function TenantChatPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function TenantChatPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ embed?: string }>;
+}) {
   const { slug } = await params;
+  // embed=1 is set by the floating widget, which already draws its own header bar; hiding
+  // the page's topbar then avoids two stacked "Business Name" headers eating chat space.
+  const embed = (await searchParams).embed === "1";
   const loaded = await loadTenantBySlug(slug);
   if (!loaded) notFound();
 
@@ -39,7 +48,8 @@ export default async function TenantChatPage({ params }: { params: Promise<{ slu
     : undefined;
 
   return (
-    <div className="app" style={themeStyle} data-theme={branding.theme}>
+    <div className={`app${embed ? " app-embed" : ""}`} style={themeStyle} data-theme={branding.theme}>
+      {!embed && (
       <header className="topbar">
         <div className="brand">
           {branding.logoUrl ? (
@@ -58,6 +68,7 @@ export default async function TenantChatPage({ params }: { params: Promise<{ slu
           )}
         </div>
       </header>
+      )}
       <ChatPanel
         embedKey={embedKey}
         title={branding.greeting ?? `Chat with ${tenant.name}`}

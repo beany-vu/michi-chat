@@ -328,19 +328,17 @@ export function ChatPanel({
           {busy ? "…" : "Send"}
         </button>
       </form>
-      {disclaimer && (
-        <div className="disclaimer-row">
-          <p className={`disclaimer${noticeOpen ? "" : " disclaimer-collapsed"}`} role="note">
-            {disclaimer}
-          </p>
+      {disclaimer && noticeOpen && (
+        <div className="notice-box" role="note">
           <button
             type="button"
-            className="disclaimer-toggle"
-            aria-expanded={noticeOpen}
-            onClick={() => setNoticeOpen((v) => !v)}
+            className="notice-x"
+            aria-label="Dismiss notice"
+            onClick={() => setNoticeOpen(false)}
           >
-            {noticeOpen ? "Hide" : "More"}
+            ×
           </button>
+          <p>{disclaimer}</p>
         </div>
       )}
       <p className="credit">
