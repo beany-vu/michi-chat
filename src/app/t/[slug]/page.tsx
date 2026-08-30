@@ -76,7 +76,8 @@ export default async function TenantChatPage({
         placeholder={branding.placeholder}
         suggestions={branding.suggestions ?? []}
         disclaimer={branding.disclaimer}
-        modelLabel={tenant.model ?? process.env.CHAT_MODEL ?? "michi"}
+        // modelLabel deliberately not passed: with it the credit wraps to two lines on
+        // phones, and the model alias means nothing to visitors anyway.
       />
     </div>
   );
