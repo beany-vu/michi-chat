@@ -2,6 +2,7 @@
   "name": "michi-chat",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://beany-vu.github.io/michi-chat/",
   "scripts": {
     "dev": "drizzle-kit migrate && next dev",
     "build": "next build",
