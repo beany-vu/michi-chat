@@ -3,7 +3,7 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
-## v0.2.3 — 2026-08-30
+## v0.2.4 — 2026-08-30
 
 ### Fixed
 

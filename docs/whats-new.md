@@ -3,10 +3,10 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
-## v0.2.3 — Next.js 16
+## v0.2.4 — Next.js 16 and safer errors
 
 Upgraded the framework to Next.js 16, which clears the outstanding security advisories.
-No change to how the bot behaves.
+Also: the bot never shows raw backend errors to visitors now, only a friendly line.
 
 ## v0.2.2 — safety hardening
 
