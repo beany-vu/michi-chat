@@ -23,8 +23,8 @@
     --bg: #161514;
     --surface: #1d1c1a;
     --fg: #edeae4;
-    --muted: #98928a;
-    --line: #2e2c28;
+    --muted: #a09a91;
+    --line: #3a3731;
     --accent: #c2a077;
     --danger: #d98a84;
     --okay: #9dc18d;
@@ -32,29 +32,86 @@
   }
 }
 
-.admin-bar {
+.admin-shell {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  padding: 18px 32px;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface);
+  min-height: 100vh;
 }
 
-.admin-bar nav {
+.admin-side {
+  width: 216px;
+  flex: 0 0 auto;
   display: flex;
-  gap: 26px;
+  flex-direction: column;
+  gap: 28px;
+  padding: 28px 24px;
+  border-right: 1px solid var(--line);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  height: 100vh;
 }
-.admin-bar nav a {
+.admin-logo {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.admin-side nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.admin-side nav a {
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.09em;
   color: var(--muted);
+  padding: 8px 10px;
+  margin: 0 -10px;
+  border-radius: 2px;
 }
-.admin-bar nav a:hover {
+.admin-side nav a:hover {
   color: var(--fg);
+  background: var(--soft);
   text-decoration: none;
+}
+.admin-side-foot {
+  margin-top: auto;
+}
+.admin-side-foot button {
+  width: 100%;
+}
+
+/* Small screens: the rail folds back into a horizontal strip. No JS drawer to break. */
+@media (max-width: 780px) {
+  .admin-shell {
+    flex-direction: column;
+  }
+  .admin-side {
+    width: auto;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+  }
+  .admin-side nav {
+    flex-direction: row;
+    gap: 2px;
+  }
+  .admin-side nav a {
+    white-space: nowrap;
+  }
+  .admin-side-foot {
+    margin-top: 0;
+    margin-left: auto;
+  }
+  .admin-side-foot button {
+    width: auto;
+  }
 }
 
 .admin a {
@@ -71,9 +128,39 @@
 }
 
 .admin-main {
+  flex: 1 1 auto;
+  min-width: 0;
   max-width: 1040px;
   margin: 0 auto;
   padding: 44px 32px 96px;
+}
+
+/* Filter chips (e.g. per-tenant on Conversations): the active one is unmistakable. */
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 5px 12px;
+}
+.filter:hover {
+  color: var(--fg);
+  border-color: var(--fg);
+  text-decoration: none;
+}
+.filter-active,
+.filter-active:hover {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
 }
 
 .head {
@@ -97,13 +184,18 @@
   flex-wrap: wrap;
 }
 .head-links a {
-  color: var(--muted);
-  font-size: 13px;
+  color: var(--fg);
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 6px 12px;
+  background: var(--surface);
 }
 .head-links a:hover {
-  color: var(--fg);
+  border-color: var(--fg);
+  text-decoration: none;
 }
 
 .admin table {
@@ -231,12 +323,13 @@
   cursor: default;
 }
 .admin button.ghost {
-  background: transparent;
+  background: var(--soft);
   color: var(--fg);
-  border-color: var(--line);
+  border: 1px solid var(--muted);
 }
 .admin button.ghost:hover:not(:disabled) {
   border-color: var(--fg);
+  background: var(--surface);
 }
 
 .row-form {
@@ -416,4 +509,36 @@
   height: 26px;
   background: var(--accent);
   border-radius: 1px;
+}
+
+/* Row actions: links and buttons in tables share one chip skin, so "Edit" (a link) and
+   "Delete" (a form button) read as siblings, not different species. */
+.admin .row-action {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  border: 1px solid var(--muted);
+  background: var(--soft);
+  color: var(--fg);
+  border-radius: 2px;
+  padding: 5px 12px;
+}
+.admin .row-action:hover {
+  border-color: var(--fg);
+  background: var(--surface);
+  text-decoration: none;
+}
+.admin td button.ghost,
+.head-links button.ghost {
+  padding: 5px 12px;
+  font-size: 12px;
+}
+.admin td form {
+  display: inline;
+}
+
+.admin-side nav a.active {
+  color: var(--fg);
+  background: var(--soft);
+  box-shadow: inset 2px 0 0 var(--accent);
 }

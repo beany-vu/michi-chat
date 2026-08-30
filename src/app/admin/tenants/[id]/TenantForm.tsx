@@ -148,8 +148,9 @@ export function TenantForm({
       <fieldset>
         <legend>Tools</legend>
         <small>
-          Tools are code packs. A tenant enables one and fills in its parameters; the URL is
-          always built by the platform, never supplied here in full.
+          Tools are code packs from the platform catalog. Enable what fits this business and
+          leave the rest off; packs built for another site's API simply don't apply. URLs
+          are always validated by the platform, never free-form.
         </small>
         {packs.map((pack) => {
           const config = (toolConfig[pack.id] ?? {}) as Record<string, unknown>;

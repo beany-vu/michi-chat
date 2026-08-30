@@ -2,8 +2,8 @@
 // redirect, but it does NOT protect server actions, which run before a layout re-renders.
 // The real guard is requireAdmin() at the top of each action in ./actions.ts.
 
-import Link from "next/link";
 import { getAdminSession } from "@/lib/admin-auth";
+import { AdminNav } from "./AdminNav";
 import { logoutAction } from "./actions";
 import "./admin.css";
 
@@ -14,21 +14,19 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!session) return <div className="admin">{children}</div>;
 
   return (
-    <div className="admin">
-      <header className="admin-bar">
-        <nav>
-          <Link href="/admin">Tenants</Link>
-          <Link href="/admin/conversations">Conversations</Link>
-          <Link href="/admin/usage">Usage</Link>
-          {/* Hiding the link is UX; the page and its actions enforce owner themselves. */}
-          {session.role === "owner" && <Link href="/admin/users">Accounts</Link>}
-        </nav>
-        <form action={logoutAction}>
+    <div className="admin admin-shell">
+      {/* Sidebar rail on desktop; collapses to a horizontal strip on small screens
+          purely in CSS, so there is no menu JavaScript to break. */}
+      <aside className="admin-side">
+        <div className="admin-logo">michi-chat</div>
+        {/* Hiding owner links is UX; the pages and actions enforce the role themselves. */}
+        <AdminNav isOwner={session.role === "owner"} />
+        <form action={logoutAction} className="admin-side-foot">
           <button type="submit" className="ghost">
             Sign out
           </button>
         </form>
-      </header>
+      </aside>
       <main className="admin-main">{children}</main>
     </div>
   );
