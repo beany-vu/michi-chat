@@ -11,7 +11,8 @@
 | Section | What it controls |
 | --- | --- |
 | Identity | Name, active/disabled, model alias override, **timezone** (cap reset + analytics buckets), **daily message cap**, store-conversations switch |
-| Persona | The tenant layer of the system prompt: identity, hours, location, voice |
+| Persona | The tenant layer of the system prompt: identity, hours, location, voice. The bot replies in the visitor's language automatically |
+| Protection rules | Hard boundaries in your words (e.g. "never quote rental prices", "only answer about the cafe, no stories"). Can only tighten behaviour, never loosen the platform rules |
 | Branding | Title, greeting, subtitle, composer placeholder, accent color, suggestion chips |
 | Tools | Enable tool packs and fill in their parameters (see below) |
 | Notifications | Optional Slack incoming webhook — new-conversation and cap-reached alerts |

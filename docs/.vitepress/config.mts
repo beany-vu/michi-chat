@@ -10,10 +10,15 @@ export default defineConfig({
   ignoreDeadLinks: [/^http:\/\/localhost/],
   themeConfig: {
     nav: [
+      { text: "What\u2019s new", link: "/whats-new" },
       { text: "Guide", link: "/guide/quickstart" },
       { text: "GitHub", link: "https://github.com/beany-vu/michi-chat" },
     ],
     sidebar: [
+      {
+        text: "Release notes",
+        items: [{ text: "What\u2019s new", link: "/whats-new" }],
+      },
       {
         text: "For business owners",
         items: [
