@@ -156,13 +156,14 @@
   border-color: var(--fg);
   text-decoration: none;
 }
-/* .admin prefix on purpose: it must outrank `.admin a`'s ink color, or the active chip
-   renders ink-on-ink. */
+/* .admin prefix on purpose: it must outrank `.admin a`'s ink color. Oak tint rather
+   than solid ink, so the active state belongs to the palette instead of shouting. */
 .admin .filter-active,
 .admin .filter-active:hover {
-  background: var(--fg);
-  color: var(--bg);
-  border-color: var(--fg);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--fg);
+  border-color: var(--accent);
+  font-weight: 600;
 }
 
 .head {
