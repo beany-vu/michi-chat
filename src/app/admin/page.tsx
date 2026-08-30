@@ -7,6 +7,7 @@ import { dbRoot } from "@/db";
 import { apiKeys, conversations, messages, tenants } from "@/db/schema";
 import { isAuthenticated } from "@/lib/admin-auth";
 import { NewTenantForm } from "./NewTenantForm";
+import { TenantImport } from "./TenantImport";
 
 export default async function AdminHome() {
   if (!(await isAuthenticated())) redirect("/admin/login");
@@ -93,6 +94,8 @@ export default async function AdminHome() {
         <h2>New tenant</h2>
         <NewTenantForm />
       </section>
+
+      <TenantImport />
     </>
   );
 }

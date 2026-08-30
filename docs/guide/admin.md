@@ -39,6 +39,14 @@ messages, tokens and latency per tenant per day. **Tenant → Analytics** breaks
 30 days: volume, tool mix, the actual knowledge-base queries visitors triggered, busy hours,
 origins, and (behind Cloudflare) country-level location — never IPs.
 
+## Moving a tenant between instances
+
+**Tenant → Export JSON** (owner only) downloads everything that makes the tenant: settings,
+branding, tools, origins, and the knowledge base. **Admin → Import a tenant** brings it to
+any michi-chat instance — laptop to production in one file. Imports into an existing tenant
+show a preview of exactly what would change and require an explicit overwrite confirmation;
+knowledge is re-embedded on arrival, so transfers work across different embedding models.
+
 ## Roles and privacy
 
 **Accounts** (owner only) adds staff logins: conversations/usage reading plus knowledge-base

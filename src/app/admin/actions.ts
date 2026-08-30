@@ -20,7 +20,9 @@ import { MAX_PERSONA_CHARS } from "@/lib/prompt";
 import { deleteDocument, ingestDocument } from "@/lib/rag";
 import { clearAnswerCache } from "@/lib/rag/answer-cache";
 import { validateSlackWebhookUrl } from "@/lib/slack";
+import { exportTenant, importTenant, previewTenantImport } from "@/lib/tenant-transfer";
 import { normalizeOrigin } from "@/lib/tenant";
+import { validateBaseUrl, validatePath } from "@/lib/validate";
 import { TOOL_PACKS } from "@/lib/tools";
 
 const lines = (value: FormDataEntryValue | null) =>
@@ -29,33 +31,6 @@ const lines = (value: FormDataEntryValue | null) =>
     .map((line) => line.trim())
     .filter(Boolean);
 
-/**
- * The one place a tenant-influenced URL enters the system. Only an operator can set it,
- * but validate anyway: this process can reach the host's unauthenticated Ollama, the
- * database, and the LiteLLM admin port.
- */
-function validateBaseUrl(raw: string): string {
-  const url = new URL(raw);
-  if (url.protocol !== "https:") throw new Error(`${raw}: must be https`);
-  if (url.port) throw new Error(`${raw}: explicit ports are not allowed`);
-  const host = url.hostname.toLowerCase();
-  const blocked =
-    host === "localhost" ||
-    host.endsWith(".local") ||
-    host.endsWith(".internal") ||
-    /^\d+\.\d+\.\d+\.\d+$/.test(host) ||
-    host.includes(":");
-  if (blocked) throw new Error(`${raw}: host is not allowed`);
-  return `${url.protocol}//${url.host}`;
-}
-
-/** A fixed endpoint path for the generic pack: absolute, no query, no traversal. */
-function validatePath(raw: string): string {
-  if (!/^\/[A-Za-z0-9\/_.-]*$/.test(raw) || raw.includes("..") || raw.includes("//")) {
-    throw new Error(`${raw}: path must look like /api/something/ with no query or ..`);
-  }
-  return raw;
-}
 
 export async function loginAction(_prev: unknown, formData: FormData) {
   const ok = await login(
@@ -369,4 +344,25 @@ export async function importKbCsvAction(tenantId: string, _prev: unknown, formDa
     return { error: `Imported ${saved}, unchanged ${unchanged}; problems: ${problems.slice(0, 3).join("; ")}` };
   }
   return { ok: true as const, info: `${saved} imported, ${unchanged} unchanged.` };
+}
+
+export async function importTenantAction(_prev: unknown, formData: FormData) {
+  const session = await requireOwner();
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "Choose a tenant JSON file." };
+  if (file.size > 10_000_000) return { error: "File is larger than 10 MB." };
+  try {
+    const payload = JSON.parse(await file.text());
+    const preview = await previewTenantImport(payload);
+    // Existing tenant + no explicit confirmation = show the diff, change nothing.
+    if (preview.exists && formData.get("confirm") !== "on") {
+      return { preview: preview.changes };
+    }
+    const summary = await importTenant(payload);
+    logAudit(session, "tenant.import", summary);
+    revalidatePath("/admin");
+    return { ok: true as const, info: summary };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Import failed." };
+  }
 }
