@@ -3,6 +3,14 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.3 — 2026-08-30
+
+### Changed
+
+- **Upgraded to Next.js 16** (from 15). Clears the postcss and sharp security advisories
+  (npm audit --omit=dev: 0 high/critical). No behaviour change; verified with a clean
+  build, typecheck, 29 tests, and a live smoke test.
+
 ## v0.2.2 — 2026-08-30
 
 Safety hardening, driven by real production transcripts (67 visitor messages audited).
