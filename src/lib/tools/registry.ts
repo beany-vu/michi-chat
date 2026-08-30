@@ -35,6 +35,9 @@ export interface ToolConfigField {
 /** Supplied by the platform per call, never by tenant config. */
 export interface ToolContext {
   tenantId: string;
+  /** The tenant's IANA timezone: date-aware tools compute "today" in it, because the
+   *  server's clock day and the cafe's day differ for most of every day. */
+  timezone: string;
 }
 
 export interface ToolPack {

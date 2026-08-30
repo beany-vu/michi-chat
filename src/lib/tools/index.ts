@@ -17,7 +17,11 @@ export interface TenantTools {
   execute(name: string, args: string): Promise<string>;
 }
 
-export function buildTenantTools(toolConfig: ToolConfig, tenantId: string): TenantTools {
+export function buildTenantTools(
+  toolConfig: ToolConfig,
+  tenantId: string,
+  timezone = "UTC",
+): TenantTools {
   const enabled = Object.entries(toolConfig ?? {}).filter(
     ([id, config]) => config?.enabled && TOOL_PACKS[id],
   );
@@ -45,7 +49,7 @@ export function buildTenantTools(toolConfig: ToolConfig, tenantId: string): Tena
         Object.entries(rawConfig).map(([k, v]) => [k, typeof v === "string" ? v : ""]),
       );
       try {
-        return await TOOL_PACKS[id].run(config, args, { tenantId });
+        return await TOOL_PACKS[id].run(config, args, { tenantId, timezone });
       } catch (error) {
         // Errors go back to the MODEL as JSON, so a dead upstream becomes an apology
         // rather than a failed turn.

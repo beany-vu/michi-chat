@@ -226,7 +226,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const tools = buildTenantTools(tenant.toolConfig, tenant.id);
+  const tools = buildTenantTools(tenant.toolConfig, tenant.id, tenant.timezone);
   const model = tenant.model ?? process.env.CHAT_MODEL ?? "michi";
 
   const turn: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [

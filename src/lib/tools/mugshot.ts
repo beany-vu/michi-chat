@@ -139,22 +139,36 @@ const events: ToolPack = {
   configFields: [
     { key: "baseUrl", label: "Site base URL", type: "url", required: true },
   ],
-  async run(config) {
+  async run(config, _args, ctx) {
     const payload = (await getJson(`${config.baseUrl}/api/events/`)) as Record<
       string,
       unknown
     >[];
-    return JSON.stringify(
-      payload.slice(0, 10).map((event) => ({
-        title: event.title,
-        date: event.date,
-        startTime: event.startTime,
-        endTime: event.endTime,
-        type: event.type,
-        description: typeof event.description === "string" ? event.description.slice(0, 200) : undefined,
-        capacity: event.capacity,
-      })),
-    );
+    // "Today" in the cafe's own day, not the server's: the API's dates are local to the
+    // cafe, and en-CA formats as YYYY-MM-DD, so plain string comparison works.
+    let today: string;
+    try {
+      today = new Intl.DateTimeFormat("en-CA", { timeZone: ctx.timezone }).format(new Date());
+    } catch {
+      today = new Intl.DateTimeFormat("en-CA", { timeZone: "UTC" }).format(new Date());
+    }
+    const trim = (event: Record<string, unknown>) => ({
+      title: event.title,
+      date: event.date,
+      startTime: event.startTime,
+      endTime: event.endTime,
+      type: event.type,
+      description: typeof event.description === "string" ? event.description.slice(0, 200) : undefined,
+      capacity: event.capacity,
+    });
+    const dated = payload
+      .filter((event) => typeof event.date === "string")
+      .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    // Split around today so the model never has to do date math: the API returns the
+    // full history oldest-first, and slicing it blind used to serve only past events.
+    const upcoming = dated.filter((event) => String(event.date) >= today).slice(0, 8).map(trim);
+    const recentPast = dated.filter((event) => String(event.date) < today).slice(-3).reverse().map(trim);
+    return JSON.stringify({ today, upcoming, recentPast });
   },
 };
 
