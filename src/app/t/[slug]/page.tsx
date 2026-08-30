@@ -30,6 +30,7 @@ export default async function TenantChatPage({ params }: { params: Promise<{ slu
         subtitle={branding.subtitle}
         placeholder={branding.placeholder}
         suggestions={branding.suggestions ?? []}
+        disclaimer={branding.disclaimer}
       />
     </div>
   );

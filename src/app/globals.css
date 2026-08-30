@@ -272,3 +272,12 @@ body {
 .composer button:disabled { opacity: 0.45; cursor: default; }
 .composer button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
 .composer .ghost { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); font-weight: 400; }
+
+/* Visitor notice under the composer: privacy + scope, admin-composed per tenant. */
+.disclaimer {
+  margin: 0.5rem 1rem 0.75rem;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  text-align: center;
+}

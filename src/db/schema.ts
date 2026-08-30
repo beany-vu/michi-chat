@@ -27,6 +27,9 @@ export interface Branding {
   placeholder?: string;
   accent?: string;
   suggestions?: string[];
+  /** Visitor-facing notice under the composer: privacy ("don't share sensitive info")
+   *  and scope ("I only answer questions about this business"). Admin-composed. */
+  disclaimer?: string;
 }
 
 // One row per cafe. Everything that used to be a constant in the code (persona, tool

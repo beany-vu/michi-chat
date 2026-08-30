@@ -15,6 +15,8 @@ export interface ChatPanelProps {
   subtitle?: string;
   placeholder?: string;
   suggestions?: string[];
+  /** Privacy/scope notice rendered under the composer; hidden when empty. */
+  disclaimer?: string;
 }
 
 interface ToolCall {
@@ -38,6 +40,7 @@ export function ChatPanel({
   subtitle = "Ask about the menu, the weather, or what to try. Answers come from live data.",
   placeholder = "Send a message…",
   suggestions = [],
+  disclaimer,
 }: ChatPanelProps) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
@@ -251,6 +254,11 @@ export function ChatPanel({
           {busy ? "…" : "Send"}
         </button>
       </form>
+      {disclaimer && (
+        <p className="disclaimer" role="note">
+          {disclaimer}
+        </p>
+      )}
     </div>
   );
 }

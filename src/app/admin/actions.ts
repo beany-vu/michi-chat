@@ -150,6 +150,7 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
     placeholder: String(formData.get("brand.placeholder") ?? "").trim() || undefined,
     accent: String(formData.get("brand.accent") ?? "").trim() || undefined,
     suggestions: lines(formData.get("brand.suggestions")),
+    disclaimer: String(formData.get("brand.disclaimer") ?? "").trim() || undefined,
   };
 
   await dbRoot

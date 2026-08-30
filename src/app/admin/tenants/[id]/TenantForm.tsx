@@ -97,6 +97,19 @@ export function TenantForm({
           defaultValue={(branding.suggestions ?? []).join("\n")}
         />
         <small>One per line.</small>
+
+        <label htmlFor="brand-disclaimer">Visitor notice</label>
+        <textarea
+          id="brand-disclaimer"
+          name="brand.disclaimer"
+          rows={3}
+          defaultValue={branding.disclaimer ?? ""}
+          placeholder="Please don't share personal or sensitive information here. I can only help with questions about our cafe."
+        />
+        <small>
+          Shown under the message box on every visit: ask visitors not to share sensitive
+          information and set expectations about what the bot answers. Blank hides it.
+        </small>
       </fieldset>
 
       <fieldset>
