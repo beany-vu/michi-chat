@@ -1,24 +1,106 @@
 {
   "_comment": "Golden set for recall@k. Each entry: a question a real visitor would type, and the TITLE(s) of the document whose chunks should be retrieved (string or array when a fact lives in two docs). Grows with the KB; keep questions in visitor voice, typos and all.",
   "cases": [
-    { "question": "what time do you open", "expectDoc": "Hours and location" },
-    { "question": "are you open on monday?", "expectDoc": "Hours and location" },
-    { "question": "where exactly are you located", "expectDoc": "Hours and location" },
-    { "question": "is there parking nearby", "expectDoc": ["Hours and location", "Frequently asked questions"] },
-    { "question": "do u have wifi", "expectDoc": ["Hours and location", "Frequently asked questions"] },
-    { "question": "what is your phone number", "expectDoc": "Hours and location" },
-    { "question": "how much is a latte", "expectDoc": ["Frequently asked questions", "Coffee and retail"] },
-    { "question": "how can I pay, gcash ok?", "expectDoc": "Frequently asked questions" },
-    { "question": "do you deliver to makati", "expectDoc": "Frequently asked questions" },
-    { "question": "can I reserve a table for 8 people", "expectDoc": "Frequently asked questions" },
-    { "question": "any vegan food? I have a nut allergy", "expectDoc": "Frequently asked questions" },
-    { "question": "do you sell coffee", "expectDoc": "Coffee and retail" },
-    { "question": "do you sell coffee beans to take home", "expectDoc": "Coffee and retail" },
-    { "question": "what roast are your beans", "expectDoc": "Coffee and retail" },
-    { "question": "what seasonal drinks do you have", "expectDoc": "Coffee and retail" },
-    { "question": "can I rent the cafe for a birthday party", "expectDoc": "Events and venue rental" },
-    { "question": "how do I book the venue for a private event", "expectDoc": "Events and venue rental" },
-    { "question": "do you host events", "expectDoc": "Events and venue rental" },
-    { "question": "when is the next movie night", "expectDoc": "Events and venue rental" }
+    {
+      "question": "what time do you open",
+      "expectDoc": "Hours and location"
+    },
+    {
+      "question": "are you open on monday?",
+      "expectDoc": "Hours and location"
+    },
+    {
+      "question": "where exactly are you located",
+      "expectDoc": "Hours and location"
+    },
+    {
+      "question": "is there parking nearby",
+      "expectDoc": [
+        "Hours and location",
+        "Frequently asked questions"
+      ]
+    },
+    {
+      "question": "do u have wifi",
+      "expectDoc": [
+        "Hours and location",
+        "Frequently asked questions"
+      ]
+    },
+    {
+      "question": "what is your phone number",
+      "expectDoc": "Hours and location"
+    },
+    {
+      "question": "how much is a latte",
+      "expectDoc": [
+        "Frequently asked questions",
+        "Coffee and retail"
+      ]
+    },
+    {
+      "question": "how can I pay, gcash ok?",
+      "expectDoc": "Frequently asked questions"
+    },
+    {
+      "question": "do you deliver to makati",
+      "expectDoc": "Frequently asked questions"
+    },
+    {
+      "question": "can I reserve a table for 8 people",
+      "expectDoc": "Frequently asked questions"
+    },
+    {
+      "question": "any vegan food? I have a nut allergy",
+      "expectDoc": "Frequently asked questions"
+    },
+    {
+      "question": "do you sell coffee",
+      "expectDoc": "Coffee and retail"
+    },
+    {
+      "question": "do you sell coffee beans to take home",
+      "expectDoc": "Coffee and retail"
+    },
+    {
+      "question": "what roast are your beans",
+      "expectDoc": "Coffee and retail"
+    },
+    {
+      "question": "what seasonal drinks do you have",
+      "expectDoc": "Coffee and retail"
+    },
+    {
+      "question": "can I rent the cafe for a birthday party",
+      "expectDoc": "Events and venue rental"
+    },
+    {
+      "question": "how do I book the venue for a private event",
+      "expectDoc": "Events and venue rental"
+    },
+    {
+      "question": "do you host events",
+      "expectDoc": "Events and venue rental"
+    },
+    {
+      "question": "when is the next movie night",
+      "expectDoc": "Events and venue rental"
+    },
+    {
+      "question": "how many people can the venue fit?",
+      "expectDoc": "Events and venue rental"
+    },
+    {
+      "question": "do you have a projector for private screenings?",
+      "expectDoc": "Events and venue rental"
+    },
+    {
+      "question": "can you do a coffee cart at our office event?",
+      "expectDoc": "Events and venue rental"
+    },
+    {
+      "question": "do you have pottery or art workshops?",
+      "expectDoc": "Events and venue rental"
+    }
   ]
 }
