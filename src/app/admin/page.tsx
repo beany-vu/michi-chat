@@ -20,14 +20,14 @@ export default async function AdminHome() {
       cap: tenants.dailyMessageCap,
       messages7d: sql<number>`(
         select count(*)::int from ${messages} m
-        where m.tenant_id = ${tenants.id} and m.created_at > now() - interval '7 days'
+        where m.tenant_id = tenants.id and m.created_at > now() - interval '7 days'
       )`,
       keys: sql<number>`(
         select count(*)::int from ${apiKeys} k
-        where k.tenant_id = ${tenants.id} and k.revoked_at is null
+        where k.tenant_id = tenants.id and k.revoked_at is null
       )`,
       lastActivity: sql<string | null>`(
-        select max(c.last_message_at) from ${conversations} c where c.tenant_id = ${tenants.id}
+        select max(c.last_message_at) from ${conversations} c where c.tenant_id = tenants.id
       )`,
     })
     .from(tenants)
@@ -69,8 +69,12 @@ export default async function AdminHome() {
               <td className="num">{row.keys}</td>
               <td>{row.lastActivity ? new Date(row.lastActivity).toLocaleString() : "never"}</td>
               <td>
+                <Link href={`/admin/tenants/${row.id}/kb`}>facts</Link>
+                {" · "}
+                <Link href={`/admin/tenants/${row.id}/analytics`}>analytics</Link>
+                {" · "}
                 <Link href={`/t/${row.slug}`} target="_blank">
-                  open chat
+                  chat
                 </Link>
               </td>
             </tr>

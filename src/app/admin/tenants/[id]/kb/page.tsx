@@ -6,7 +6,7 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { dbRoot } from "@/db";
-import { kbChunks, kbDocuments, tenants } from "@/db/schema";
+import { kbDocuments, tenants } from "@/db/schema";
 import { isAuthenticated } from "@/lib/admin-auth";
 import { deleteKbDocumentAction } from "../../../actions";
 import { KbForm } from "./KbForm";
@@ -30,7 +30,9 @@ export default async function KbPage({
       id: kbDocuments.id,
       title: kbDocuments.title,
       updatedAt: kbDocuments.updatedAt,
-      chunkCount: sql<number>`(select count(*)::int from ${kbChunks} where ${kbChunks.documentId} = ${kbDocuments.id})`,
+      // Raw table/column names on purpose: interpolating the drizzle objects here
+      // produced a subquery that silently counted zero rows.
+      chunkCount: sql<number>`(select count(*)::int from kb_chunks c where c.document_id = kb_documents.id)`,
     })
     .from(kbDocuments)
     .where(eq(kbDocuments.tenantId, id))
@@ -58,9 +60,10 @@ export default async function KbPage({
       </div>
 
       <p className="note">
-        What the <code>search_kb</code> tool retrieves from. Enable that pack on the tenant
-        page or none of this reaches the bot. Facts here follow the same rule as the persona:
-        nothing you would not say to a customer at the counter.
+        This is where the facts live: every <code>##</code> heading section in a document is
+        one retrievable fact, and the <code>search_kb</code> tool answers from them. Enable
+        that pack on the tenant page or none of this reaches the bot. Facts follow the same
+        rule as the persona: nothing you would not say to a customer at the counter.
       </p>
 
       {documents.length > 0 && (
@@ -80,7 +83,7 @@ export default async function KbPage({
                 <td>{document.chunkCount}</td>
                 <td>{document.updatedAt.toLocaleString()}</td>
                 <td>
-                  <Link href={`/admin/tenants/${id}/kb?doc=${document.id}`}>Edit</Link>{" "}
+                  <Link className="row-action" href={`/admin/tenants/${id}/kb?doc=${document.id}#kb-editor`}>Edit</Link>{" "}
                   <form
                     action={deleteKbDocumentAction.bind(null, id, document.id)}
                     style={{ display: "inline" }}
@@ -96,12 +99,14 @@ export default async function KbPage({
         </table>
       )}
 
-      <KbForm
-        key={doc ?? "new"}
-        tenantId={id}
-        initialTitle={editing?.title}
-        initialContent={editing?.content}
-      />
+      <div id="kb-editor">
+        <KbForm
+          key={doc ?? "new"}
+          tenantId={id}
+          initialTitle={editing?.title}
+          initialContent={editing?.content}
+        />
+      </div>
     </>
   );
 }

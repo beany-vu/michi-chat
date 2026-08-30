@@ -29,7 +29,7 @@ export default async function ConversationsPage({
       startedAt: conversations.startedAt,
       lastMessageAt: conversations.lastMessageAt,
       messageCount: sql<number>`(
-        select count(*)::int from ${messages} m where m.conversation_id = ${conversations.id}
+        select count(*)::int from ${messages} m where m.conversation_id = conversations.id
       )`,
     })
     .from(conversations)
@@ -42,10 +42,19 @@ export default async function ConversationsPage({
     <>
       <div className="head">
         <h1>Conversations</h1>
-        <div className="head-links">
-          <Link href="/admin/conversations">all</Link>
+        <div className="filters">
+          <Link
+            className={`filter${!tenantSlug ? " filter-active" : ""}`}
+            href="/admin/conversations"
+          >
+            All
+          </Link>
           {allTenants.map((t) => (
-            <Link key={t.slug} href={`/admin/conversations?tenant=${t.slug}`}>
+            <Link
+              key={t.slug}
+              className={`filter${tenantSlug === t.slug ? " filter-active" : ""}`}
+              href={`/admin/conversations?tenant=${t.slug}`}
+            >
               {t.name}
             </Link>
           ))}
@@ -72,7 +81,7 @@ export default async function ConversationsPage({
               <td className="num">{row.messageCount}</td>
               <td>{row.originHost ?? "direct"}</td>
               <td>
-                <Link href={`/admin/conversations/${row.id}`}>view</Link>
+                <Link className="row-action" href={`/admin/conversations/${row.id}`}>View</Link>
               </td>
             </tr>
           ))}
