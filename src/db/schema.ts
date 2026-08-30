@@ -207,6 +207,23 @@ export const adminSessions = pgTable("admin_sessions", {
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
 });
 
+// Append-only trail of who did what in the admin. Never updated, never joined for
+// authorization — purely forensic, so multi-user access has a memory. actorUserId is
+// null for the env-password (break-glass) owner; actorLabel keeps the row readable even
+// if the user is later deleted.
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    actorUserId: uuid("actor_user_id"),
+    actorLabel: text("actor_label").notNull(),
+    action: text("action").notNull(),
+    subject: text("subject").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("audit_log_created_idx").on(desc(t.createdAt))],
+);
+
 // Fixed-window counters. In Postgres rather than an in-process Map because a Map silently
 // resets on every dev HMR reload, so you could never tell whether it worked.
 export const rateBuckets = pgTable(

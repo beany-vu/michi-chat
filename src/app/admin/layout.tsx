@@ -21,6 +21,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="admin-logo">michi-chat</div>
         {/* Hiding owner links is UX; the pages and actions enforce the role themselves. */}
         <AdminNav isOwner={session.role === "owner"} />
+        <a
+          className="admin-guide"
+          href="https://beany-vu.github.io/michi-chat/owner/setup"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Guide &amp; help ↗
+        </a>
         <form action={logoutAction} className="admin-side-foot">
           <button type="submit" className="ghost">
             Sign out

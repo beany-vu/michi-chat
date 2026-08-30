@@ -8,6 +8,7 @@ const ITEMS = [
   { href: "/admin/conversations", label: "Conversations" },
   { href: "/admin/usage", label: "Usage" },
   { href: "/admin/users", label: "Accounts", ownerOnly: true },
+  { href: "/admin/audit", label: "Activity", ownerOnly: true },
 ];
 
 export function AdminNav({ isOwner }: { isOwner: boolean }) {

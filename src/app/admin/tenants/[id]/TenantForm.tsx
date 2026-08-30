@@ -35,6 +35,7 @@ export function TenantForm({
 
         <label htmlFor="name">Name</label>
         <input id="name" name="name" defaultValue={tenant.name} required />
+        <small>The business name. Shown in the chat header unless a Branding title overrides it.</small>
 
         <label htmlFor="status">Status</label>
         <select id="status" name="status" defaultValue={tenant.status}>
@@ -45,7 +46,12 @@ export function TenantForm({
 
         <label htmlFor="model">Model alias</label>
         <input id="model" name="model" defaultValue={tenant.model ?? ""} placeholder="michi" />
-        <small>A LiteLLM alias. Blank falls back to CHAT_MODEL.</small>
+        <small>
+          Which AI answers for this tenant, by alias: michi is the standard model,
+          michi-mini is faster and cheaper (simpler answers), gemma is the current trial.
+          Blank uses the platform default. Aliases are defined in litellm/config.yaml;
+          the docs&apos; Model backends page shows how to point one at any provider.
+        </small>
 
         <label htmlFor="dailyMessageCap">Daily message cap</label>
         <input
@@ -86,12 +92,15 @@ export function TenantForm({
         <legend>Branding</legend>
         <label htmlFor="brand-title">Title</label>
         <input id="brand-title" name="brand.title" defaultValue={branding.title ?? ""} />
+        <small>Optional display name in the chat header; blank shows the business name.</small>
 
         <label htmlFor="brand-greeting">Greeting heading</label>
         <input id="brand-greeting" name="brand.greeting" defaultValue={branding.greeting ?? ""} />
+        <small>The big line visitors see before their first message, e.g. &quot;Chat with Mugshot&quot;.</small>
 
         <label htmlFor="brand-subtitle">Subtitle</label>
         <input id="brand-subtitle" name="brand.subtitle" defaultValue={branding.subtitle ?? ""} />
+        <small>One friendly line under the greeting saying what the assistant can help with.</small>
 
         <label htmlFor="brand-placeholder">Composer placeholder</label>
         <input
@@ -99,9 +108,14 @@ export function TenantForm({
           name="brand.placeholder"
           defaultValue={branding.placeholder ?? ""}
         />
+        <small>The grey hint inside the message box, e.g. &quot;Message Mugshot&quot;.</small>
 
         <label htmlFor="brand-accent">Accent colour</label>
         <input id="brand-accent" name="brand.accent" defaultValue={branding.accent ?? ""} />
+        <small>
+          One colour (e.g. #43302b) that themes the whole chat: send button, your visitor&apos;s
+          message bubbles, highlights.
+        </small>
 
         <label htmlFor="brand-theme">Theme</label>
         <select id="brand-theme" name="brand.theme" defaultValue={branding.theme ?? ""}>
@@ -109,6 +123,7 @@ export function TenantForm({
           <option value="light">light, always</option>
           <option value="dark">dark, always</option>
         </select>
+        <small>Pin the chat light or dark, or let it follow each visitor&apos;s device setting.</small>
 
         <label htmlFor="brand-logo">Logo URL</label>
         <input
@@ -129,7 +144,10 @@ export function TenantForm({
           rows={4}
           defaultValue={(branding.suggestions ?? []).join("\n")}
         />
-        <small>One per line.</small>
+        <small>
+          One per line. Shown as tappable question chips, and they stay available during the
+          conversation as a small carousel, so pick the questions you most want to invite.
+        </small>
 
         <label htmlFor="brand-disclaimer">Visitor notice</label>
         <textarea

@@ -542,3 +542,12 @@
   background: var(--soft);
   box-shadow: inset 2px 0 0 var(--accent);
 }
+
+.admin-guide {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  border-bottom: none;
+}
+.admin-guide:hover { color: var(--fg); }

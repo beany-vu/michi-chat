@@ -61,6 +61,13 @@ export default async function ConversationsPage({
         </div>
       </div>
 
+      <p className="note">
+        Every stored chat, newest first; use the chips to see one tenant. Transcripts are
+        shown as plain text on purpose (nothing a visitor types can run in your browser).
+        Reading these weekly is how the bot gets better: when you spot a bad answer, add
+        the missing fact on that tenant&apos;s Facts &amp; knowledge page.
+      </p>
+
       <table>
         <thead>
           <tr>

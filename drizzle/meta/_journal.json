@@ -50,6 +50,13 @@
       "when": 1788095716839,
       "tag": "0006_brave_hannibal_king",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788097127891,
+      "tag": "0007_right_caretaker",
+      "breakpoints": true
     }
   ]
 }

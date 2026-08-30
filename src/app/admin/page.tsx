@@ -39,15 +39,22 @@ export default async function AdminHome() {
         <h1>Tenants</h1>
       </div>
 
+      <p className="note">
+        A tenant is one business with its own assistant: its personality, facts, tools,
+        look, and spending limit. Click a name to configure it, or use the shortcuts on
+        the right of each row. Day-to-day work lives under Conversations (read what
+        visitors asked) and each tenant&apos;s Facts &amp; knowledge (teach better answers).
+      </p>
+
       <table>
         <thead>
           <tr>
             <th>Name</th>
             <th>Slug</th>
             <th>Status</th>
-            <th className="num">Messages 7d</th>
-            <th className="num">Cap/day</th>
-            <th className="num">Keys</th>
+            <th className="num" title="Visitor messages in the last 7 days">Messages 7d</th>
+            <th className="num" title="Daily message limit. When reached, the bot politely stops until midnight. This is what makes the bill predictable.">Cap/day</th>
+            <th className="num" title="Active embed keys: the public identifier a website uses to show this bot">Keys</th>
             <th>Last activity</th>
             <th />
           </tr>

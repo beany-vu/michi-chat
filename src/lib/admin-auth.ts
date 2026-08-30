@@ -18,7 +18,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
-import { adminSessions, adminUsers } from "@/db/schema";
+import { adminSessions, adminUsers, auditLog } from "@/db/schema";
 import { isRateLimited } from "./rate-limit";
 import { hashToken } from "./tenant";
 
@@ -36,6 +36,8 @@ export type AdminRole = "owner" | "staff";
 export interface AdminSession {
   role: AdminRole;
   userId: string | null;
+  /** The account email, or "operator" for the env-password owner. */
+  label: string;
 }
 
 /** "scrypt:<saltHex>:<hashHex>" with a per-user random salt. */
@@ -92,6 +94,7 @@ export async function login(email: string, password: string): Promise<boolean> {
   if (!email) {
     if (!(await envPasswordMatches(password))) return false;
     await issueSession("owner", null);
+    void dbRoot.insert(auditLog).values({ actorLabel: "operator", action: "auth.login", subject: "env password" }).catch(() => {});
     return true;
   }
 
@@ -103,6 +106,7 @@ export async function login(email: string, password: string): Promise<boolean> {
   if (!user || !(await verifyPassword(password, user.passwordHash))) return false;
 
   await issueSession(user.role, user.id);
+  void dbRoot.insert(auditLog).values({ actorUserId: user.id, actorLabel: user.email, action: "auth.login", subject: user.role }).catch(() => {});
   void dbRoot
     .update(adminUsers)
     .set({ lastLoginAt: new Date() })
@@ -129,6 +133,7 @@ export async function getAdminSession(): Promise<AdminSession | null> {
       role: adminSessions.role,
       userId: adminSessions.userId,
       userStatus: adminUsers.status,
+      email: adminUsers.email,
     })
     .from(adminSessions)
     .leftJoin(adminUsers, eq(adminUsers.id, adminSessions.userId))
@@ -138,7 +143,7 @@ export async function getAdminSession(): Promise<AdminSession | null> {
     .limit(1);
   if (!row) return null;
   if (row.userId && row.userStatus !== "active") return null;
-  return { role: row.role, userId: row.userId };
+  return { role: row.role, userId: row.userId, label: row.email ?? "operator" };
 }
 
 export async function isAuthenticated(): Promise<boolean> {

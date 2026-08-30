@@ -37,6 +37,13 @@ export default async function UsagePage() {
         <h1>Usage, last 30 days</h1>
       </div>
 
+      <p className="note">
+        One row per tenant per day: how many visitor questions (turns), how much model
+        work they cost (tokens), and how fast answers came back. Watch this to see if a
+        tenant is drifting toward its daily cap, and see each tenant&apos;s Analytics page
+        for what those conversations were about.
+      </p>
+
       <table>
         <thead>
           <tr>

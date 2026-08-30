@@ -14,6 +14,7 @@ import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { adminUsers, apiKeys, conversations, tenants, type Branding, type ToolConfig } from "@/db/schema";
 import { hashPassword, login, logout, requireAdmin, requireOwner } from "@/lib/admin-auth";
+import { logAudit } from "@/lib/audit";
 import { MAX_PERSONA_CHARS } from "@/lib/prompt";
 import { deleteDocument, ingestDocument } from "@/lib/rag";
 import { validateSlackWebhookUrl } from "@/lib/slack";
@@ -62,7 +63,7 @@ export async function logoutAction() {
 }
 
 export async function createTenantAction(_prev: unknown, formData: FormData) {
-  await requireOwner();
+  const session = await requireOwner();
   const slug = String(formData.get("slug") ?? "")
     .trim()
     .toLowerCase();
@@ -90,6 +91,7 @@ export async function createTenantAction(_prev: unknown, formData: FormData) {
       name: "default",
       publicKey: `pk_${randomBytes(18).toString("base64url")}`,
     });
+    logAudit(session, "tenant.create", slug);
     revalidatePath("/admin");
     redirect(`/admin/tenants/${tenant.id}`);
   } catch (error) {
@@ -99,7 +101,7 @@ export async function createTenantAction(_prev: unknown, formData: FormData) {
 }
 
 export async function saveTenantAction(tenantId: string, _prev: unknown, formData: FormData) {
-  await requireOwner();
+  const session = await requireOwner();
 
   const persona = String(formData.get("persona") ?? "").trim();
   if (persona.length > MAX_PERSONA_CHARS) {
@@ -189,26 +191,28 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
     })
     .where(eq(tenants.id, tenantId));
 
+  logAudit(session, "tenant.update", String(formData.get("name") ?? tenantId));
   revalidatePath(`/admin/tenants/${tenantId}`);
   revalidatePath("/admin");
   return { ok: true as const };
 }
 
 export async function createKeyAction(tenantId: string, formData: FormData) {
-  await requireOwner();
+  const session = await requireOwner();
   await dbRoot.insert(apiKeys).values({
     tenantId,
     kind: "public",
     name: String(formData.get("name") ?? "").trim() || "untitled",
     publicKey: `pk_${randomBytes(18).toString("base64url")}`,
   });
+  logAudit(session, "key.create", tenantId);
   revalidatePath(`/admin/tenants/${tenantId}/keys`);
 }
 
 const MAX_KB_DOC_CHARS = 100_000;
 
 export async function saveKbDocumentAction(tenantId: string, _prev: unknown, formData: FormData) {
-  await requireAdmin();
+  const session = await requireAdmin();
   const title = String(formData.get("title") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
   if (!title) return { error: "Title is required." };
@@ -219,6 +223,7 @@ export async function saveKbDocumentAction(tenantId: string, _prev: unknown, for
 
   try {
     const chunks = await ingestDocument({ tenantId, title, content });
+    logAudit(session, "kb.save", title);
     revalidatePath(`/admin/tenants/${tenantId}/kb`);
     return {
       ok: true as const,
@@ -232,26 +237,28 @@ export async function saveKbDocumentAction(tenantId: string, _prev: unknown, for
 }
 
 export async function deleteKbDocumentAction(tenantId: string, documentId: string) {
-  await requireAdmin();
+  const session = await requireAdmin();
   await deleteDocument(tenantId, documentId);
+  logAudit(session, "kb.delete", documentId);
   revalidatePath(`/admin/tenants/${tenantId}/kb`);
 }
 
 export async function revokeKeyAction(tenantId: string, keyId: string) {
-  await requireOwner();
+  const session = await requireOwner();
   // Soft revoke: conversations keep a valid foreign key, and traffic still arriving on a
   // dead key stays visible.
   await dbRoot
     .update(apiKeys)
     .set({ revokedAt: new Date() })
     .where(and(eq(apiKeys.id, keyId), eq(apiKeys.tenantId, tenantId)));
+  logAudit(session, "key.revoke", keyId);
   revalidatePath(`/admin/tenants/${tenantId}/keys`);
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function createAdminUserAction(_prev: unknown, formData: FormData) {
-  await requireOwner();
+  const session = await requireOwner();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const name = String(formData.get("name") ?? "").trim();
   const password = String(formData.get("password") ?? "");
@@ -271,26 +278,29 @@ export async function createAdminUserAction(_prev: unknown, formData: FormData) 
   } catch {
     return { error: "That email already has an account." };
   }
+  logAudit(session, "user.create", `${email} (${role})`);
   revalidatePath("/admin/users");
   return { ok: true as const };
 }
 
 export async function setAdminUserStatusAction(userId: string, status: "active" | "disabled") {
-  await requireOwner();
+  const session = await requireOwner();
   // Disabling rather than deleting keeps the audit trail; a disabled user's sessions die
   // on their next request (getAdminSession re-checks status).
   await dbRoot
     .update(adminUsers)
     .set({ status: status === "disabled" ? "disabled" : "active" })
     .where(eq(adminUsers.id, userId));
+  logAudit(session, "user.status", `${userId} -> ${status}`);
   revalidatePath("/admin/users");
 }
 
 export async function deleteConversationAction(conversationId: string) {
-  await requireOwner();
+  const session = await requireOwner();
   // Messages go with it via the composite-FK cascade. Deletion is real and final;
   // export first if the transcript matters.
   await dbRoot.delete(conversations).where(eq(conversations.id, conversationId));
+  logAudit(session, "conversation.delete", conversationId);
   revalidatePath("/admin/conversations");
   redirect("/admin/conversations");
 }
