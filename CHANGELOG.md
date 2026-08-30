@@ -3,10 +3,16 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
-## v0.2.4 — 2026-08-30
+## v0.2.5 — 2026-08-30
 
 ### Fixed
 
+- **Faster answers.** Upstream tool calls (weather, menu, events) are cached for 60s and
+  run in parallel within a round, and the fetch timeout dropped from 15s to 6s, so a slow
+  cafe API no longer makes a visitor wait. Repeat suggestion-chip questions are near-instant
+  via the semantic cache.
+- **No invented products.** The bot lists only real menu items and the single real coffee
+  bean; negative facts ("what we do not sell") let it refuse confidently.
 - **Provider errors never reach the visitor.** If the model backend returns an error as
   message content (e.g. an over-eager content-moderation block), the bot now shows a
   friendly fallback and keeps the real error in the transcript for the operator, instead
