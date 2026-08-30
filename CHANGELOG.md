@@ -3,6 +3,18 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.8 - 2026-08-30
+
+### Changed
+
+- **Compact visitor notice.** The notice is a small rounded box with an x to dismiss,
+  freeing chat space, instead of a large text block with a Hide link.
+- **Visible Send button** in every theme (a dark tenant accent no longer makes the
+  disabled button vanish).
+- **Embed mode** (?embed=1): the floating widget hides the chat page's own header so the
+  two headers no longer stack, and the redundant Close pill is gone (the header collapse
+  control is the single close).
+
 ## v0.2.7 - 2026-08-30
 
 ### Added
