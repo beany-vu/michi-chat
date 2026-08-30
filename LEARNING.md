@@ -60,21 +60,48 @@ general pattern rather than a detail of this app.
 | Model routing, retries, budgets, spend | LiteLLM (`litellm/config.yaml`) |
 | The agent loop, tenancy, RAG, evals, UI | this app |
 
-The app knows only the strings `"michi"` and `"judge"`. Swapping Ollama for OpenAI is a config
-edit. That is why this rebuild is small: LiteLLM deleted the infrastructure half of the .NET
-project.
+The app knows only the strings `"michi"`, `"judge"` and `"embed"`. Swapping Ollama for OpenAI is
+a config edit. That is why this rebuild is small: LiteLLM deleted the infrastructure half of the
+.NET project.
+
+### Why the gateway earns its container
+
+Every provider has its own API, SDK, key format and parameter quirks. A gateway collapses that
+to one dialect: the app's single LLM dependency is the plain OpenAI SDK pointed at
+`http://litellm:4000`, and the yaml decides what each alias actually means. Four concrete
+benefits, each already exercised in this repo:
+
+1. **Provider swaps are config, not code.** `michi` = local qwen today, DashScope or OpenAI on
+   launch day, by editing one line. No new SDK, no retesting the tool loop.
+2. **The proxy absorbs provider quirks.** Worked example from the RAG build: the OpenAI SDK
+   always sends `encoding_format` on embedding calls; Ollama supports neither value, and the
+   SDK's base64 default came back garbled through the proxy. The fix was `drop_params: true` on
+   the `embed` alias plus an explicit `encoding_format: "float"` from the app. Without the
+   gateway, that translation would live in application code, once per provider quirk, forever.
+3. **Aliases are indirection that features hang off.** `judge` exists so evals are graded by a
+   *different* model than the one being judged; `tenants.model` makes per-tenant model tiers a DB
+   column, not a code path. Both stay meaningful across any provider swap.
+4. **It is the reason the rebuild fits in one reading.** The .NET predecessor spent half its code
+   on provider routing, key management and budgets. LiteLLM *is* that half, off the shelf.
+
+The honest caveat: with one provider and three aliases it is insurance, paid for with one extra
+container. The payoff lands the first time providers are switched or mixed, which for a platform
+promising per-tenant model choice is a when, not an if. (Onyx, the open-source knowledge
+assistant, made the same bet: it runs LiteLLM internally.)
 
 ---
 
 ## 2. Database design
 
-Seven tables. The interesting part is not the columns, it is **where isolation is enforced**.
+Nine tables. The interesting part is not the columns, it is **where isolation is enforced**.
 
 ```text
 tenants ──┬──< api_keys           (public embed keys; secret keys hashed)
           ├──< widget_sessions    (server-issued visitor identity)
           ├──< conversations ──┐
-          └──< messages ───────┘   composite FK, see below
+          ├──< messages ───────┘   composite FK, see below
+          ├──< kb_documents ───┐
+          └──< kb_chunks ──────┘   same composite-FK pattern
 
 admin_sessions   (operator; no users table, one password in env)
 rate_buckets     (fixed-window counters, (key, window_start) PK)
@@ -125,9 +152,10 @@ harness. LiteLLM's own spend logs attribute to a *virtual key*, which is coarser
 them requires giving LiteLLM a database it does not have. Per-message columns cost nothing and
 are strictly more granular.
 
-### The RAG seam, decided in advance
+### The RAG tables, decided before they were built
 
-Commented into `src/db/schema.ts`, because both decisions are expensive to reverse:
+Both decisions were written into `src/db/schema.ts` as a comment months before the tables
+existed, because both are expensive to reverse:
 
 - **`tenant_id` goes directly on `kb_chunks`**, not reached through `kb_documents`. Retrieval is
   `where tenant_id = $1 order by embedding <=> $2 limit k` — a leaf scan with no join to hang the
@@ -138,6 +166,15 @@ Commented into `src/db/schema.ts`, because both decisions are expensive to rever
   that only shows up for your smallest customer. An exact scan with a btree on `tenant_id` is
   correct and fast to roughly 50k chunks per tenant. Past that, pgvector 0.8.4 (already on the
   image) has `hnsw.iterative_scan`, which is the real fix.
+
+Now that it is built, the shape to study in `src/lib/rag/`: chunking is heading-aware (the unit
+of retrieval is a section, not a character window, with the heading breadcrumb embedded and
+stored), ingestion embeds *before* touching the tables so a dead embedding service cannot leave
+a document without chunks, and retrieval is the promised one-liner. Retrieval reaches the model
+as a tool pack (`search_kb`) with a distance cutoff that returns "nothing found, say you do not
+know" instead of the least-irrelevant chunk. Quality is measured, not assumed:
+`npm run kb:eval` computes recall@k over `eval/kb-golden.json` (document-level, because chunk
+boundaries move on every edit but "the hours question must hit the hours document" stays true).
 
 ### Migrations, not push
 
@@ -254,8 +291,11 @@ Read in this order; each depends only on what came before.
 | `src/lib/tools/registry.ts` | The pack interface, and a long comment on why there is no generic HTTP tool |
 | `src/lib/tools/mugshot.ts` | Three real executors. Note the projection and the CMS quirks |
 | `src/lib/tools/index.ts` | Turns `toolConfig` into definitions + labels + one executor |
-| `src/db/schema.ts` | Seven tables plus the commented RAG seam. The composite FK is the thing to study |
+| `src/db/schema.ts` | Nine tables. The composite FK is the thing to study; kb_chunks repeats it |
 | `src/db/tenant-db.ts` | `forTenant()`, and a comment on why RLS is absent |
+| `src/lib/rag/chunk.ts` | Heading-aware chunking, dependency-free and deterministic on purpose |
+| `src/lib/rag/index.ts` | Ingestion (embed before write) and the leaf-scan retrieval |
+| `src/lib/slack.ts` | The one tenant URL in the system, and the pin that makes it safe |
 | `src/lib/tenant.ts` | Embed key → tenant, origin allowlist, sessions, CORS helpers |
 | `src/app/api/chat/route.ts` | The whole backend of a turn. Read last, once the pieces make sense |
 | `src/components/ChatPanel.tsx` | Hand-rolled SSE parsing; one `phase` field drives the UI |
@@ -296,10 +336,12 @@ Grouped by where they bite. You will know most; the value is in the specific got
 - *SSE*, why `EventSource` cannot POST, `X-Accel-Buffering: no`
 - *LLM gateway* (LiteLLM), *virtual keys*, *model aliasing*
 
-**RAG, for what comes next**
-- *heading-aware chunking*, *embedding dimensions*, *cosine distance* (`<=>`)
+**RAG, now built**
+- *heading-aware chunking*, *embedding dimensions*, *cosine distance* (`<=>`) — and operator
+  precedence: `${expr}::float8` in a SQL template casts the *parameter*, not the result
 - *HNSW*, *IVFFlat*, `ef_search`, **post-filtering vs pre-filtering**, `hnsw.iterative_scan`
 - *recall@k*, *golden set*, *LLM-as-judge* (and why the judge is a different model)
+- `encoding_format` and `drop_params` — the embedding-quirk story in section 1
 
 **Postgres and Drizzle**
 - `drizzle-kit generate` vs `push`, `__drizzle_migrations`, *baselining*
@@ -321,8 +363,9 @@ Grouped by where they bite. You will know most; the value is in the specific got
   Wiring `stream: true` through a tool loop is genuinely instructive: you must buffer enough of
   each round to tell a tool call from an answer.
 - **RLS**, pending a `NOSUPERUSER` role.
-- **RAG, evals, the widget embed** — the roadmap in `CLAUDE.md`. The schema seam and the `judge`
-  alias are already in place.
+- **The answers eval and the widget embed** — the roadmap in `CLAUDE.md`. RAG shipped with a
+  *retrieval* eval (recall@k); grading *answers* needs the golden set + the `judge` alias, and
+  is the next item. The kb/mugshot documents are placeholders until real facts replace them.
 - **LiteLLM's own database**, and with it virtual keys and budgets. Deferred because spend is
   genuinely $0 on local Ollama. The trigger to revisit is written down: the day
   `litellm/config.yaml` points at a paid provider, virtual keys buy a hard budget ceiling

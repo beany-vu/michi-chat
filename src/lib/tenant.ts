@@ -17,6 +17,11 @@ const SESSION_TTL_DAYS = 30;
 // model calls. Requests per minute matters less than how many can be in flight.
 const PER_SESSION_PER_MINUTE = 12;
 const PER_IP_PER_MINUTE = 30;
+// New sessions minted per tenant per day. The per-IP limit is spoofable without a
+// trusted proxy (the header is client-controlled), and a caller who simply never
+// presents a session token would otherwise mint one row per request. This bounds the
+// table; the daily message cap bounds the bill.
+const SESSIONS_MINTED_PER_DAY = 1000;
 
 export type Tenant = typeof tenants.$inferSelect;
 
@@ -143,6 +148,15 @@ export async function resolveTenant(request: NextRequest): Promise<Resolved | Re
   }
 
   if (!sessionId) {
+    if (
+      await isRateLimited({
+        key: `mint:${row.tenant.id}`,
+        windowSeconds: 86_400,
+        max: SESSIONS_MINTED_PER_DAY,
+      })
+    ) {
+      return { ok: false, status: 429, error: "too many requests", corsOk: true };
+    }
     const token = randomBytes(32).toString("base64url");
     const expiresAt = new Date(Date.now() + SESSION_TTL_DAYS * 86_400_000);
     const [created] = await dbRoot

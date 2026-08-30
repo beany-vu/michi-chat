@@ -1,0 +1,38 @@
+# Model routing for the quickstart. The app only ever asks for the three ALIASES on the
+# left (michi = chat, judge = eval grading, embed = RAG embeddings); what actually serves
+# them is decided here. Two paths:
+#
+#   Path A (default) — local Ollama on the machine running Docker:
+#     ollama pull qwen3.5:4b && ollama pull qwen2.5:7b && ollama pull nomic-embed-text
+#
+#   Path B — hosted provider: replace the litellm_params of an alias, e.g.
+#     - model_name: michi
+#       litellm_params:
+#         model: openai/gpt-4o-mini
+#         api_key: os.environ/OPENAI_API_KEY      # set it in .env
+#     No app changes needed; that is the whole point of the aliases.
+#
+# CAUTION on `embed`: the database column is sized to 768 dimensions (nomic-embed-text).
+# Swapping the embedding model means a schema migration AND re-embedding every document.
+
+model_list:
+  - model_name: michi
+    litellm_params:
+      model: ollama_chat/qwen3.5:4b
+      api_base: os.environ/OLLAMA_API_BASE
+
+  - model_name: judge
+    litellm_params:
+      model: ollama_chat/qwen2.5:7b
+      api_base: os.environ/OLLAMA_API_BASE
+
+  - model_name: embed
+    litellm_params:
+      model: ollama/nomic-embed-text
+      api_base: os.environ/OLLAMA_API_BASE
+      # The OpenAI SDK always sends encoding_format; Ollama supports neither value.
+      # Stripping it is the proxy's job.
+      drop_params: true
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY

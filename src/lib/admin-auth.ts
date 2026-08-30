@@ -14,6 +14,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { adminSessions } from "@/db/schema";
+import { isRateLimited } from "./rate-limit";
 import { hashToken } from "./tenant";
 
 const scrypt = promisify(scryptCb) as (
@@ -36,6 +37,12 @@ async function passwordMatches(candidate: string): Promise<boolean> {
 }
 
 export async function login(password: string): Promise<boolean> {
+  // Global (not per-IP) on purpose: client IP is spoofable without a trusted proxy, and
+  // a single operator never needs more than a handful of attempts. This turns an
+  // unthrottled brute force into ~14k guesses/day, which a strong password laughs at.
+  if (await isRateLimited({ key: "admin-login", windowSeconds: 60, max: 10 })) {
+    return false;
+  }
   if (!(await passwordMatches(password))) return false;
 
   const token = randomBytes(32).toString("base64url");

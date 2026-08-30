@@ -29,7 +29,10 @@ carry over 1:1.
 
 - **No tenant-supplied URLs.** Tools are code packs in `src/lib/tools/`; a tenant enables one and
   fills in parameters. This process can reach an unauthenticated Ollama on the host, so a
-  free-form URL field would be an SSRF hole.
+  free-form URL field would be an SSRF hole. **One carve-out:** the per-tenant Slack webhook,
+  allowed only because `validateSlackWebhookUrl()` pins it to exactly
+  `https://hooks.slack.com/services/…` (no other host, no port, no redirect following) — a URL
+  that can only ever be hooks.slack.com cannot be aimed at Ollama or the DB.
 - **The admin conversation viewer renders message content as plain text**, never markdown and
   never HTML. The visitor widget renders markdown, which is fine there; the operator's browser
   holds the session that controls the whole platform.
@@ -46,9 +49,14 @@ carry over 1:1.
 - `src/app/api/chat/route.ts` — SSE chat turn: hand-rolled tool loop (status/tool/delta/done)
 - `src/lib/tenant.ts` — embed-key resolution, origin allowlist, sessions, CORS helpers
 - `src/lib/prompt.ts` — system prompt assembly, three trust levels
-- `src/lib/tools/` — pack registry, the mugshot packs, and `index.ts` which turns a tenant's
-  `toolConfig` into definitions + labels + one executor
-- `src/db/schema.ts` — tenants, api_keys, widget_sessions, conversations, messages, admin_sessions
+- `src/lib/tools/` — pack registry, the mugshot packs, the `search_kb` pack, and `index.ts`
+  which turns a tenant's `toolConfig` into definitions + labels + one executor
+- `src/lib/rag/` — heading-aware chunker, embeddings (LiteLLM alias `embed`, 768 dims),
+  ingestion + the tenant-scoped leaf-scan retrieval
+- `src/lib/slack.ts` — webhook validator (the SSRF pin) + fire-and-forget notifier
+- `src/db/schema.ts` — tenants, api_keys, widget_sessions, conversations, messages,
+  admin_sessions, kb_documents, kb_chunks
+- `kb/<slug>/` — markdown source docs per tenant; `eval/kb-golden.json` — the recall golden set
 - `src/db/tenant-db.ts` — `forTenant()`, the tenant-scoped query helpers
 - `src/app/admin/` — the operator UI (server components + server actions)
 - `src/components/ChatPanel.tsx` — the chat UI, fully driven by props
@@ -62,13 +70,27 @@ docker compose exec app npm test                  # unit tests (no DB)
 docker compose exec app npm run test:isolation    # cross-tenant tests (needs the DB)
 docker compose exec app npx tsc --noEmit          # typecheck
 docker compose exec app npm run db:generate       # after editing schema.ts
+docker compose exec app npm run kb:ingest -- mugshot   # (re)embed kb/mugshot/*.md
+docker compose exec app npm run kb:eval -- mugshot     # recall@k over eval/kb-golden.json
+docker build -t michi-chat:local .                     # the publishable image (standalone + migrate-on-boot)
 ```
+
+## Distribution
+
+The publishable image is built by `Dockerfile` (Next standalone; `docker/entrypoint.mjs` runs
+migrations via drizzle-orm's programmatic migrator, then starts the server) and published to
+GHCR by `.github/workflows/docker-publish.yml` on `v*` tags. Outsiders run it via the three
+files in `examples/quickstart/` — that compose pins LiteLLM by digest and requires passwords
+instead of dev defaults. GHCR packages start private: flip to public once after the first
+publish. The `ghcr.io/OWNER/michi-chat` placeholder needs the real GitHub owner before tagging.
 
 ## Roadmap
 
-RAG knowledge base (pgvector + heading-aware chunking + recall@k eval) → eval harness
-(golden set + judge via the `judge` alias) → widget embed for mugshotmnl.com.
+~~RAG knowledge base~~ (done: pgvector + heading-aware chunking + recall@k eval; the two schema
+decisions — tenantId directly on `kb_chunks`, no ANN index at first — are explained in
+`src/db/schema.ts`) → eval harness for ANSWERS (golden set + judge via the `judge` alias; the
+recall eval only grades retrieval) → widget embed for mugshotmnl.com.
 
-Two RAG decisions are already recorded in `src/db/schema.ts`: `tenantId` goes directly on
-`kb_chunks` (retrieval is a leaf scan with no join to filter on), and there is **no ANN index at
-first**, because pgvector post-filters and would silently under-return for small tenants.
+The kb/mugshot docs are PLACEHOLDERS: every fact must be replaced with real ones before launch.
+Editing config.yaml needs `docker compose up -d --force-recreate litellm` (plain restart dies on
+the stale single-file bind mount under Docker Desktop/WSL).

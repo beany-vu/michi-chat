@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Self-contained server bundle for the Docker image: .next/standalone carries its own
+  // pruned node_modules and server.js. The headers() below still apply there.
+  output: "standalone",
   // Static security headers for the admin area ONLY.
   //
   // CORS deliberately does NOT live here. The chat endpoint sets its own per-tenant CORS

@@ -1,0 +1,18 @@
+# Keep the build context to what the image actually needs. drizzle/ stays: the runtime
+# image runs migrations from it on boot.
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+*.log
+tsconfig.tsbuildinfo
+
+# Dev-repo-only content: KB sources and eval tooling need tsx (a devDependency) and are
+# documented as clone-the-repo workflows, not image features.
+kb
+eval
+scripts
+examples
+LEARNING.md
