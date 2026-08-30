@@ -15,6 +15,7 @@ import { dbRoot } from "@/db";
 import { adminUsers, apiKeys, conversations, tenants, type Branding, type ToolConfig } from "@/db/schema";
 import { hashPassword, login, logout, requireAdmin, requireOwner } from "@/lib/admin-auth";
 import { logAudit } from "@/lib/audit";
+import { parseCsv } from "@/lib/csv";
 import { MAX_PERSONA_CHARS } from "@/lib/prompt";
 import { deleteDocument, ingestDocument } from "@/lib/rag";
 import { clearAnswerCache } from "@/lib/rag/answer-cache";
@@ -316,4 +317,47 @@ export async function deleteConversationAction(conversationId: string) {
   logAudit(session, "conversation.delete", conversationId);
   revalidatePath("/admin/conversations");
   redirect("/admin/conversations");
+}
+
+const MAX_KB_IMPORT_ROWS = 200;
+
+export async function importKbCsvAction(tenantId: string, _prev: unknown, formData: FormData) {
+  const session = await requireAdmin();
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "Choose a CSV file first." };
+  if (file.size > 5_000_000) return { error: "CSV is larger than 5 MB." };
+
+  const rows = parseCsv(await file.text());
+  if (rows.length === 0) return { error: "The CSV is empty." };
+  // A header row is expected (the export writes one) but optional.
+  const body = rows[0][0]?.trim().toLowerCase() === "title" ? rows.slice(1) : rows;
+  if (body.length > MAX_KB_IMPORT_ROWS) {
+    return { error: `Too many rows (${body.length}); the limit is ${MAX_KB_IMPORT_ROWS}.` };
+  }
+
+  let saved = 0;
+  let unchanged = 0;
+  const problems: string[] = [];
+  for (const [index, row] of body.entries()) {
+    const title = (row[0] ?? "").trim();
+    const content = (row[1] ?? "").trim();
+    if (!title || !content) {
+      problems.push(`row ${index + 1}: needs both title and content`);
+      continue;
+    }
+    try {
+      const chunks = await ingestDocument({ tenantId, title, content });
+      if (chunks === -1) unchanged += 1;
+      else saved += 1;
+    } catch {
+      problems.push(`row ${index + 1} ("${title.slice(0, 40)}"): embedding failed`);
+    }
+  }
+
+  logAudit(session, "kb.import", `${saved} saved, ${unchanged} unchanged, ${problems.length} failed`);
+  revalidatePath(`/admin/tenants/${tenantId}/kb`);
+  if (problems.length > 0) {
+    return { error: `Imported ${saved}, unchanged ${unchanged}; problems: ${problems.slice(0, 3).join("; ")}` };
+  }
+  return { ok: true as const, info: `${saved} imported, ${unchanged} unchanged.` };
 }

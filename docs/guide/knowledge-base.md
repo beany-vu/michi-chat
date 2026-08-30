@@ -29,6 +29,14 @@ The recall eval measures retrieval; the answers eval sends real chat turns and h
 model grade each reply for faithfulness (nothing invented) and completeness (the required
 facts arrive) — numbers, not feelings.
 
+## Backup and bulk editing (CSV)
+
+**Export CSV** on the Knowledge base page downloads every document as a two-column
+spreadsheet (title, content). Edit it in Excel or Google Sheets — fix facts, add rows —
+then **Import from CSV** brings it back: rows match by title, changed documents are
+re-embedded, unchanged ones are skipped. Export before big edits and you always have a
+restore point.
+
 ## Instant repeat answers
 
 Common opening questions ("what time do you open?") are served from a semantic cache: an

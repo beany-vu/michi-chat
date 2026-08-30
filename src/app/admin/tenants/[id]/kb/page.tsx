@@ -9,6 +9,7 @@ import { dbRoot } from "@/db";
 import { kbDocuments, tenants } from "@/db/schema";
 import { isAuthenticated } from "@/lib/admin-auth";
 import { deleteKbDocumentAction } from "../../../actions";
+import { KbImport } from "./KbImport";
 import { KbForm } from "./KbForm";
 
 export default async function KbPage({
@@ -55,6 +56,7 @@ export default async function KbPage({
       <div className="head">
         <h1>{tenant.name}: knowledge base</h1>
         <div className="head-links">
+          <a href={`/admin/kb-csv?tenant=${id}`}>Export CSV</a>
           <Link href={`/admin/tenants/${id}`}>Back to tenant</Link>
         </div>
       </div>
@@ -98,6 +100,8 @@ export default async function KbPage({
           </tbody>
         </table>
       )}
+
+      <KbImport tenantId={id} />
 
       <div id="kb-editor">
         <KbForm
