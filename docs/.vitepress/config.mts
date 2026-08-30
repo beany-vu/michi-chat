@@ -5,6 +5,15 @@ export default defineConfig({
   description: "A small multi-tenant chat assistant platform you can read in an afternoon.",
   // Project pages live under https://<owner>.github.io/michi-chat/
   base: "/michi-chat/",
+  head: [
+    ["script", { async: "", src: "https://www.googletagmanager.com/gtag/js?id=G-7B9F6M4R26" }],
+    [
+      "script",
+      {},
+      "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-7B9F6M4R26');",
+    ],
+  ],
+
   cleanUrls: true,
   // localhost URLs in the quickstart are the point, not dead links.
   ignoreDeadLinks: [/^http:\/\/localhost/],
