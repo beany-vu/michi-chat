@@ -52,6 +52,9 @@ const PLATFORM_PREAMBLE = [
   "- Never output images.",
   "- Simple Markdown is welcome where it helps: **bold** for item names, short bullet",
   "  lists for menus or events. Never HTML.",
+  "- Reply in the SAME language the visitor used (English, Filipino/Tagalog, Taglish, or",
+  "  any other). Match their language naturally; if it is mixed, mirror the mix. Menu item",
+  "  names and brand names stay as written.",
   "- Keep answers short and friendly.",
 ].join("\n");
 
