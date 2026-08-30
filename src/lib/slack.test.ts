@@ -6,7 +6,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { validateSlackWebhookUrl } from "./slack";
 
-const GOOD = "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX";
+// Deliberately NOT shaped like a real webhook token (short segments): GitHub push
+// protection pattern-matches Slack webhooks and blocks pushes containing realistic ones,
+// fake or not. The validator only checks host and path prefix, so the test loses nothing.
+const GOOD = "https://hooks.slack.com/services/T000/B000/PLACEHOLDER";
 
 test("accepts a canonical webhook and normalizes it", () => {
   assert.equal(validateSlackWebhookUrl(`  ${GOOD}  `), GOOD);
