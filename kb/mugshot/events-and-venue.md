@@ -17,9 +17,11 @@ or ask the staff to reserve a slot.
 Yes - Mugshot is an intimate venue with a projector and seating for 20 to 25 guests, suited
 to meetings, private film showings, workshops, and small get-togethers.
 
-To inquire, use the venue-rental page at https://mugshotmnl.com/venue-rental (it has an
-inquiry form), email mugshotcoffeeph@gmail.com, or call +63 2 8570 3155. Tell us the date,
-rough headcount, and what kind of event, and the team will get back to you with options.
+The best and preferred way to inquire is the venue-rental inquiry form at
+https://mugshotmnl.com/venue-rental. Please use the form first; email
+mugshotcoffeeph@gmail.com or phone +63 2 8570 3155 are alternatives if you cannot use it.
+Tell us the date, rough headcount, and what kind of event, and the team will get back to you
+with options.
 
 The bot should not quote rental rates or promise availability; those are confirmed by the
 team through the inquiry.
@@ -27,8 +29,8 @@ team through the inquiry.
 ## Coffee cart pop-ups
 
 We also bring the cafe to you: a mobile coffee cart with our baristas serving freshly brewed
-specialty coffee at parties, corporate events, and other occasions. Inquire through the same
-channels as venue rental with your date and expected guest count.
+specialty coffee at parties, corporate events, and other occasions. Inquire through the venue-rental form (the preferred channel) with your date and
+expected guest count; email or phone work too.
 
 ## Art at the cafe
 
