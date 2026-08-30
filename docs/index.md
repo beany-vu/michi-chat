@@ -10,6 +10,9 @@ hero:
       text: Quickstart
       link: /guide/quickstart
     - theme: alt
+      text: For business owners
+      link: /owner/meet-your-assistant
+    - theme: alt
       text: View on GitHub
       link: https://github.com/beany-vu/michi-chat
 

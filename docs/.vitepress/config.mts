@@ -15,6 +15,14 @@ export default defineConfig({
     ],
     sidebar: [
       {
+        text: "For business owners",
+        items: [
+          { text: "Meet your assistant", link: "/owner/meet-your-assistant" },
+          { text: "Set it up, step by step", link: "/owner/setup" },
+          { text: "Running it day to day", link: "/owner/day-to-day" },
+        ],
+      },
+      {
         text: "Getting started",
         items: [
           { text: "Quickstart", link: "/guide/quickstart" },

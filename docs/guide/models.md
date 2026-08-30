@@ -39,6 +39,14 @@ Restart the litellm container after editing:
 docker compose up -d --force-recreate litellm
 ```
 
+## Trying a different model on one tenant
+
+Add a trial alias in the yaml (say, `gemma` → `ollama_chat/gemma3:4b`), restart the litellm
+container, and set one tenant's **Model alias** field to `gemma` in the admin UI. That tenant
+now runs the new model while every other tenant is untouched — A/B testing as configuration:
+
+![A test tenant answering through the gemma alias](/screenshots/gemma-testcafe.png)
+
 ## The embedding caveat
 
 The knowledge-base column is sized to **768 dimensions** (nomic-embed-text). Changing the `embed` alias to a model with different dimensions requires a schema migration **and** re-embedding every document. Change `michi` and `judge` freely; think twice about `embed`.
