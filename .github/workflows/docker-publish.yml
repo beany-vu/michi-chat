@@ -14,7 +14,10 @@ permissions:
 
 jobs:
   build-push:
-    runs-on: ubuntu-latest
+    # Self-hosted by policy. Safe here because the workflow triggers on tag pushes only
+    # (never on fork PRs). A runner must be registered on the repo BEFORE tagging, or the
+    # job queues for 24h and is discarded: Settings → Actions → Runners → New runner.
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
 

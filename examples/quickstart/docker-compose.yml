@@ -9,7 +9,7 @@
 
 services:
   app:
-    image: ${MICHI_IMAGE:-ghcr.io/OWNER/michi-chat:latest}
+    image: ${MICHI_IMAGE:-ghcr.io/beany-vu/michi-chat:latest}
     environment:
       DATABASE_URL: "postgres://michi:${MICHI_DB_PASSWORD:?set MICHI_DB_PASSWORD in .env}@db:5432/michichat"
       LITELLM_BASE_URL: "http://litellm:4000/v1"
