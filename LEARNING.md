@@ -303,6 +303,9 @@ Read in this order; each depends only on what came before.
 | `src/app/admin/actions.ts` | Every mutation, each opening with `requireAdmin()` |
 | `src/lib/admin-auth.ts` | scrypt, timing-safe compare, revocable sessions, no library |
 | `drizzle/0001_tenants.sql` | The hand-edited backfill. Read the header comment |
+| `src/lib/rag/answer-cache.ts` | The semantic cache and its four safety rules |
+| `src/lib/guardrail.ts` | Bait strikes: why the patterns are narrow on purpose |
+| `src/lib/audit.ts` + `admin-auth.ts` | Roles, break-glass owner, append-only trail |
 
 Skim only: `admin/*/page.tsx` (plain server components), `globals.css`, `admin.css`.
 
@@ -364,9 +367,11 @@ Grouped by where they bite. You will know most; the value is in the specific got
   Wiring `stream: true` through a tool loop is genuinely instructive: you must buffer enough of
   each round to tell a tool call from an answer.
 - **RLS**, pending a `NOSUPERUSER` role.
-- **The answers eval and the widget embed** — the roadmap in `CLAUDE.md`. RAG shipped with a
-  *retrieval* eval (recall@k); grading *answers* needs the golden set + the `judge` alias, and
-  is the next item. The kb/mugshot documents are placeholders until real facts replace them.
+- **The answers eval shipped** (`eval:answers`, judge alias = qwen3:8b after calibrating away
+  a 7B grader's false negatives; baseline 10/10 with the semantic cache in the loop). The
+  kb/mugshot documents now carry real facts harvested from the live site. What remains from
+  the original roadmap is only the production widget embed (built on a mugshotcoffee branch,
+  waiting on the server deploy in ai-docs/michi-chat/deploy/).
 - **LiteLLM's own database**, and with it virtual keys and budgets. Deferred because spend is
   genuinely $0 on local Ollama. The trigger to revisit is written down: the day
   `litellm/config.yaml` points at a paid provider, virtual keys buy a hard budget ceiling

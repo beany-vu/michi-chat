@@ -58,8 +58,17 @@ carry over 1:1.
 - `src/lib/rag/` — heading-aware chunker, embeddings (LiteLLM alias `embed`, 768 dims),
   ingestion + the tenant-scoped leaf-scan retrieval
 - `src/lib/slack.ts` — webhook validator (the SSRF pin) + fire-and-forget notifier
-- `src/db/schema.ts` — tenants, api_keys, widget_sessions, conversations, messages,
-  admin_sessions, kb_documents, kb_chunks
+- `src/lib/guardrail.ts` — bait circuit breaker (3 strikes/session/hour, narrow patterns)
+- `src/lib/rag/answer-cache.ts` — semantic cache (first messages, 0.05 cutoff, 24h TTL,
+  invalidated by any KB/tenant change, off in privacy mode)
+- `src/lib/admin-auth.ts` + `src/lib/audit.ts` — owner/staff roles (env password stays
+  break-glass owner) and the append-only audit trail every mutation writes to
+- `src/lib/csv.ts` + `src/app/admin/kb-csv/` — KB export/import as two-column CSV
+- `src/app/admin/tenants/[id]/analytics/` — per-tenant analytics (tool mix, literal
+  search_kb queries, busy hours in the tenant's timezone, country via cf-ipcountry)
+- `src/db/schema.ts` — tenants (incl. timezone, storeConversations), api_keys,
+  widget_sessions, conversations, messages, admin_users, admin_sessions, kb_documents,
+  kb_chunks, answer_cache, audit_log, rate_buckets
 - `kb/<slug>/` — markdown source docs per tenant; `eval/kb-golden.json` — the recall golden set
 - `src/db/tenant-db.ts` — `forTenant()`, the tenant-scoped query helpers
 - `src/app/admin/` — the operator UI (server components + server actions)
