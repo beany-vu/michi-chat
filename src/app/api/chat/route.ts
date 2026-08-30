@@ -298,13 +298,21 @@ export async function POST(request: NextRequest) {
           }
 
           turn.push(choice);
+          // Show every chip immediately, then run the tools IN PARALLEL. When the model
+          // asks for weather AND menu in one round, two slow upstreams should overlap, not
+          // stack (the difference between ~2s and ~4s that made a visitor quit).
           for (const call of toolCalls) {
             emit("tool", {
               name: call.function.name,
               label: tools.labelFor(call.function.name),
               arguments: call.function.arguments,
             });
-            const result = await tools.execute(call.function.name, call.function.arguments);
+          }
+          const results = await Promise.all(
+            toolCalls.map((call) => tools.execute(call.function.name, call.function.arguments)),
+          );
+          toolCalls.forEach((call, i) => {
+            const result = results[i];
             toolLog.push({
               name: call.function.name,
               arguments: call.function.arguments,
@@ -315,7 +323,7 @@ export async function POST(request: NextRequest) {
             // system prompt. That separation is the one structural defence against a
             // compromised upstream injecting instructions.
             turn.push({ role: "tool", tool_call_id: call.id, content: wrapToolResult(result) });
-          }
+          });
         }
 
         // A provider can hand back an ERROR payload as ordinary content instead of
