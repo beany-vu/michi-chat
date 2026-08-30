@@ -69,8 +69,11 @@ export function forTenant(tenantId: string) {
         .where(and(eq(conversations.id, conversationId), eq(conversations.tenantId, tenantId)));
     },
 
-    /** User turns since midnight, for the daily cap. Counts against the tenant, not the visitor. */
-    async userMessagesToday() {
+    /** User turns since the TENANT'S midnight, for the daily cap. A Manila cafe's cap
+     *  must reset at Manila midnight, not the server's; the timezone comes from the
+     *  tenant row and Postgres does the conversion. Invalid zones throw, which is why
+     *  saveTenantAction validates with Intl before anything reaches this query. */
+    async userMessagesToday(timezone: string) {
       const [row] = await dbRoot
         .select({ count: sql<number>`count(*)::int` })
         .from(messages)
@@ -78,7 +81,7 @@ export function forTenant(tenantId: string) {
           and(
             eq(messages.tenantId, tenantId),
             eq(messages.role, "user"),
-            sql`${messages.createdAt} >= date_trunc('day', now())`,
+            sql`${messages.createdAt} >= date_trunc('day', now() at time zone ${timezone}) at time zone ${timezone}`,
           ),
         );
       return row?.count ?? 0;

@@ -70,6 +70,26 @@ export function TenantForm({
         />
         <small>The only limit that holds against someone who has the public embed key.</small>
 
+        <label htmlFor="timezone">Timezone</label>
+        <input
+          id="timezone"
+          name="timezone"
+          defaultValue={tenant.timezone}
+          placeholder="Asia/Manila"
+          list="tz-suggestions"
+        />
+        <datalist id="tz-suggestions">
+          <option value="Asia/Manila" />
+          <option value="Asia/Ho_Chi_Minh" />
+          <option value="Asia/Singapore" />
+          <option value="Europe/Paris" />
+          <option value="UTC" />
+        </datalist>
+        <small>
+          The business&apos;s local time (IANA name). Sets when the daily cap resets and how
+          the analytics day/busy-hours buckets are drawn.
+        </small>
+
         <label className="check">
           <input
             type="checkbox"

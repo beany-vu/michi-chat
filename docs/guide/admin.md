@@ -10,7 +10,7 @@
 
 | Section | What it controls |
 | --- | --- |
-| Identity | Name, active/disabled, model alias override, **daily message cap** |
+| Identity | Name, active/disabled, model alias override, **timezone** (cap reset + analytics buckets), **daily message cap**, store-conversations switch |
 | Persona | The tenant layer of the system prompt: identity, hours, location, voice |
 | Branding | Title, greeting, subtitle, composer placeholder, accent color, suggestion chips |
 | Tools | Enable tool packs and fill in their parameters (see below) |

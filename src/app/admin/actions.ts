@@ -160,6 +160,14 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
     }
   }
 
+  const timezone = String(formData.get("timezone") ?? "").trim() || "UTC";
+  try {
+    // Throws on anything Postgres would also choke on; one gate for both consumers.
+    new Intl.DateTimeFormat("en", { timeZone: timezone });
+  } catch {
+    return { error: `Not a valid timezone: ${timezone} (use an IANA name like Asia/Manila).` };
+  }
+
   const branding: Branding = {
     title: String(formData.get("brand.title") ?? "").trim() || undefined,
     subtitle: String(formData.get("brand.subtitle") ?? "").trim() || undefined,
@@ -197,6 +205,7 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
       branding,
       toolConfig,
       allowedOrigins: origins,
+      timezone,
       storeConversations: formData.get("storeConversations") === "on",
       slackWebhookUrl,
       updatedAt: new Date(),

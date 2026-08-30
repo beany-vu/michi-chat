@@ -64,6 +64,13 @@
       "when": 1788099416226,
       "tag": "0008_tan_korg",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788102134505,
+      "tag": "0009_chemical_the_fury",
+      "breakpoints": true
     }
   ]
 }

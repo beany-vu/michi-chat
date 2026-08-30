@@ -57,6 +57,19 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ id: 
 
   // --- aggregate in TS: tenant volumes are small, and jsonb spelunking in SQL is
   // harder to read than a loop.
+  // Buckets are drawn in the TENANT'S timezone: "busy at 7pm" must mean 7pm at the
+  // counter, not wherever the server happens to run.
+  const dayFmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tenant.timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const hourFmt = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tenant.timezone,
+    hour: "2-digit",
+    hourCycle: "h23",
+  });
   const perDay = new Map<string, number>();
   const perHour = new Array<number>(24).fill(0);
   const toolMix = new Map<string, number>();
@@ -68,9 +81,9 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ id: 
 
   for (const message of recentMessages) {
     if (message.role === "user") {
-      const day = message.createdAt.toISOString().slice(0, 10);
+      const day = dayFmt.format(message.createdAt);
       perDay.set(day, (perDay.get(day) ?? 0) + 1);
-      perHour[message.createdAt.getHours()] += 1;
+      perHour[Number.parseInt(hourFmt.format(message.createdAt), 10) % 24] += 1;
     } else {
       if (message.latencyMs !== null) {
         latencyTotal += message.latencyMs;
@@ -199,7 +212,7 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ id: 
             />
           ))}
         </div>
-        <p className="note">Midnight → 23:00, server time. Darker = busier.</p>
+        <p className="note">Midnight → 23:00 in {tenant.timezone}. Darker = busier.</p>
       </section>
 
       <section className="card">

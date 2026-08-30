@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
   // since the key is public and Origin is forgeable off-browser. It protects the bill.
   const storing = tenant.storeConversations;
   if (storing) {
-    const usedToday = await db.userMessagesToday();
+    const usedToday = await db.userMessagesToday(tenant.timezone);
     if (usedToday >= tenant.dailyMessageCap) {
       return corsJson({ error: "daily message limit reached" }, 429, origin);
     }

@@ -61,6 +61,10 @@ export const tenants = pgTable("tenants", {
   // Browser-enforced scoping for the embed, stored as "scheme://host[:port]", lowercased.
   allowedOrigins: text("allowed_origins").array().notNull().default([]),
   dailyMessageCap: integer("daily_message_cap").notNull().default(500),
+  // IANA zone ("Asia/Manila"). Owns two boundaries: analytics day/hour buckets, and when
+  // the daily cap resets — a Manila cafe's cap must reset at Manila midnight, not the
+  // server's. Validated with Intl on save.
+  timezone: text("timezone").notNull().default("UTC"),
   // Privacy switch: when false, no conversation or message rows are written at all.
   // Two consequences, both deliberate: the bot loses multi-turn memory (history is
   // rebuilt from these rows), and the daily cap is enforced via rate_buckets instead
