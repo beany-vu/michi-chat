@@ -1,5 +1,7 @@
 # michi-chat
 
+**Documentation: <https://beany-vu.github.io/michi-chat/>** — quickstart, admin guide, extending.
+
 A small multi-tenant chat assistant platform. Next.js + OpenAI SDK, with LiteLLM routing to any
 model provider (Ollama by default) and Postgres (pgvector) holding tenants, conversations and the
 per-tenant knowledge base.
