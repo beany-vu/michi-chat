@@ -76,6 +76,7 @@ docker compose exec app npx tsc --noEmit          # typecheck
 docker compose exec app npm run db:generate       # after editing schema.ts
 docker compose exec app npm run kb:ingest -- mugshot   # (re)embed kb/mugshot/*.md
 docker compose exec app npm run kb:eval -- mugshot     # recall@k over eval/kb-golden.json
+docker compose exec app npm run eval:answers -- mugshot # judge-graded answers over eval/answers-golden.json
 docker build -t michi-chat:local .                     # the publishable image (standalone + migrate-on-boot)
 ```
 
@@ -91,10 +92,11 @@ which must be registered on the repo before pushing a tag.
 
 ## Roadmap
 
-~~RAG knowledge base~~ (done: pgvector + heading-aware chunking + recall@k eval; the two schema
-decisions — tenantId directly on `kb_chunks`, no ANN index at first — are explained in
-`src/db/schema.ts`) → eval harness for ANSWERS (golden set + judge via the `judge` alias; the
-recall eval only grades retrieval) → widget embed for mugshotmnl.com.
+~~RAG knowledge base~~ → ~~answers eval~~ (done: eval/answers-golden.json, judge alias grades
+faithfulness + completeness through the real chat API, semantic cache in the loop on purpose)
+→ widget embed for mugshotmnl.com (built on a mugshotcoffee branch, unpushed). The semantic
+answer cache (answer_cache, first messages only, 0.05 cosine cutoff, 24h TTL, wiped on any
+KB/tenant change, off in privacy mode) is in src/lib/rag/answer-cache.ts.
 
 The kb/mugshot docs carry REAL facts harvested from mugshotmnl.com's live APIs on 2026-08-30
 (hours, address, contacts, beans, events, venue-rental channels, the from-₱99 price line);

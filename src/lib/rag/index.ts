@@ -7,6 +7,7 @@ import { createHash } from "node:crypto";
 import { and, asc, cosineDistance, eq, sql } from "drizzle-orm";
 import { dbRoot } from "@/db";
 import { kbChunks, kbDocuments } from "@/db/schema";
+import { clearAnswerCache } from "./answer-cache";
 import { chunkMarkdown } from "./chunk";
 import { embedText, embedTexts } from "./embed";
 
@@ -24,6 +25,9 @@ export async function ingestDocument(input: {
   content: string;
 }): Promise<number> {
   const hash = contentHash(input.content);
+
+  // Cached answers are downstream of the knowledge; stale beats slow, never the reverse.
+  void clearAnswerCache(input.tenantId);
 
   const [existing] = await dbRoot
     .select({ id: kbDocuments.id, contentHash: kbDocuments.contentHash })
@@ -71,6 +75,7 @@ export async function ingestDocument(input: {
 }
 
 export async function deleteDocument(tenantId: string, documentId: string) {
+  void clearAnswerCache(tenantId);
   // Chunks go via the composite-FK cascade.
   await dbRoot
     .delete(kbDocuments)

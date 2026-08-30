@@ -17,6 +17,7 @@ import { hashPassword, login, logout, requireAdmin, requireOwner } from "@/lib/a
 import { logAudit } from "@/lib/audit";
 import { MAX_PERSONA_CHARS } from "@/lib/prompt";
 import { deleteDocument, ingestDocument } from "@/lib/rag";
+import { clearAnswerCache } from "@/lib/rag/answer-cache";
 import { validateSlackWebhookUrl } from "@/lib/slack";
 import { normalizeOrigin } from "@/lib/tenant";
 import { TOOL_PACKS } from "@/lib/tools";
@@ -201,6 +202,8 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
     })
     .where(eq(tenants.id, tenantId));
 
+  // Persona/tools/settings feed every answer; cached ones are now suspect.
+  void clearAnswerCache(tenantId);
   logAudit(session, "tenant.update", String(formData.get("name") ?? tenantId));
   revalidatePath(`/admin/tenants/${tenantId}`);
   revalidatePath("/admin");

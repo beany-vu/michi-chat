@@ -18,6 +18,10 @@ import {
   vector,
 } from "drizzle-orm/pg-core";
 
+// 768 = nomic-embed-text via the LiteLLM alias `embed`; kb_chunks and answer_cache
+// are both sized to it, so changing the embedding model is a migration + re-embed.
+export const EMBEDDING_DIMENSIONS = 768;
+
 /** Per-pack settings, e.g. { get_menu: { enabled: true, baseUrl: "https://..." } }. */
 export type ToolConfig = Record<string, { enabled: boolean } & Record<string, unknown>>;
 
@@ -207,6 +211,29 @@ export const adminSessions = pgTable("admin_sessions", {
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
 });
 
+// Semantic answer cache: opening-hours-style questions dominate real traffic (the
+// analytics page proves it), and a paraphrase of an already-answered opener can be
+// served instantly at zero token cost. Only FIRST messages of a conversation are ever
+// cached or served from here (follow-ups depend on history), rows are wiped whenever
+// the tenant's knowledge or settings change, and privacy-mode tenants skip it entirely.
+// No ANN index, same reasoning as kb_chunks.
+export const answerCache = pgTable(
+  "answer_cache",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    question: text("question").notNull(),
+    embedding: vector("embedding", { dimensions: EMBEDDING_DIMENSIONS }).notNull(),
+    answer: text("answer").notNull(),
+    model: text("model"),
+    hits: integer("hits").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("answer_cache_tenant_idx").on(t.tenantId)],
+);
+
 // Append-only trail of who did what in the admin. Never updated, never joined for
 // authorization — purely forensic, so multi-user access has a memory. actorUserId is
 // null for the env-password (break-glass) owner; actorLabel keeps the row readable even
@@ -253,8 +280,6 @@ export const rateBuckets = pgTable(
 // 768 dimensions = nomic-embed-text, served through the LiteLLM alias `embed`. Changing
 // the embedding model means a migration AND re-embedding every chunk; the dimension
 // lives here so that fact is impossible to miss.
-
-export const EMBEDDING_DIMENSIONS = 768;
 
 // The source of truth a tenant's operator edits: full markdown, stored verbatim so
 // chunks can always be rebuilt (re-chunk, re-embed) without asking for the text again.

@@ -11,6 +11,7 @@ import OpenAI from "openai";
 import { forTenant } from "@/db/tenant-db";
 import { buildSystemPrompt, wrapToolResult } from "@/lib/prompt";
 import { BAIT_STRIKES_PER_HOUR, BAIT_WINDOW_SECONDS, looksLikeBait } from "@/lib/guardrail";
+import { lookupCachedAnswer, storeCachedAnswer } from "@/lib/rag/answer-cache";
 import { isRateLimited } from "@/lib/rate-limit";
 import { notifySlack } from "@/lib/slack";
 import { corsHeaders, corsJson, isOriginRegistered, normalizeOrigin, resolveTenant } from "@/lib/tenant";
@@ -177,6 +178,26 @@ export async function POST(request: NextRequest) {
   // Privacy mode: no rows at all, which also means no multi-turn memory. That trade-off
   // is stated on the admin form where the switch lives.
 
+  // Semantic cache, first messages only (see answer-cache.ts for the full rules). A hit
+  // skips the model entirely; a miss reuses this embedding when storing the new answer.
+  const cacheEligible = storing && history.length === 0;
+  let cachedAnswer: string | null = null;
+  let cachedModel: string | null = null;
+  let questionEmbedding: number[] | null = null;
+  if (cacheEligible) {
+    try {
+      const { hit, embedding } = await lookupCachedAnswer(tenant.id, userText);
+      questionEmbedding = embedding;
+      if (hit) {
+        cachedAnswer = hit.answer;
+        cachedModel = hit.model;
+      }
+    } catch (error) {
+      // The cache must never break a turn; a cold embedder just means the slow path.
+      console.warn("answer cache lookup failed", error);
+    }
+  }
+
   const tools = buildTenantTools(tenant.toolConfig, tenant.id);
   const model = tenant.model ?? process.env.CHAT_MODEL ?? "michi";
 
@@ -199,6 +220,35 @@ export async function POST(request: NextRequest) {
 
       try {
         emit("status", { state: "thinking" });
+
+        // Cache hit: same events, same persistence, no model call. The visitor cannot
+        // tell except by the speed; the transcript records which model originally wrote it.
+        if (cachedAnswer !== null) {
+          for (let i = 0; i < cachedAnswer.length; i += 48) {
+            emit("delta", { text: cachedAnswer.slice(i, i + 48) });
+          }
+          const latencyMs = Date.now() - started;
+          if (conversation) {
+            await db.appendMessage({
+              conversationId: conversation.id,
+              role: "assistant",
+              content: cachedAnswer,
+              model: cachedModel ?? model,
+              tokensIn: 0,
+              tokensOut: 0,
+              latencyMs,
+            });
+            await db.touchConversation(conversation.id);
+          }
+          emit("done", {
+            conversationId: conversation?.id ?? null,
+            sessionToken: issuedSessionToken,
+            cached: true,
+            usage: { inTokens: 0, outTokens: 0 },
+            latencyMs,
+          });
+          return;
+        }
 
         // The loop: while the model asks for tools, run them and resend; the first
         // plain-text response is the answer.
@@ -270,6 +320,17 @@ export async function POST(request: NextRequest) {
             latencyMs,
           });
           await db.touchConversation(conversation.id);
+        }
+
+        // Feed the semantic cache, but never with the gave-up fallback.
+        if (cacheEligible && questionEmbedding && !answer.startsWith("Sorry, I could not")) {
+          void storeCachedAnswer({
+            tenantId: tenant.id,
+            question: userText,
+            embedding: questionEmbedding,
+            answer,
+            model,
+          });
         }
 
         emit("done", {

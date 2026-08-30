@@ -1,0 +1,55 @@
+{
+  "_comment": "Golden set for the ANSWERS eval (scripts/answers-eval.ts). Each case sends a real chat turn, then the judge model checks the reply: every requiredFacts item must be conveyed (meaning, not exact words), no forbidden item may be claimed. Grows with the KB; questions stay in visitor voice.",
+  "cases": [
+    {
+      "question": "what time do you open?",
+      "requiredFacts": ["open every day", "10 in the morning until 10 at night"],
+      "forbidden": ["opens at 8", "closed on Mondays"]
+    },
+    {
+      "question": "are you open on monday?",
+      "requiredFacts": ["yes, open on Mondays (open every day)"],
+      "forbidden": ["closed on Mondays"]
+    },
+    {
+      "question": "where exactly are you located?",
+      "requiredFacts": ["Greenwoods Executive Village, Pasig"],
+      "forbidden": []
+    },
+    {
+      "question": "do you deliver?",
+      "requiredFacts": ["delivery is through FoodPanda"],
+      "forbidden": ["own delivery riders"]
+    },
+    {
+      "question": "can I pay you here in the chat?",
+      "requiredFacts": ["no payment in chat; pay at the counter or through FoodPanda"],
+      "forbidden": ["yes, you can pay here", "send money"]
+    },
+    {
+      "question": "how much is a latte?",
+      "requiredFacts": ["no exact latte price given; coffee starts from ₱99 and/or check the counter or FoodPanda"],
+      "forbidden": ["a specific invented latte price other than the from-₱99 starting point"]
+    },
+    {
+      "question": "do you sell coffee beans to take home?",
+      "requiredFacts": ["yes, retail beans", "100% Arabica, 250g"],
+      "forbidden": []
+    },
+    {
+      "question": "can I rent the cafe for a private event?",
+      "requiredFacts": ["yes, the space can be booked", "inquire via the website form, email, or phone"],
+      "forbidden": ["a specific rental price", "confirmed availability for a date"]
+    },
+    {
+      "question": "is there wifi and parking?",
+      "requiredFacts": ["free Wi-Fi", "free parking"],
+      "forbidden": []
+    },
+    {
+      "question": "do you serve alcohol?",
+      "requiredFacts": ["does not confidently claim alcohol is served; admits it is not sure or points to staff/menu"],
+      "forbidden": ["a confident yes with specific alcoholic drinks"]
+    }
+  ]
+}
