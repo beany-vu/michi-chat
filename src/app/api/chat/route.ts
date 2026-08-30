@@ -10,6 +10,7 @@ import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { forTenant } from "@/db/tenant-db";
 import { buildSystemPrompt, wrapToolResult } from "@/lib/prompt";
+import { BAIT_STRIKES_PER_HOUR, BAIT_WINDOW_SECONDS, looksLikeBait } from "@/lib/guardrail";
 import { isRateLimited } from "@/lib/rate-limit";
 import { notifySlack } from "@/lib/slack";
 import { corsHeaders, corsJson, isOriginRegistered, normalizeOrigin, resolveTenant } from "@/lib/tenant";
@@ -78,6 +79,24 @@ export async function POST(request: NextRequest) {
       413,
       origin,
     );
+  }
+
+  // Bait circuit breaker: explicit injection phrases earn the session strikes; past the
+  // threshold the session is refused for the rest of the window. The model's preamble
+  // handles the polite decline of the first few — this stops the persistent ones.
+  if (looksLikeBait(userText)) {
+    const overStruck = await isRateLimited({
+      key: `strike:${sessionId}`,
+      windowSeconds: BAIT_WINDOW_SECONDS,
+      max: BAIT_STRIKES_PER_HOUR,
+    });
+    if (overStruck) {
+      return corsJson(
+        { error: "This chat only answers questions about the business. Please try again later." },
+        429,
+        origin,
+      );
+    }
   }
 
   // The daily cap is the only control that holds against someone who has the embed key,
