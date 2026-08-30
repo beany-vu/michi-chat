@@ -10,7 +10,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/lib/prompt.test.ts src/lib/tenant.test.ts src/lib/tools/tools.test.ts src/lib/rag/chunk.test.ts src/lib/slack.test.ts src/lib/guardrail.test.ts src/lib/tools/generic.test.ts src/lib/csv.test.ts",
+    "test": "tsx --test src/lib/prompt.test.ts src/lib/tenant.test.ts src/lib/tools/tools.test.ts src/lib/rag/chunk.test.ts src/lib/slack.test.ts src/lib/guardrail.test.ts src/lib/tools/generic.test.ts src/lib/csv.test.ts src/lib/moderation.test.ts",
     "test:isolation": "tsx --test src/db/isolation.test.ts",
     "kb:ingest": "tsx scripts/kb-ingest.ts",
     "kb:eval": "tsx scripts/kb-eval.ts",

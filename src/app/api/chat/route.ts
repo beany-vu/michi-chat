@@ -15,6 +15,7 @@ import { lookupCachedAnswer, storeCachedAnswer } from "@/lib/rag/answer-cache";
 import { isRateLimited } from "@/lib/rate-limit";
 import { notifySlack } from "@/lib/slack";
 import { corsHeaders, corsJson, isOriginRegistered, normalizeOrigin, resolveTenant } from "@/lib/tenant";
+import { FRIENDLY_ERROR, looksLikeProviderError } from "@/lib/moderation";
 import { buildTenantTools } from "@/lib/tools";
 
 const MAX_ROUNDS = 6;
@@ -52,6 +53,7 @@ export async function OPTIONS(request: NextRequest) {
 
 const CANNED_REFUSAL =
   "I can only help with questions about the business, like the menu, hours, or events. What can I help you find?";
+
 
 /** A fixed decline streamed as a normal turn (no model, no DB write). Same SSE shape a
  *  real answer has, so the widget renders it as an ordinary reply. */
@@ -316,12 +318,20 @@ export async function POST(request: NextRequest) {
           }
         }
 
+        // A provider can hand back an ERROR payload as ordinary content instead of
+        // throwing, e.g. an over-eager content-moderation block on an innocent question.
+        // A visitor must never see that raw text: log it, keep the real error in the
+        // transcript's tool log so the operator can see what happened, and replace the
+        // visitor-facing answer with a friendly line.
+        if (looksLikeProviderError(answer)) {
+          console.error("provider returned error content:", answer.slice(0, 500));
+          toolLog.push({ name: "provider_error", arguments: "", result: answer.slice(0, 8192) });
+          answer = FRIENDLY_ERROR;
+        }
+
         // If every round came back asking for more tools we fall out of the loop with
         // nothing to say. Without this the visitor just gets an empty bubble.
-        if (!answer.trim()) {
-          answer =
-            "Sorry, I could not work that one out just now. Could you try asking it a different way?";
-        }
+        if (!answer.trim()) answer = FRIENDLY_ERROR;
 
         // House style, enforced in code: models follow "no dashes" unreliably.
         answer = answer
@@ -348,8 +358,8 @@ export async function POST(request: NextRequest) {
           await db.touchConversation(conversation.id);
         }
 
-        // Feed the semantic cache, but never with the gave-up fallback.
-        if (cacheEligible && questionEmbedding && !answer.startsWith("Sorry, I could not")) {
+        // Feed the semantic cache, but never with a fallback/error line.
+        if (cacheEligible && questionEmbedding && answer !== FRIENDLY_ERROR) {
           void storeCachedAnswer({
             tenantId: tenant.id,
             question: userText,

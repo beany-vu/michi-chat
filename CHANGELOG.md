@@ -5,6 +5,13 @@ This project is versioned by git tags (`v*`), which trigger the GHCR image build
 
 ## v0.2.3 — 2026-08-30
 
+### Fixed
+
+- **Provider errors never reach the visitor.** If the model backend returns an error as
+  message content (e.g. an over-eager content-moderation block), the bot now shows a
+  friendly fallback and keeps the real error in the transcript for the operator, instead
+  of streaming raw JSON into the chat.
+
 ### Changed
 
 - **Upgraded to Next.js 16** (from 15). Clears the postcss and sharp security advisories
