@@ -10,6 +10,36 @@ The app never names a real model. It asks LiteLLM for three **aliases**:
 
 What actually serves each alias is decided in `litellm.config.yaml`. Swapping providers is an edit there - never a code change.
 
+## When each model actually runs
+
+The three aliases are not a chain; only two of them ever touch a live visitor turn.
+
+```
+LIVE - every visitor message
+  visitor message
+     |-- guardrails + daily cap ......... no model (patterns + counters)
+     |-- answer cache lookup ............ embed
+     |      hit -> stream cached answer, done (no other model runs)
+     |      miss v
+     '-- michi (the chat model, tool loop)
+            |-- get_weather / get_events / get_menu ... plain HTTP, no model
+            '-- search_kb -> embed (question -> vector)
+                              -> Postgres pgvector: nearest chunks (not a model)
+            v
+        answer streams to the visitor; embed stores it in the cache
+
+OFFLINE - only when you run eval:answers
+  golden questions -> the real pipeline above -> answers -> judge grades each one
+```
+
+- `michi` is the only model that writes words to a visitor.
+- `embed` never writes words; it only turns text into vectors (cache check, KB search).
+- `judge` runs only in the eval suite - a different model than `michi`, so the bot never
+  grades its own homework, and it costs nothing per visitor.
+
+Cheapest turns first: a guardrail refusal uses no model at all, a cache hit uses only
+`embed`, and a full tool-loop answer uses `michi` once per round plus `embed` twice.
+
 ## Path A: local Ollama (default)
 
 On the machine running Docker:
