@@ -14,6 +14,17 @@ import { getAdminSession } from "@/lib/admin-auth";
 import { deleteConversationAction } from "../../actions";
 import { LocalTime } from "../../LocalTime";
 
+// Tool results are stored as JSON *strings* inside the toolCalls JSON; dumped raw they
+// render as one endless escaped line. Decode when possible, show verbatim when not.
+function prettyJson(value: string | undefined): string {
+  if (!value) return "(no result)";
+  try {
+    return JSON.stringify(JSON.parse(value), null, 2);
+  } catch {
+    return value;
+  }
+}
+
 export default async function TranscriptPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getAdminSession();
   if (!session) redirect("/admin/login");
@@ -79,8 +90,26 @@ export default async function TranscriptPage({ params }: { params: Promise<{ id:
             <pre>{turn.content}</pre>
             {turn.toolCalls != null && (
               <details>
-                <summary>tool calls</summary>
-                <pre>{JSON.stringify(turn.toolCalls, null, 2)}</pre>
+                <summary>
+                  debug: tool calls &amp; results
+                  {Array.isArray(turn.toolCalls) ? ` (${turn.toolCalls.length})` : ""}
+                </summary>
+                {Array.isArray(turn.toolCalls) ? (
+                  turn.toolCalls.map((call, i) => {
+                    const c = call as { name?: string; arguments?: string; result?: string };
+                    return (
+                      <div key={i} className="tool-call">
+                        <p className="tool-call-name">
+                          {c.name ?? "unknown"}
+                          {c.arguments && c.arguments !== "{}" ? `  ${c.arguments}` : "()"}
+                        </p>
+                        <pre>{prettyJson(c.result)}</pre>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <pre>{JSON.stringify(turn.toolCalls, null, 2)}</pre>
+                )}
               </details>
             )}
           </article>

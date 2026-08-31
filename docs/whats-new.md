@@ -3,6 +3,10 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.13 - readable tool debugging
+
+The tool-calls expander in transcripts pretty-prints each call and its result.
+
 ## v0.2.12 - readable transcripts
 
 Conversation transcripts are now a chat view (visitor right, assistant left), and every

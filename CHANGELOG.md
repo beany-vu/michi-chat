@@ -3,6 +3,14 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.13 - 2026-08-31
+
+### Changed
+
+- **Readable tool debugging in transcripts.** The "debug: tool calls & results" expander
+  shows each call as its own block with pretty-printed arguments and result JSON, instead
+  of one escaped line. Still plain text.
+
 ## v0.2.12 - 2026-08-31
 
 ### Changed
