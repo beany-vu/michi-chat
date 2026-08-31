@@ -3,6 +3,14 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.14 - 2026-08-31
+
+### Added
+
+- **"cached" badge in transcripts.** Assistant turns served from the semantic answer
+  cache are labeled, explaining why they carry no tool debug block (no model ran, no
+  tools were called). Detected by their stored 0->0 token signature.
+
 ## v0.2.13 - 2026-08-31
 
 ### Changed

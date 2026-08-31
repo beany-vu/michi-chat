@@ -77,6 +77,11 @@ export default async function TranscriptPage({ params }: { params: Promise<{ id:
           <article key={turn.id} className={`turn ${turn.role}`}>
             <header>
               <strong>{turn.role === "user" ? "visitor" : "assistant"}</strong>
+              {/* Cache hits persist with 0->0 tokens (no model ran); live answers always
+                  burn tokens. That signature is why cached turns have no debug block. */}
+              {turn.role === "assistant" && turn.tokensIn === 0 && turn.tokensOut === 0 && (
+                <span className="pill">cached</span>
+              )}
               <span>
                 <LocalTime iso={turn.createdAt.toISOString()} />
               </span>
