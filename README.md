@@ -1,6 +1,9 @@
 # michi-chat
 
 **Documentation: <https://beany-vu.github.io/michi-chat/>** - quickstart, admin guide, extending.
+For AI assistants: [`llms.txt`](llms.txt) is the machine-readable project map
+([llmstxt.org](https://llmstxt.org)), also served at
+<https://beany-vu.github.io/michi-chat/llms.txt>.
 
 A small multi-tenant chat assistant platform. Next.js + OpenAI SDK, with LiteLLM routing to any
 model provider (Ollama by default) and Postgres (pgvector) holding tenants, conversations and the
@@ -109,6 +112,14 @@ The public embed key is a tenant **selector**, not a credential: it ships in the
 source. The Origin allowlist is browser-enforced, so it stops another website embedding a
 tenant's bot but does nothing against a direct request. The per-tenant daily cap is the control
 that actually protects the bill.
+
+## Contributing
+
+Contributions are warmly welcome — this project exists so small shops can afford a real AI
+assistant, and every tool pack, doc fix, KB template or eval case widens who it serves. The
+codebase is small enough to read in an afternoon and everything runs locally with no cloud
+account. Start with [CONTRIBUTING.md](CONTRIBUTING.md); a one-file tool pack with a test is
+the ideal first PR.
 
 ## Developing
 

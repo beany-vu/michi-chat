@@ -11,7 +11,7 @@ name: deploy-docs
 on:
   push:
     branches: [master]
-    paths: ["docs/**", "package.json", "package-lock.json", ".github/workflows/deploy-docs.yml"]
+    paths: ["docs/**", "llms.txt", "package.json", "package-lock.json", ".github/workflows/deploy-docs.yml"]
   workflow_dispatch:
 
 permissions:
