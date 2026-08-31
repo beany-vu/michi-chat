@@ -43,6 +43,11 @@ services:
   # pgvector image so the RAG knowledge base needs no image migration later.
   db:
     image: pgvector/pgvector:pg17
+    # Learning mode: MICHI_DB_LOG_STATEMENT=all logs every SQL statement to
+    # `docker compose logs -f db` - the way to WATCH the pgvector `<=>` queries run.
+    # Params are capped at 300 chars so the 768-number vectors don't flood the log.
+    # Default none: normal operation logs nothing.
+    command: postgres -c log_statement=${MICHI_DB_LOG_STATEMENT:-none} -c log_parameter_max_length=300
     environment:
       POSTGRES_USER: michi
       POSTGRES_DB: michichat
