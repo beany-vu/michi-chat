@@ -29,12 +29,16 @@ const weather: ToolPack = {
       today?: Record<string, unknown>;
     };
     const today = data.today ?? {};
+    // Two temperatures confuse small models into quoting the heat index as "the
+    // temperature" (a visitor compared us to a weather app and saw a 10 degree gap).
+    // Self-describing names + an explicit usage note keep the phrasing honest.
     return JSON.stringify({
-      temperatureC: today.temp,
-      feelsLikeC: today.feels_like,
+      airTemperatureC: today.temp,
+      heatIndexFeelsLikeC: today.feels_like,
       condition: today.description,
       rainChancePct: today.rain_chance,
       goodDayForACafeVisit: today.is_good_day,
+      note: "When stating the temperature, use airTemperatureC. heatIndexFeelsLikeC is the heat index; mention it only as 'feels like'.",
     });
   },
 };

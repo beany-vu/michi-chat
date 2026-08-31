@@ -3,6 +3,14 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.11 - 2026-08-31
+
+### Fixed
+
+- **Weather answers no longer quote the heat index as the temperature.** The tool output
+  uses self-describing field names (airTemperatureC / heatIndexFeelsLikeC) plus a usage
+  note, after a visitor compared the bot to a weather app and saw a 10 degree gap.
+
 ## v0.2.10 - 2026-08-31
 
 ### Fixed

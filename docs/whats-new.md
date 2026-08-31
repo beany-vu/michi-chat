@@ -3,6 +3,10 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.11 - honest thermometer
+
+Weather answers now state the air temperature, and only call the heat index "feels like".
+
 ## v0.2.10 - right events, phone-friendly
 
 "What's coming up?" now answers with events that are actually upcoming, judged in the
