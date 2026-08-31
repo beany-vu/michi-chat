@@ -3,6 +3,12 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.10 - right events, phone-friendly
+
+"What's coming up?" now answers with events that are actually upcoming, judged in the
+cafe's own timezone. The admin works properly on phones, and the chat footer fits one
+line.
+
 ## v0.2.7 - smoother chat
 
 Messages and chips now animate in, and image builds are much faster.

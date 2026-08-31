@@ -3,6 +3,24 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.10 - 2026-08-31
+
+### Fixed
+
+- **Events answers are date-aware.** `get_events` now splits results into upcoming and
+  recent past around "today" in the tenant's timezone; before, it blindly served the ten
+  oldest events from the API, so "what's coming up" answered with long-past events.
+- **Admin usable on phones.** Tables scroll inside themselves instead of forcing the whole
+  page wide, and paddings scale down through CSS variables. Every admin page now fits a
+  phone viewport with no horizontal page scroll.
+
+### Changed
+
+- **One-line footer credit.** The model alias is no longer shown in the chat footer, so
+  the credit fits one line on phones ("AI answers can contain mistakes" stays).
+- **KB: contact channels.** The Mugshot knowledge base now prefers the inquiry form and
+  email over the phone line, which is not staffed around the clock.
+
 ## v0.2.9 - 2026-08-30
 
 ### Added
