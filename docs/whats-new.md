@@ -3,6 +3,11 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.12 - readable transcripts
+
+Conversation transcripts are now a chat view (visitor right, assistant left), and every
+admin timestamp shows in your own timezone instead of the server's.
+
 ## v0.2.11 - honest thermometer
 
 Weather answers now state the air temperature, and only call the heat index "feels like".

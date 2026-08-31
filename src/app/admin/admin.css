@@ -392,26 +392,43 @@
   width: 100%;
 }
 
+/* Chat-box transcript: visitor bubbles right (accent-tinted), assistant left, the
+   same sides the widget uses, so operators read what the visitor saw. */
 .transcript {
-  display: grid;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 860px;
 }
 .turn {
+  max-width: 76%;
   border: 1px solid var(--line);
-  border-radius: 3px;
-  padding: 16px 20px;
+  border-radius: 12px;
+  padding: 12px 16px;
   background: var(--surface);
 }
+.turn.assistant {
+  align-self: flex-start;
+  border-bottom-left-radius: 3px;
+}
 .turn.user {
-  background: var(--soft);
+  align-self: flex-end;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  border-bottom-right-radius: 3px;
 }
 .turn header {
   display: flex;
-  gap: 16px;
-  font-size: 12px;
+  gap: 12px;
+  font-size: 11px;
   color: var(--muted);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   flex-wrap: wrap;
+}
+.turn header strong {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
 }
 /* Plain text on purpose: never render stored message content as markdown or HTML here. */
 .turn pre {
@@ -571,6 +588,9 @@
   }
   .head h1 {
     font-size: 22px;
+  }
+  .turn {
+    max-width: 92%;
   }
   .admin-side {
     width: auto;

@@ -8,6 +8,7 @@ import { apiKeys, conversations, messages, tenants } from "@/db/schema";
 import { isAuthenticated } from "@/lib/admin-auth";
 import { NewTenantForm } from "./NewTenantForm";
 import { TenantImport } from "./TenantImport";
+import { LocalTime } from "./LocalTime";
 
 export default async function AdminHome() {
   if (!(await isAuthenticated())) redirect("/admin/login");
@@ -75,7 +76,7 @@ export default async function AdminHome() {
               <td className="num">{row.messages7d}</td>
               <td className="num">{row.cap}</td>
               <td className="num">{row.keys}</td>
-              <td>{row.lastActivity ? new Date(row.lastActivity).toLocaleString() : "never"}</td>
+              <td>{row.lastActivity ? <LocalTime iso={new Date(row.lastActivity).toISOString()} /> : "never"}</td>
               <td>
                 <Link href={`/admin/tenants/${row.id}/kb`}>facts</Link>
                 {" · "}

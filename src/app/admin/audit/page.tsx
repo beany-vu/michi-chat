@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { auditLog } from "@/db/schema";
 import { getAdminSession } from "@/lib/admin-auth";
+import { LocalTime } from "../LocalTime";
 
 export default async function AuditPage() {
   const session = await getAdminSession();
@@ -39,7 +40,7 @@ export default async function AuditPage() {
         <tbody>
           {rows.map((row) => (
             <tr key={row.id}>
-              <td>{row.createdAt.toLocaleString()}</td>
+              <td><LocalTime iso={row.createdAt.toISOString()} /></td>
               <td>{row.actorLabel}</td>
               <td>
                 <code>{row.action}</code>

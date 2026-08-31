@@ -12,6 +12,7 @@ import { dbRoot } from "@/db";
 import { conversations, messages, tenants } from "@/db/schema";
 import { getAdminSession } from "@/lib/admin-auth";
 import { deleteConversationAction } from "../../actions";
+import { LocalTime } from "../../LocalTime";
 
 export default async function TranscriptPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getAdminSession();
@@ -58,12 +59,16 @@ export default async function TranscriptPage({ params }: { params: Promise<{ id:
         </div>
       </div>
 
+      {/* Chat-box layout mirroring the widget: visitor right, assistant left, so the
+          operator reads the conversation the way the visitor experienced it. */}
       <div className="transcript">
         {turns.map((turn) => (
           <article key={turn.id} className={`turn ${turn.role}`}>
             <header>
-              <strong>{turn.role}</strong>
-              <span>{turn.createdAt.toLocaleString()}</span>
+              <strong>{turn.role === "user" ? "visitor" : "assistant"}</strong>
+              <span>
+                <LocalTime iso={turn.createdAt.toISOString()} />
+              </span>
               {turn.latencyMs !== null && (
                 <span>
                   {(turn.latencyMs / 1000).toFixed(1)}s · {turn.tokensIn}→{turn.tokensOut} tokens

@@ -5,6 +5,7 @@ import { dbRoot } from "@/db";
 import { apiKeys, tenants } from "@/db/schema";
 import { isAuthenticated } from "@/lib/admin-auth";
 import { createKeyAction, revokeKeyAction } from "../../../actions";
+import { LocalTime } from "../../../LocalTime";
 
 export default async function KeysPage({ params }: { params: Promise<{ id: string }> }) {
   if (!(await isAuthenticated())) redirect("/admin/login");
@@ -52,8 +53,8 @@ export default async function KeysPage({ params }: { params: Promise<{ id: strin
               <td>
                 <code>{key.publicKey}</code>
               </td>
-              <td>{key.createdAt.toLocaleDateString()}</td>
-              <td>{key.lastUsedAt ? key.lastUsedAt.toLocaleString() : "never"}</td>
+              <td><LocalTime iso={key.createdAt.toISOString()} mode="date" /></td>
+              <td>{key.lastUsedAt ? <LocalTime iso={key.lastUsedAt.toISOString()} /> : "never"}</td>
               <td>
                 <span className={`pill ${key.revokedAt ? "disabled" : "active"}`}>
                   {key.revokedAt ? "revoked" : "live"}

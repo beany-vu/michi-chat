@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { conversations, messages, tenants } from "@/db/schema";
 import { isAuthenticated } from "@/lib/admin-auth";
+import { LocalTime } from "../LocalTime";
 
 const PAGE_SIZE = 50;
 
@@ -90,8 +91,8 @@ export default async function ConversationsPage({
           {rows.map((row) => (
             <tr key={row.id}>
               <td>{row.tenantName}</td>
-              <td>{row.startedAt.toLocaleString()}</td>
-              <td>{row.lastMessageAt.toLocaleString()}</td>
+              <td><LocalTime iso={row.startedAt.toISOString()} /></td>
+              <td><LocalTime iso={row.lastMessageAt.toISOString()} /></td>
               <td className="num">{row.messageCount}</td>
               <td>{row.country ?? "-"}</td>
               <td>{row.originHost ?? "direct"}</td>

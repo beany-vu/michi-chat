@@ -9,6 +9,7 @@ import { adminUsers } from "@/db/schema";
 import { getAdminSession } from "@/lib/admin-auth";
 import { setAdminUserStatusAction } from "../actions";
 import { UserForm } from "./UserForm";
+import { LocalTime } from "../LocalTime";
 
 export default async function UsersPage() {
   const session = await getAdminSession();
@@ -55,7 +56,7 @@ export default async function UsersPage() {
                     {user.status}
                   </span>
                 </td>
-                <td>{user.lastLoginAt ? user.lastLoginAt.toLocaleString() : "never"}</td>
+                <td>{user.lastLoginAt ? <LocalTime iso={user.lastLoginAt.toISOString()} /> : "never"}</td>
                 <td>
                   <form
                     action={setAdminUserStatusAction.bind(

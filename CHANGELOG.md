@@ -3,6 +3,18 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.12 - 2026-08-31
+
+### Changed
+
+- **Admin timestamps show in the operator's own timezone.** Dates across the admin
+  (conversations, transcripts, keys, accounts, activity, KB) now render browser-local via
+  a client component; before they showed the server's UTC clock. Analytics day/busy-hour
+  buckets intentionally stay in the tenant's timezone.
+- **Transcripts read like a chat.** Visitor messages are accent-tinted bubbles on the
+  right, assistant replies on the left, the same sides as the widget - instead of a flat
+  stack of blocks. Content stays plain text (never markdown/HTML in the admin).
+
 ## v0.2.11 - 2026-08-31
 
 ### Fixed

@@ -11,6 +11,7 @@ import { isAuthenticated } from "@/lib/admin-auth";
 import { deleteKbDocumentAction } from "../../../actions";
 import { KbImport } from "./KbImport";
 import { KbForm } from "./KbForm";
+import { LocalTime } from "../../../LocalTime";
 
 export default async function KbPage({
   params,
@@ -83,7 +84,7 @@ export default async function KbPage({
               <tr key={document.id}>
                 <td>{document.title}</td>
                 <td>{document.chunkCount}</td>
-                <td>{document.updatedAt.toLocaleString()}</td>
+                <td><LocalTime iso={document.updatedAt.toISOString()} /></td>
                 <td>
                   <Link className="row-action" href={`/admin/tenants/${id}/kb?doc=${document.id}#kb-editor`}>Edit</Link>{" "}
                   <form
