@@ -3,6 +3,33 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.15 - 2026-09-02
+
+### Added
+
+- **Flagged conversations.** Conversations get a moderation marker: a 🚩 column on the
+  admin list (reason on hover) and a Flag/Unflag button on the transcript page (staff
+  can flag too). The probe breaker flags automatically (`auto: prompt-injection bait`,
+  `auto: command probe`); manual flags record `manual`.
+- **Slash-command probes get a deterministic brush-off.** A message that is just a
+  command (`/context`, `/reset`) never reaches the model: a fixed "I don't run commands,
+  maybe a typo?" line comes back, and the conversation is flagged.
+- **Opt-in GA4 analytics on visitor pages.** Set `GA_MEASUREMENT_ID` (env, runtime,
+  server-injected - deliberately not `NEXT_PUBLIC_*` because the image is prebuilt).
+  Tenants separate by `page_path` (`/t/<slug>`) and a `tenant` event param. Admin pages
+  stay untracked.
+
+### Changed
+
+- **Bait turns are stored now.** The bait breaker used to refuse without writing any
+  rows, which made baiting invisible in the admin. Detected turns (and the canned
+  refusal) now land in the transcript and auto-flag the conversation; the 3-strikes/hour
+  cut-off is unchanged.
+- **Prompt hardening from live transcripts.** Off-topic requests get ONE short decline
+  sentence (no partial answers, no padded advice); platform/admin/password/account-
+  recovery help is refused in one sentence however urgent it sounds; slash commands are
+  never treated as commands and never answered with a capability list.
+
 ## v0.2.14 - 2026-08-31
 
 ### Added
