@@ -3,8 +3,17 @@
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Script from "next/script";
 import { ChatPanel } from "@/components/ChatPanel";
 import { loadTenantBySlug } from "@/lib/serve-tenant";
+
+// Visitor-page analytics (GA4), opt-in via env, admin pages deliberately untracked.
+// Read server-side at runtime, NOT as NEXT_PUBLIC_*: the published image is prebuilt,
+// so a build-time inline would freeze whatever the image builder had (nothing).
+// Format-checked because the value is interpolated into an inline script.
+const GA_ID = /^G-[A-Z0-9]{4,20}$/.test(process.env.GA_MEASUREMENT_ID ?? "")
+  ? (process.env.GA_MEASUREMENT_ID as string)
+  : null;
 
 export async function generateMetadata({
   params,
@@ -79,6 +88,23 @@ export default async function TenantChatPage({
         // modelLabel deliberately not passed: with it the credit wraps to two lines on
         // phones, and the model alias means nothing to visitors anyway.
       />
+      {GA_ID && (
+        <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+            strategy="afterInteractive"
+          />
+          {/* Tenants separate two ways: page_path is /t/<slug> on every hit, and the
+              `tenant` event param is there for a GA custom dimension. tenant.slug is a
+              DB value constrained to [a-z0-9-] on creation, safe to inline. */}
+          <Script id="ga-init" strategy="afterInteractive">
+            {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_ID}', { tenant: '${tenant.slug}' });`}
+          </Script>
+        </>
+      )}
     </div>
   );
 }

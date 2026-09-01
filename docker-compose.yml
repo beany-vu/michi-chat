@@ -16,6 +16,8 @@ services:
       EMBED_MODEL: "embed"
       ADMIN_PASSWORD: "${MICHI_ADMIN_PASSWORD:-change-me}"
       DEFAULT_TENANT_SLUG: "${MICHI_DEFAULT_TENANT:-mugshot}"
+      # GA4 measurement id ("G-…"). Empty = no analytics; visitor pages only.
+      GA_MEASUREMENT_ID: "${MICHI_GA_ID:-}"
     command: sh -c "npm install && npm run dev"
     ports:
       - "127.0.0.1:${MICHI_CHAT_PORT:-3001}:3000"
