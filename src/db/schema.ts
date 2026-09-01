@@ -142,6 +142,11 @@ export const conversations = pgTable(
     country: text("country"),
     startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
     lastMessageAt: timestamp("last_message_at", { withTimezone: true }).notNull().defaultNow(),
+    // Moderation marker. Set automatically when the bait breaker trips or a bare slash
+    // command comes in, and toggled by hand from the transcript page. Null = clean.
+    // The first reason wins; unflagging clears both.
+    flaggedAt: timestamp("flagged_at", { withTimezone: true }),
+    flagReason: text("flag_reason"),
   },
   (t) => [
     // Not redundant with the PK: it is the target of the composite FK on messages below.

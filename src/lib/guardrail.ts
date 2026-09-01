@@ -24,6 +24,20 @@ export function looksLikeBait(message: string): boolean {
   return BAIT_PATTERNS.some((pattern) => pattern.test(message));
 }
 
+// A bare slash command ("/context", "/reset", "/system prompt"). Real customers do not
+// speak CLI; these come from people probing whether the widget is a thin wrapper around
+// some agent with commands. There are no commands, and the honest, boring answer is a
+// fixed line that never reaches the model, so there is nothing to talk around. Only a
+// message that IS a command matches - a slash mid-sentence ("open 24/7?") never does.
+const COMMAND_PATTERN = /^\/[a-z][\w-]{0,31}(\s+[\w./-]{1,40}){0,2}$/i;
+
+export function looksLikeCommand(message: string): boolean {
+  return COMMAND_PATTERN.test(message.trim());
+}
+
+export const COMMAND_REFUSAL =
+  "I don't run commands like that, so that message may have been a typo. I'm happy to answer questions about the business, like the menu, hours, or events.";
+
 /** Strikes allowed per session per window before the session is cut off. */
 export const BAIT_STRIKES_PER_HOUR = 3;
 export const BAIT_WINDOW_SECONDS = 3600;

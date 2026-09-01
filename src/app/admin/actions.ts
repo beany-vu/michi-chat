@@ -295,6 +295,19 @@ export async function setAdminUserStatusAction(userId: string, status: "active" 
   revalidatePath("/admin/users");
 }
 
+export async function setConversationFlagAction(conversationId: string, flagged: boolean) {
+  // Staff can flag too: spotting a malicious chat is day-to-day conversation reading,
+  // not tenant administration.
+  const session = await requireAdmin();
+  await dbRoot
+    .update(conversations)
+    .set(flagged ? { flaggedAt: new Date(), flagReason: "manual" } : { flaggedAt: null, flagReason: null })
+    .where(eq(conversations.id, conversationId));
+  logAudit(session, flagged ? "conversation.flag" : "conversation.unflag", conversationId);
+  revalidatePath("/admin/conversations");
+  revalidatePath(`/admin/conversations/${conversationId}`);
+}
+
 export async function deleteConversationAction(conversationId: string) {
   const session = await requireOwner();
   // Messages go with it via the composite-FK cascade. Deletion is real and final;

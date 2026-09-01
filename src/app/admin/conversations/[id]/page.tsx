@@ -11,7 +11,7 @@ import { notFound, redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { conversations, messages, tenants } from "@/db/schema";
 import { getAdminSession } from "@/lib/admin-auth";
-import { deleteConversationAction } from "../../actions";
+import { deleteConversationAction, setConversationFlagAction } from "../../actions";
 import { LocalTime } from "../../LocalTime";
 
 // Tool results are stored as JSON *strings* inside the toolCalls JSON; dumped raw they
@@ -35,6 +35,8 @@ export default async function TranscriptPage({ params }: { params: Promise<{ id:
       id: conversations.id,
       startedAt: conversations.startedAt,
       originHost: conversations.originHost,
+      flaggedAt: conversations.flaggedAt,
+      flagReason: conversations.flagReason,
       tenantName: tenants.name,
       tenantId: tenants.id,
     })
@@ -56,6 +58,16 @@ export default async function TranscriptPage({ params }: { params: Promise<{ id:
         <h1>{conversation.tenantName}</h1>
         <div className="head-links">
           <span>{conversation.originHost ?? "direct"}</span>
+          {/* Flagging is staff-reachable on purpose: it is conversation reading, not
+              administration. "auto: …" flags come from the probe breaker in the chat
+              route; unflagging one is how you mark it reviewed. */}
+          <form
+            action={setConversationFlagAction.bind(null, conversation.id, !conversation.flaggedAt)}
+          >
+            <button type="submit" className="ghost" title={conversation.flagReason ?? undefined}>
+              {conversation.flaggedAt ? "🚩 Unflag" : "Flag as malicious"}
+            </button>
+          </form>
           {session.role === "owner" && (
             <>
               <a href={`/admin/export?conversation=${conversation.id}`}>Export JSON</a>

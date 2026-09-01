@@ -28,6 +28,8 @@ export default async function ConversationsPage({
       tenantSlug: tenants.slug,
       originHost: conversations.originHost,
       country: conversations.country,
+      flaggedAt: conversations.flaggedAt,
+      flagReason: conversations.flagReason,
       startedAt: conversations.startedAt,
       lastMessageAt: conversations.lastMessageAt,
       messageCount: sql<number>`(
@@ -78,6 +80,7 @@ export default async function ConversationsPage({
       <table>
         <thead>
           <tr>
+            <th aria-label="Flagged" />
             <th>Tenant</th>
             <th>Started</th>
             <th>Last message</th>
@@ -90,6 +93,9 @@ export default async function ConversationsPage({
         <tbody>
           {rows.map((row) => (
             <tr key={row.id}>
+              {/* The reason rides on hover; "auto: …" comes from the probe breaker,
+                  "manual" from the flag button on the transcript. */}
+              <td title={row.flagReason ?? undefined}>{row.flaggedAt ? "🚩" : ""}</td>
               <td>{row.tenantName}</td>
               <td><LocalTime iso={row.startedAt.toISOString()} /></td>
               <td><LocalTime iso={row.lastMessageAt.toISOString()} /></td>

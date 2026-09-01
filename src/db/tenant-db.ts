@@ -62,6 +62,21 @@ export function forTenant(tenantId: string) {
       await dbRoot.insert(messages).values({ ...input, tenantId });
     },
 
+    /** Auto-flag from the probe breaker. The FIRST reason sticks (a conversation that
+     *  trips twice keeps its original story); unflagging is an admin-only action. */
+    async flagConversation(conversationId: string, reason: string) {
+      await dbRoot
+        .update(conversations)
+        .set({ flaggedAt: new Date(), flagReason: reason })
+        .where(
+          and(
+            eq(conversations.id, conversationId),
+            eq(conversations.tenantId, tenantId),
+            sql`${conversations.flaggedAt} is null`,
+          ),
+        );
+    },
+
     async touchConversation(conversationId: string) {
       await dbRoot
         .update(conversations)

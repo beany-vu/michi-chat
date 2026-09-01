@@ -2,7 +2,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { looksLikeBait } from "./guardrail";
+import { looksLikeBait, looksLikeCommand } from "./guardrail";
 
 test("flags explicit injection bait", () => {
   const bait = [
@@ -33,5 +33,26 @@ test("never flags normal cafe questions", () => {
   ];
   for (const message of normal) {
     assert.equal(looksLikeBait(message), false, message);
+  }
+});
+
+test("flags bare slash commands", () => {
+  const commands = ["/context", "/reset", "/system prompt", " /help ", "/show-config", "/cmd a b"];
+  for (const message of commands) {
+    assert.equal(looksLikeCommand(message), true, message);
+  }
+});
+
+test("never flags a slash inside a real sentence", () => {
+  const normal = [
+    "are you open 24/7?",
+    "can I get 1/2 sugar",
+    "what does / mean on the menu?",
+    "/context is what I typed before, sorry! do you have wifi?",
+    "/",
+    "https://mugshotmnl.com",
+  ];
+  for (const message of normal) {
+    assert.equal(looksLikeCommand(message), false, message);
   }
 });

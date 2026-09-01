@@ -10,7 +10,13 @@ import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { forTenant } from "@/db/tenant-db";
 import { buildSystemPrompt, wrapToolResult } from "@/lib/prompt";
-import { BAIT_STRIKES_PER_HOUR, BAIT_WINDOW_SECONDS, looksLikeBait } from "@/lib/guardrail";
+import {
+  BAIT_STRIKES_PER_HOUR,
+  BAIT_WINDOW_SECONDS,
+  COMMAND_REFUSAL,
+  looksLikeBait,
+  looksLikeCommand,
+} from "@/lib/guardrail";
 import { lookupCachedAnswer, storeCachedAnswer } from "@/lib/rag/answer-cache";
 import { isRateLimited } from "@/lib/rate-limit";
 import { notifySlack } from "@/lib/slack";
@@ -55,16 +61,21 @@ const CANNED_REFUSAL =
   "I can only help with questions about the business, like the menu, hours, or events. What can I help you find?";
 
 
-/** A fixed decline streamed as a normal turn (no model, no DB write). Same SSE shape a
- *  real answer has, so the widget renders it as an ordinary reply. */
-function cannedRefusal(origin: string | null, sessionToken: string | null): Response {
+/** A fixed decline streamed as a normal turn (no model call). Same SSE shape a real
+ *  answer has, so the widget renders it as an ordinary reply. */
+function cannedStream(
+  text: string,
+  conversationId: string | null,
+  origin: string | null,
+  sessionToken: string | null,
+): Response {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     start(controller) {
       const emit = (event: string, payload: unknown) =>
         controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`));
-      emit("delta", { text: CANNED_REFUSAL });
-      emit("done", { conversationId: null, sessionToken, refused: true, usage: { inTokens: 0, outTokens: 0 } });
+      emit("delta", { text });
+      emit("done", { conversationId, sessionToken, refused: true, usage: { inTokens: 0, outTokens: 0 } });
       controller.close();
     },
   });
@@ -105,13 +116,20 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Bait circuit breaker. This English-pattern check is a cheap FIRST filter, never the
+  // Probe detection. This English-pattern check is a cheap FIRST filter, never the
   // wall: an attack in another language slips past it to the model, which refuses anyway
   // (the model is multilingual and nothing secret is ever in its context). What matching
   // buys us is a deterministic, model-free refusal for the obvious cases - the strongest
   // possible answer because no model runs, so there is nothing to talk around - plus a
-  // strike that cuts off a persistent baiter for the window.
-  if (looksLikeBait(userText)) {
+  // strike that cuts off a persistent baiter for the window. Unlike the original breaker,
+  // a detected turn is still STORED and the conversation auto-flagged (below), so probes
+  // are visible in the admin instead of silently vanishing.
+  const probe = looksLikeBait(userText)
+    ? ("bait" as const)
+    : looksLikeCommand(userText)
+      ? ("command" as const)
+      : null;
+  if (probe === "bait") {
     const overStruck = await isRateLimited({
       key: `strike:${sessionId}`,
       windowSeconds: BAIT_WINDOW_SECONDS,
@@ -124,8 +142,6 @@ export async function POST(request: NextRequest) {
         origin,
       );
     }
-    // Detected but under the strike cap: hand back a fixed line without calling the model.
-    return cannedRefusal(origin, issuedSessionToken);
   }
 
   // The daily cap is the only control that holds against someone who has the embed key,
@@ -205,6 +221,25 @@ export async function POST(request: NextRequest) {
   }
   // Privacy mode: no rows at all, which also means no multi-turn memory. That trade-off
   // is stated on the admin form where the switch lives.
+
+  // Detected probe: store the canned reply as a normal assistant turn, flag the
+  // conversation for the admin's attention, and answer without ever calling the model.
+  if (probe) {
+    const text = probe === "bait" ? CANNED_REFUSAL : COMMAND_REFUSAL;
+    if (conversation) {
+      try {
+        await db.appendMessage({ conversationId: conversation.id, role: "assistant", content: text });
+        await db.touchConversation(conversation.id);
+        await db.flagConversation(
+          conversation.id,
+          probe === "bait" ? "auto: prompt-injection bait" : "auto: command probe",
+        );
+      } catch (error) {
+        console.error("probe bookkeeping failed", error);
+      }
+    }
+    return cannedStream(text, conversation?.id ?? null, origin, issuedSessionToken);
+  }
 
   // Semantic cache, first messages only (see answer-cache.ts for the full rules). A hit
   // skips the model entirely; a miss reuses this embedding when storing the new answer.
