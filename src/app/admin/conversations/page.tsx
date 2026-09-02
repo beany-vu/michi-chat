@@ -1,4 +1,4 @@
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
@@ -8,13 +8,26 @@ import { LocalTime } from "../LocalTime";
 
 const PAGE_SIZE = 50;
 
+/** Query-string helper so every chip and pager link preserves the other filters. */
+function href(params: { tenant?: string; flagged?: boolean; page?: number }) {
+  const query = new URLSearchParams();
+  if (params.tenant) query.set("tenant", params.tenant);
+  if (params.flagged) query.set("flagged", "1");
+  if (params.page && params.page > 1) query.set("page", String(params.page));
+  const s = query.toString();
+  return s ? `/admin/conversations?${s}` : "/admin/conversations";
+}
+
 export default async function ConversationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tenant?: string }>;
+  searchParams: Promise<{ tenant?: string; flagged?: string; page?: string }>;
 }) {
   if (!(await isAuthenticated())) redirect("/admin/login");
-  const { tenant: tenantSlug } = await searchParams;
+  const params = await searchParams;
+  const tenantSlug = params.tenant;
+  const flaggedOnly = params.flagged === "1";
+  const page = Math.max(1, Number(params.page) || 1);
 
   const allTenants = await dbRoot
     .select({ slug: tenants.slug, name: tenants.name })
@@ -38,9 +51,18 @@ export default async function ConversationsPage({
     })
     .from(conversations)
     .innerJoin(tenants, eq(tenants.id, conversations.tenantId))
-    .where(tenantSlug ? eq(tenants.slug, tenantSlug) : undefined)
+    .where(
+      and(
+        tenantSlug ? eq(tenants.slug, tenantSlug) : undefined,
+        flaggedOnly ? isNotNull(conversations.flaggedAt) : undefined,
+      ),
+    )
     .orderBy(desc(conversations.lastMessageAt))
-    .limit(PAGE_SIZE);
+    // One extra row is the cheapest "is there a next page" check.
+    .limit(PAGE_SIZE + 1)
+    .offset((page - 1) * PAGE_SIZE);
+  const hasNext = rows.length > PAGE_SIZE;
+  if (hasNext) rows.pop();
 
   return (
     <>
@@ -49,7 +71,7 @@ export default async function ConversationsPage({
         <div className="filters">
           <Link
             className={`filter${!tenantSlug ? " filter-active" : ""}`}
-            href="/admin/conversations"
+            href={href({ flagged: flaggedOnly })}
           >
             All
           </Link>
@@ -57,11 +79,17 @@ export default async function ConversationsPage({
             <Link
               key={t.slug}
               className={`filter${tenantSlug === t.slug ? " filter-active" : ""}`}
-              href={`/admin/conversations?tenant=${t.slug}`}
+              href={href({ tenant: t.slug, flagged: flaggedOnly })}
             >
               {t.name}
             </Link>
           ))}
+          <Link
+            className={`filter${flaggedOnly ? " filter-active" : ""}`}
+            href={href({ tenant: tenantSlug, flagged: !flaggedOnly })}
+          >
+            🚩 Flagged
+          </Link>
         </div>
       </div>
 
@@ -109,7 +137,21 @@ export default async function ConversationsPage({
           ))}
         </tbody>
       </table>
-      {rows.length === PAGE_SIZE && <p className="note">Showing the {PAGE_SIZE} most recent.</p>}
+      {(hasNext || page > 1) && (
+        <p className="note pager">
+          {page > 1 && (
+            <Link href={href({ tenant: tenantSlug, flagged: flaggedOnly, page: page - 1 })}>
+              ← Newer
+            </Link>
+          )}
+          <span> Page {page} </span>
+          {hasNext && (
+            <Link href={href({ tenant: tenantSlug, flagged: flaggedOnly, page: page + 1 })}>
+              Older →
+            </Link>
+          )}
+        </p>
+      )}
     </>
   );
 }

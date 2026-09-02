@@ -214,6 +214,14 @@ export async function POST(request: NextRequest) {
         role: "user",
         content: userText,
       });
+
+      // Retention sweep, lazy on purpose: piggybacks on traffic instead of a cron.
+      // Fire-and-forget; a failed sweep must never cost a visitor their answer.
+      if (tenant.retentionDays) {
+        db.sweepExpiredConversations(tenant.retentionDays).catch((error) =>
+          console.warn("retention sweep failed", error),
+        );
+      }
     } catch (error) {
       console.error("chat preamble failed", error);
       return corsJson({ error: "Chat is unavailable right now." }, 503, origin);
@@ -422,6 +430,21 @@ export async function POST(request: NextRequest) {
       } catch (error) {
         console.error("chat turn failed", error);
         emit("error", { message: "Something went wrong. Please try again." });
+        // Leave a marker so the transcript shows the gap instead of a lone visitor
+        // message (the pre-fix transcripts had exactly that: questions with no reply
+        // and no explanation). model:"error" is what the transcript pill keys on.
+        if (conversation) {
+          try {
+            await db.appendMessage({
+              conversationId: conversation.id,
+              role: "assistant",
+              content: "(no reply was delivered: the model call failed and the visitor saw an error)",
+              model: "error",
+            });
+          } catch (markerError) {
+            console.warn("failed-turn marker not stored", markerError);
+          }
+        }
       } finally {
         controller.close();
       }

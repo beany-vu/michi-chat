@@ -68,6 +68,10 @@ export const tenants = pgTable("tenants", {
   // the daily cap resets - a Manila cafe's cap must reset at Manila midnight, not the
   // server's. Validated with Intl on save.
   timezone: text("timezone").notNull().default("UTC"),
+  // Retention: conversations older than this many days are deleted (a lazy sweep in the
+  // chat route, no cron). Null = keep forever. Makes the admin's "kept only to improve
+  // the service" promise mechanically true.
+  retentionDays: integer("retention_days"),
   // Privacy switch: when false, no conversation or message rows are written at all.
   // Two consequences, both deliberate: the bot loses multi-turn memory (history is
   // rebuilt from these rows), and the daily cap is enforced via rate_buckets instead

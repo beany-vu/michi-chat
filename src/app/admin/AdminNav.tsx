@@ -31,11 +31,19 @@ const ICON = {
       <path d="M10 6.6V10l2.4 1.9" />
     </>
   ),
+  unanswered: (
+    <>
+      <circle cx="10" cy="10" r="6.5" />
+      <path d="M8 8a2 2 0 1 1 2.6 1.9c-.4.15-.6.5-.6.9v.4" />
+      <path d="M10 13.6v.01" />
+    </>
+  ),
 } as const;
 
 const ITEMS: { href: string; label: string; icon: keyof typeof ICON; exact?: boolean; ownerOnly?: boolean }[] = [
   { href: "/admin", label: "Tenants", icon: "tenants", exact: true },
   { href: "/admin/conversations", label: "Conversations", icon: "conversations" },
+  { href: "/admin/unanswered", label: "Unanswered", icon: "unanswered" },
   { href: "/admin/usage", label: "Usage", icon: "usage" },
   { href: "/admin/users", label: "Accounts", icon: "accounts", ownerOnly: true },
   { href: "/admin/audit", label: "Activity", icon: "activity", ownerOnly: true },

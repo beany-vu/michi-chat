@@ -3,6 +3,17 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.21 - the owner's to-do list, and friends
+
+- **Unanswered** - a new page listing every question the bot admitted it couldn't
+  answer, with an "Add fact" shortcut. It is the knowledge base's to-do list.
+- **Find the bad actors faster**: a 🚩 Flagged chip and paging on Conversations.
+- **Answer cache, visible**: see the instantly-served answers per tenant (hit counts
+  show what visitors ask most), evict a stale one, or clear all.
+- **Retention**: "delete conversations after N days", per tenant, automatic.
+- **Failed turns show up** in transcripts as a `failed` label instead of a silent gap.
+- **The mobile admin got a burger menu** - the old horizontal strip was bursting.
+
 ## v0.2.18 - PDFs into the knowledge base
 
 Upload a PDF on the knowledge-base page and the analysis is free: it reads the text out,

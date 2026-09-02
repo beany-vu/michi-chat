@@ -48,6 +48,13 @@ function answerPath(turn: {
         "Replayed from the semantic answer cache: an earlier conversation already asked this (or a close paraphrase of it), so the stored answer was served instantly. No model ran and no tools were called, which is why there is no token count and no debug block.",
     };
   }
+  if (turn.model === "error") {
+    return {
+      label: "failed",
+      explain:
+        "The model call failed on this turn: the visitor saw an error bubble and got no answer. This marker exists so the gap is visible here instead of a lone visitor message. If these cluster, check the provider or LiteLLM logs.",
+    };
+  }
   if (turn.model === null && turn.tokensIn === null) {
     return {
       label: "guardrail",

@@ -3,6 +3,38 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.21 - 2026-09-02
+
+### Added
+
+- **Unanswered report.** New admin page listing every turn (30 days) where the bot
+  admitted not knowing, with the visitor question that caused it and an "Add fact"
+  shortcut to that tenant's KB. Heuristic detection (`src/lib/unanswered.ts`), tested
+  against real prod punts; polite scope refusals are excluded on purpose.
+- **Flagged filter + pagination** on Conversations (🚩 chip composes with the tenant
+  chips; Newer/Older pager past 50 rows).
+- **Answer-cache inspector.** Tenant → Answer cache: see what's being served instantly
+  (with hit counts - also a menu of what visitors ask most), evict one row, or clear all
+  without re-saving the tenant.
+- **Conversation retention.** Per-tenant "delete conversations after N days" setting,
+  enforced by a lazy sweep on chat traffic (no cron). Blank keeps everything.
+- **Failed turns are visible.** When a model call dies mid-turn, the transcript now
+  stores a marker turn (pill: `failed`) instead of leaving a lone visitor message.
+
+### Changed
+
+- **Mobile admin nav is a burger menu.** The rail outgrew the horizontal strip; small
+  screens get a top bar with a hamburger toggle that opens the full menu and closes on
+  navigation or Escape.
+
+## v0.2.20 - 2026-09-02
+
+### Changed
+
+- **One black primary per PDF-import step** (Analyze demotes to a ghost after the first
+  pass), and the AI polish `max_tokens` guard gained a 6k floor so small inputs survive
+  providers that leak thinking tokens.
+
 ## v0.2.19 - 2026-09-02
 
 ### Changed

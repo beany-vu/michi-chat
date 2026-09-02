@@ -13,7 +13,7 @@ import OpenAI from "openai";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
-import { adminUsers, apiKeys, conversations, tenants, type Branding, type ToolConfig } from "@/db/schema";
+import { adminUsers, answerCache, apiKeys, conversations, tenants, type Branding, type ToolConfig } from "@/db/schema";
 import { hashPassword, login, logout, requireAdmin, requireOwner } from "@/lib/admin-auth";
 import { logAudit } from "@/lib/audit";
 import { parseCsv } from "@/lib/csv";
@@ -180,6 +180,10 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
       status: formData.get("status") === "disabled" ? "disabled" : "active",
       model: String(formData.get("model") ?? "").trim() || null,
       dailyMessageCap: Math.max(1, Number(formData.get("dailyMessageCap")) || 500),
+      // Blank = keep forever (null). Anything else is clamped to at least one day.
+      retentionDays: String(formData.get("retentionDays") ?? "").trim()
+        ? Math.max(1, Number(formData.get("retentionDays")) || 1)
+        : null,
       persona,
       guardrails,
       branding,
@@ -362,6 +366,27 @@ export async function importKbCsvAction(tenantId: string, _prev: unknown, formDa
     return { error: `Imported ${saved}, unchanged ${unchanged}; problems: ${problems.slice(0, 3).join("; ")}` };
   }
   return { ok: true as const, info: `${saved} imported, ${unchanged} unchanged.` };
+}
+
+// --- Answer cache --------------------------------------------------------------------
+// The cache self-invalidates on knowledge/settings edits and rows expire in 24h, but the
+// stale-events incident (2026-08-31: February events served as "coming up") proved the
+// operator needs eyes on it and a manual clear that doesn't require re-saving the tenant.
+
+export async function clearTenantCacheAction(tenantId: string) {
+  const session = await requireAdmin();
+  await clearAnswerCache(tenantId);
+  logAudit(session, "cache.clear", tenantId);
+  revalidatePath(`/admin/tenants/${tenantId}/cache`);
+}
+
+export async function deleteCachedAnswerAction(tenantId: string, cacheId: string) {
+  const session = await requireAdmin();
+  await dbRoot
+    .delete(answerCache)
+    .where(and(eq(answerCache.id, cacheId), eq(answerCache.tenantId, tenantId)));
+  logAudit(session, "cache.delete", cacheId);
+  revalidatePath(`/admin/tenants/${tenantId}/cache`);
 }
 
 // --- PDF → knowledge base ------------------------------------------------------------

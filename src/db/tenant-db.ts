@@ -84,6 +84,21 @@ export function forTenant(tenantId: string) {
         .where(and(eq(conversations.id, conversationId), eq(conversations.tenantId, tenantId)));
     },
 
+    /** Retention: delete this tenant's conversations older than N days (messages go via
+     *  the composite-FK cascade). Called lazily from the chat route, fire-and-forget -
+     *  no cron to install, and a tenant with traffic is exactly a tenant whose old rows
+     *  accumulate. Cheap: conversations_tenant_idx covers the scan. */
+    async sweepExpiredConversations(retentionDays: number) {
+      await dbRoot
+        .delete(conversations)
+        .where(
+          and(
+            eq(conversations.tenantId, tenantId),
+            sql`${conversations.lastMessageAt} < now() - make_interval(days => ${retentionDays})`,
+          ),
+        );
+    },
+
     /** User turns since the TENANT'S midnight, for the daily cap. A Manila cafe's cap
      *  must reset at Manila midnight, not the server's; the timezone comes from the
      *  tenant row and Postgres does the conversion. Invalid zones throw, which is why

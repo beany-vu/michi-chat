@@ -70,6 +70,21 @@ export function TenantForm({
         />
         <small>The only limit that holds against someone who has the public embed key.</small>
 
+        <label htmlFor="retentionDays">Delete conversations after (days)</label>
+        <input
+          id="retentionDays"
+          name="retentionDays"
+          type="number"
+          min={1}
+          defaultValue={tenant.retentionDays ?? ""}
+          placeholder="keep forever"
+        />
+        <small>
+          Conversations older than this are deleted automatically, transcripts included.
+          Blank keeps everything. This is what makes the &quot;kept only to improve the
+          service&quot; promise real; 90 is a sensible number.
+        </small>
+
         <label htmlFor="timezone">Timezone</label>
         <input
           id="timezone"

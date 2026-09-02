@@ -29,11 +29,20 @@ Open one to read the full exchange, including which lookups the assistant used:
 
 ![A single conversation transcript](/screenshots/conversation-detail.png)
 
+Suspicious chats are marked with a 🚩 (the platform flags prompt-injection bait and
+`/command` probes on its own; you can flag or unflag any conversation by hand from its
+transcript), and the **🚩 Flagged** chip shows only those.
+
 ## Fix a wrong or missing answer
 
 When you spot the assistant saying "I don't know" to something it *should* know - or being
 vague - the fix is always the same: open **Knowledge base**, add or sharpen the fact, save.
 The very next question uses the new answer. No restarts, no waiting.
+
+**Unanswered** does the spotting for you: it lists every turn where the assistant
+admitted it didn't know, with the visitor question that caused it and an **Add fact**
+shortcut. Working that list weekly is the highest-leverage habit in the admin - every
+row you fix is a question answered properly forever after.
 
 ## Watch the numbers
 

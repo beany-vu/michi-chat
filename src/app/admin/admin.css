@@ -56,6 +56,14 @@
   top: 0;
   height: 100vh;
 }
+.admin-side-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.admin-burger {
+  display: none;
+}
 .admin-logo {
   display: flex;
   align-items: center;
@@ -601,6 +609,17 @@
 }
 .admin-guide:hover { color: var(--fg); }
 
+/* Long text cells (Unanswered report, cache inspector) wrap instead of widening. */
+.gap-answer {
+  max-width: 380px;
+  color: var(--muted);
+}
+.pager {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
 /* PDF import token gauge: the verdict color IS the message, the text explains it. */
 .pdf-gauge {
   font-size: 13px;
@@ -658,38 +677,54 @@
   .turn {
     max-width: 92%;
   }
+  /* The rail becomes a top bar with a burger; the menu drops down under it. The rail
+     outgrew the old horizontal strip once icons and the Unanswered page joined. */
   .admin-side {
     width: auto;
     height: auto;
     position: static;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 0;
+    padding: 10px 16px;
     border-right: none;
     border-bottom: 1px solid var(--line);
-    overflow-x: auto;
   }
-  .admin-side nav {
-    flex-direction: row;
-    gap: 2px;
+  /* button.admin-burger out-specifies the generic black `.admin button` rule. */
+  .admin button.admin-burger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--fg);
   }
-  .admin-side nav a {
-    white-space: nowrap;
-    margin: 0;
-    padding: 7px 10px;
-    gap: 7px;
+  .admin-burger svg {
+    width: 19px;
+    height: 19px;
   }
-  /* A left inset bar reads wrong on a horizontal strip; underline the active tab instead. */
-  .admin-side nav a.active {
-    box-shadow: inset 0 -2px 0 var(--accent);
-    border-radius: 6px 6px 0 0;
+  /* Collapsed by default; AdminSide toggles the class. */
+  .admin-side nav,
+  .admin-side .admin-guide,
+  .admin-side .admin-side-foot {
+    display: none;
   }
-  .admin-side-foot {
-    margin-top: 0;
-    margin-left: auto;
+  .admin-side-open nav {
+    display: flex;
+    padding-top: 10px;
   }
-  .admin-side-foot button {
-    width: auto;
+  .admin-side-open .admin-guide {
+    display: block;
+    padding: 10px 0 4px;
+  }
+  .admin-side-open .admin-side-foot {
+    display: block;
+    margin-top: 6px;
+    padding-bottom: 4px;
+  }
+  .admin-side-open .admin-side-foot button {
+    width: 100%;
   }
 }
