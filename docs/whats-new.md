@@ -3,6 +3,32 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.17 - a cleaner console
+
+The admin navigation got a redesign: normal-case labels with hairline icons and a clear
+active marker. The knowledge-base page now explains how to bring facts in from a PDF or
+Word file (copy the text, paste, tidy into short sections).
+
+## v0.2.16 - transcripts that teach
+
+Every assistant turn in a transcript now carries a label for how the answer was produced,
+one of four cases: **cached**, **guardrail**, **used tools**, or **model only**. Hover the
+label and the tooltip explains the case, why the turn does or doesn't show tokens, and
+why the debug block is there or not.
+
+## v0.2.15 - flagging the baiters
+
+Shaped by a weekend of people probing the live bot.
+
+- **Flagged conversations.** Prompt-injection bait and `/command` probes get a fixed
+  refusal (no model runs), the turns are stored, and the conversation is auto-flagged 🚩
+  in the admin with the reason. You can also flag or unflag any conversation by hand.
+- **Shorter refusals.** Off-topic questions get one polite sentence, not an essay, and
+  requests for help with the admin portal, passwords, or account recovery are declined
+  outright, whoever claims to be asking.
+- **Optional visitor analytics.** Point `GA_MEASUREMENT_ID` at a GA4 property and the
+  visitor chat pages report per tenant; the admin stays untracked.
+
 ## v0.2.14 - cache visibility
 
 Transcript turns served from the answer cache are now badged "cached".
