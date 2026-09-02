@@ -25,6 +25,53 @@ function prettyJson(value: string | undefined): string {
   }
 }
 
+/**
+ * Which path produced an assistant turn. Every answer falls into exactly one of four
+ * cases, and the stored row is enough to tell them apart; the pill + tooltip exist so a
+ * transcript can be read (and learned from) without knowing the chat route's code.
+ *
+ *   cached     0→0 tokens: replayed from the semantic answer cache, no model ran.
+ *   guardrail  no model, no tokens: a fixed refusal from the probe breaker, no model ran.
+ *   used tools model ran AND called tools; the raw calls are in the debug block.
+ *   model only model ran and answered from its instructions alone, nothing looked up.
+ */
+function answerPath(turn: {
+  model: string | null;
+  tokensIn: number | null;
+  tokensOut: number | null;
+  toolCalls: unknown;
+}): { label: string; explain: string } {
+  if (turn.tokensIn === 0 && turn.tokensOut === 0) {
+    return {
+      label: "cached",
+      explain:
+        "Replayed from the semantic answer cache: an earlier conversation already asked this (or a close paraphrase of it), so the stored answer was served instantly. No model ran and no tools were called, which is why there is no token count and no debug block.",
+    };
+  }
+  if (turn.model === null && turn.tokensIn === null) {
+    return {
+      label: "guardrail",
+      explain:
+        "A fixed, hard-coded reply from the guardrail: the message matched a prompt-injection bait pattern or was a bare /command. The model never ran, so there is nothing to debug and no tokens were spent. These conversations are auto-flagged.",
+    };
+  }
+  if (turn.toolCalls != null) {
+    const names = Array.isArray(turn.toolCalls)
+      ? (turn.toolCalls as { name?: string }[]).map((c) => c.name ?? "unknown").join(", ")
+      : "";
+    return {
+      label: names ? `used tools: ${names}` : "used tools",
+      explain:
+        "The model decided it needed live data before answering and called the listed tools; the exact calls and raw results are in the debug block below. search_kb is the knowledge-base (RAG) lookup; provider_error means the model's raw reply was an upstream error and the visitor got a friendly line instead.",
+    };
+  }
+  return {
+    label: "model only",
+    explain:
+      "The model answered straight from its instructions (platform rules + persona + owner rules) and the conversation so far. It decided nothing needed looking up, so there are no tool calls, no knowledge-base search, and no debug block. The token count proves a model really ran.",
+  };
+}
+
 export default async function TranscriptPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getAdminSession();
   if (!session) redirect("/admin/login");
@@ -82,6 +129,15 @@ export default async function TranscriptPage({ params }: { params: Promise<{ id:
         </div>
       </div>
 
+      <p className="note">
+        Every assistant turn carries a label for how the answer was produced, one of four
+        cases: <strong>cached</strong> (replayed from the answer cache, no model),{" "}
+        <strong>guardrail</strong> (fixed refusal, no model), <strong>used tools</strong>{" "}
+        (the model fetched live data or searched the knowledge base first, see its debug
+        block), or <strong>model only</strong> (answered from its instructions alone,
+        nothing looked up). Hover a label for the full explanation.
+      </p>
+
       {/* Chat-box layout mirroring the widget: visitor right, assistant left, so the
           operator reads the conversation the way the visitor experienced it. */}
       <div className="transcript">
@@ -89,11 +145,15 @@ export default async function TranscriptPage({ params }: { params: Promise<{ id:
           <article key={turn.id} className={`turn ${turn.role}`}>
             <header>
               <strong>{turn.role === "user" ? "visitor" : "assistant"}</strong>
-              {/* Cache hits persist with 0->0 tokens (no model ran); live answers always
-                  burn tokens. That signature is why cached turns have no debug block. */}
-              {turn.role === "assistant" && turn.tokensIn === 0 && turn.tokensOut === 0 && (
-                <span className="pill">cached</span>
-              )}
+              {turn.role === "assistant" &&
+                (() => {
+                  const path = answerPath(turn);
+                  return (
+                    <span className="pill" title={path.explain}>
+                      {path.label}
+                    </span>
+                  );
+                })()}
               <span>
                 <LocalTime iso={turn.createdAt.toISOString()} />
               </span>

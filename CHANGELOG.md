@@ -3,6 +3,15 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.16 - 2026-09-02
+
+### Added
+
+- **Every assistant turn explains itself.** Transcript turns carry a labeled pill for
+  which path produced the answer - `cached`, `guardrail`, `used tools: <names>`, or
+  `model only` - with a hover tooltip teaching what that case means and why it shows (or
+  hides) tokens and the debug block. A one-line legend sits at the top of the page.
+
 ## v0.2.15 - 2026-09-02
 
 ### Added
