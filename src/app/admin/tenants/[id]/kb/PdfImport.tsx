@@ -72,8 +72,10 @@ export function PdfImport({ tenantId }: { tenantId: string }) {
           decide anything.
         </small>
         <div className="actions" style={{ marginTop: 12 }}>
-          <button type="submit" disabled={analyzing}>
-            {analyzing ? "Reading…" : "Analyze PDF (free)"}
+          {/* One black primary per step: once a file is analyzed, the next step's button
+              takes the lead and this one steps back to a ghost. */}
+          <button type="submit" className={stage === "pick" ? undefined : "ghost"} disabled={analyzing}>
+            {analyzing ? "Reading…" : stage === "pick" ? "Analyze PDF (free)" : "Analyze another PDF (free)"}
           </button>
           {analysis && "error" in analysis && <span className="error">{analysis.error}</span>}
         </div>

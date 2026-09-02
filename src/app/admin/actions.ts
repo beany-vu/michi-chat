@@ -451,7 +451,9 @@ export async function polishKbTextAction(tenantId: string, _prev: unknown, formD
       // Runaway guard: cleanup output should be SMALLER than its input. On a provider
       // that leaks thinking tokens this truncates into a visible error instead of a
       // silent bill (prod's aliases carry enable_thinking:false in litellm config).
-      max_tokens: Math.min(16_384, estimateTokens(text.length) + 2_048),
+      // Floor of 6k: small inputs still need room (a provider that leaks thinking
+      // tokens, a verbose language); the ceiling still stops a runaway on big ones.
+      max_tokens: Math.min(16_384, Math.max(6_144, estimateTokens(text.length) + 2_048)),
       messages: [
         { role: "system", content: POLISH_SYSTEM_PROMPT },
         { role: "user", content: text },
