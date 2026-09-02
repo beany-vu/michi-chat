@@ -11,6 +11,36 @@ Two rules make retrieval precise:
 1. **Structure with headings.** Chunking is heading-aware: each `##` section becomes a retrieval unit with its breadcrumb attached. One fact per section beats one wall of text.
 2. **Only counter-safe facts.** Everything here can reach a visitor. Nothing internal, no wholesale prices, nothing you would not say out loud at the counter.
 
+## Import from a PDF
+
+Facts often already live in a PDF - a handbook, a flyer, a policy sheet. **Tenant →
+Knowledge base → Import from a PDF** walks it in, and the design principle is that the
+free work happens first:
+
+1. **Analyze (free, no model).** The text is read out of the file, and mechanical junk -
+   repeated headers and footers, page numbers, table-of-contents dot lines - is stripped
+   deterministically. You get a plain-words cost estimate for the optional AI step
+   *before* deciding anything, plus targeted warnings: a scanned PDF (photos of pages,
+   nothing to read), table-heavy content (prices belong in live tools, not the KB), or a
+   file big enough to be worth splitting.
+
+![Free analysis: junk stripped, token estimate, suggestions](/screenshots/pdf-import-triage.png)
+
+2. **Trim.** The text box is the selection tool: delete anything customers never ask
+   about, and the estimate updates as you cut.
+
+3. **Tidy with AI - or skip it.** The one paid step carries its price on the button, and
+   reports the tokens actually used afterwards. The model reorganizes the text into short
+   `##` sections (the shape retrieval likes) but invents nothing; read the result before
+   saving, because you know the facts.
+
+![After the AI pass: sectioned markdown, actual usage reported](/screenshots/pdf-import-result.png)
+
+4. **Save & embed** - from here it is a normal document like any other.
+
+A green estimate means "about one conversation's worth" - just go ahead. The gauge exists
+to catch the accidental 300-page upload, not to make small imports feel expensive.
+
 ## Wiring it to the bot
 
 Enable the **`search_kb`** tool pack on the tenant page. Without it, the documents exist but the bot never reads them.
