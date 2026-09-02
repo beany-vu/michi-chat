@@ -68,6 +68,14 @@ export default async function KbPage({
         that pack on the tenant page or none of this reaches the bot. Facts follow the same
         rule as the persona: nothing you would not say to a customer at the counter.
       </p>
+      <p className="note">
+        Have the facts in a PDF, Word file, or brochure? The bot cannot read files, only the
+        text here. Open the file, copy the text out, paste it into a new document below, and
+        tidy it into short <code>##</code> sections (one topic each: hours, menu, policies).
+        Skip page numbers, headers, and layout leftovers, and shorten tables into plain
+        sentences; clean short sections retrieve far better than a raw dump. A page of text
+        per document is plenty; split big files into one document per topic.
+      </p>
 
       {documents.length > 0 && (
         <table>

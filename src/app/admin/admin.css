@@ -57,28 +57,52 @@
   height: 100vh;
 }
 .admin-logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.04em;
 }
+/* The same ● mark the visitor page uses, in oak: one brand across both surfaces. */
+.admin-logo::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: 0 0 auto;
+}
 .admin-side nav {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 .admin-side nav a {
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 13.5px;
+  font-weight: 500;
   color: var(--muted);
-  padding: 8px 10px;
-  margin: 0 -10px;
-  border-radius: 2px;
+  padding: 9px 12px;
+  margin: 0 -12px;
+  border-radius: 6px;
+  transition: background 120ms ease, color 120ms ease;
+}
+.admin-side nav a svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  opacity: 0.65;
 }
 .admin-side nav a:hover {
   color: var(--fg);
   background: var(--soft);
   text-decoration: none;
+}
+.admin-side nav a:hover svg {
+  opacity: 0.9;
 }
 .admin-side-foot {
   margin-top: auto;
@@ -541,8 +565,13 @@
 
 .admin-side nav a.active {
   color: var(--fg);
+  font-weight: 600;
   background: var(--soft);
-  box-shadow: inset 2px 0 0 var(--accent);
+  box-shadow: inset 2.5px 0 0 var(--accent);
+}
+.admin-side nav a.active svg {
+  opacity: 1;
+  color: var(--accent);
 }
 
 .admin-guide {
@@ -619,6 +648,14 @@
   }
   .admin-side nav a {
     white-space: nowrap;
+    margin: 0;
+    padding: 7px 10px;
+    gap: 7px;
+  }
+  /* A left inset bar reads wrong on a horizontal strip; underline the active tab instead. */
+  .admin-side nav a.active {
+    box-shadow: inset 0 -2px 0 var(--accent);
+    border-radius: 6px 6px 0 0;
   }
   .admin-side-foot {
     margin-top: 0;

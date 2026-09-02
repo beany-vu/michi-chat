@@ -3,6 +3,21 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.17 - 2026-09-02
+
+### Changed
+
+- **Admin navigation redesigned.** The rail keeps the paper-and-ink language but drops
+  the uppercase tracking for normal-case labels with hairline stroke icons, an oak dot
+  wordmark, and a clearer active state (oak icon + inset bar; underline on the mobile
+  strip).
+
+### Added
+
+- **PDF-to-KB guidance.** The knowledge-base page now explains how to move facts out of
+  a PDF/Word file: copy the text, paste as a document, tidy into short `##` sections,
+  drop layout leftovers. (The bot only reads the text stored here.)
+
 ## v0.2.16 - 2026-09-02
 
 ### Added
