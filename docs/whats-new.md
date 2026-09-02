@@ -3,6 +3,14 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.18 - PDFs into the knowledge base
+
+Upload a PDF on the knowledge-base page and the analysis is free: it reads the text out,
+strips page numbers and repeated headers at no cost, flags scanned files and table-heavy
+content, and shows what an AI tidy-up would cost **before** you run it. Delete what
+customers don't need, run the tidy-up (or skip it), review, save. The actual token usage
+is reported after, so the estimate earns its keep.
+
 ## v0.2.17 - a cleaner console
 
 The admin navigation got a redesign: normal-case labels with hairline icons and a clear

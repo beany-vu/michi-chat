@@ -583,6 +583,16 @@
 }
 .admin-guide:hover { color: var(--fg); }
 
+/* PDF import token gauge: the verdict color IS the message, the text explains it. */
+.pdf-gauge {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 8px 0 0;
+}
+.pdf-gauge-green { color: var(--okay); }
+.pdf-gauge-yellow { color: var(--accent); }
+.pdf-gauge-red { color: var(--danger); }
+
 .pack-family {
   font-size: 11px;
   text-transform: uppercase;

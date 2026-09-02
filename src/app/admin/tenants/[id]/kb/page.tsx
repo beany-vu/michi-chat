@@ -10,6 +10,7 @@ import { kbDocuments, tenants } from "@/db/schema";
 import { isAuthenticated } from "@/lib/admin-auth";
 import { deleteKbDocumentAction } from "../../../actions";
 import { KbImport } from "./KbImport";
+import { PdfImport } from "./PdfImport";
 import { KbForm } from "./KbForm";
 import { LocalTime } from "../../../LocalTime";
 
@@ -69,12 +70,11 @@ export default async function KbPage({
         rule as the persona: nothing you would not say to a customer at the counter.
       </p>
       <p className="note">
-        Have the facts in a PDF, Word file, or brochure? The bot cannot read files, only the
-        text here. Open the file, copy the text out, paste it into a new document below, and
-        tidy it into short <code>##</code> sections (one topic each: hours, menu, policies).
-        Skip page numbers, headers, and layout leftovers, and shorten tables into plain
-        sentences; clean short sections retrieve far better than a raw dump. A page of text
-        per document is plenty; split big files into one document per topic.
+        Have the facts in a PDF? Use <strong>Import from a PDF</strong> below: analyzing is
+        free, and you see what an AI tidy-up would cost before it runs. For Word files or
+        brochures, copy the text out and paste it into a new document, tidied into short{" "}
+        <code>##</code> sections (one topic each). Clean short sections retrieve far better
+        than a raw dump; split big files into one document per topic.
       </p>
 
       {documents.length > 0 && (
@@ -109,6 +109,8 @@ export default async function KbPage({
           </tbody>
         </table>
       )}
+
+      <PdfImport tenantId={id} />
 
       <KbImport tenantId={id} />
 

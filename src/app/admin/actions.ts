@@ -9,6 +9,7 @@
 
 import { randomBytes } from "node:crypto";
 import { and, eq } from "drizzle-orm";
+import OpenAI from "openai";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
@@ -16,6 +17,8 @@ import { adminUsers, apiKeys, conversations, tenants, type Branding, type ToolCo
 import { hashPassword, login, logout, requireAdmin, requireOwner } from "@/lib/admin-auth";
 import { logAudit } from "@/lib/audit";
 import { parseCsv } from "@/lib/csv";
+import { looksLikeProviderError } from "@/lib/moderation";
+import { MAX_PDF_BYTES, MAX_POLISH_CHARS, estimateTokens, triagePdf, type PdfTriage } from "@/lib/pdf-import";
 import { MAX_GUARDRAILS_CHARS, MAX_PERSONA_CHARS } from "@/lib/prompt";
 import { deleteDocument, ingestDocument } from "@/lib/rag";
 import { clearAnswerCache } from "@/lib/rag/answer-cache";
@@ -359,6 +362,118 @@ export async function importKbCsvAction(tenantId: string, _prev: unknown, formDa
     return { error: `Imported ${saved}, unchanged ${unchanged}; problems: ${problems.slice(0, 3).join("; ")}` };
   }
   return { ok: true as const, info: `${saved} imported, ${unchanged} unchanged.` };
+}
+
+// --- PDF → knowledge base ------------------------------------------------------------
+// Two-step flow, and the split is the point: analyze is FREE (parse + deterministic
+// cleanup + token estimate + targeted suggestions), and the model pass only runs after
+// the owner has seen the price and had the chance to trim. See src/lib/pdf-import.ts.
+
+export async function analyzePdfAction(_prev: unknown, formData: FormData) {
+  await requireAdmin();
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "Choose a PDF file first." };
+  if (file.size > MAX_PDF_BYTES) return { error: "PDF is larger than 10 MB." };
+
+  let pages: string[];
+  try {
+    // Dynamic import on purpose: actions.ts is loaded by every admin page, and pdf.js
+    // is heavy. Only the analyze click pays for it.
+    const { extractText, getDocumentProxy } = await import("unpdf");
+    const pdf = await getDocumentProxy(new Uint8Array(await file.arrayBuffer()));
+    const extracted = await extractText(pdf, { mergePages: false });
+    pages = extracted.text;
+  } catch (error) {
+    console.error("pdf extraction failed", error);
+    return { error: "Could not read that PDF. Is it password-protected or corrupted?" };
+  }
+
+  const triage: PdfTriage = triagePdf(pages);
+  // The editor has to hold this in a browser; a monster extraction gets cut with a note.
+  const EDITOR_CAP = 300_000;
+  if (triage.text.length > EDITOR_CAP) {
+    triage.text = triage.text.slice(0, EDITOR_CAP);
+    triage.suggestions.push(
+      `This file extracted to more than ${EDITOR_CAP.toLocaleString()} characters; only the first ${EDITOR_CAP.toLocaleString()} are shown below. Import it topic by topic instead.`,
+    );
+  }
+  if (triage.text.length === 0) {
+    return {
+      error: triage.likelyScanned
+        ? "No selectable text in this PDF: it is scanned images, which the bot cannot read. Re-export it as text, or type the facts into a document instead."
+        : "That PDF contains no text.",
+    };
+  }
+  return { ok: true as const, triage };
+}
+
+const POLISH_SYSTEM_PROMPT = [
+  "You turn raw text extracted from a business document (usually a PDF) into a clean",
+  "knowledge-base document for a customer-facing assistant.",
+  "Rules:",
+  "- Keep every real fact; never invent, guess, or embellish. Numbers, names, prices,",
+  "  dates and hours stay exactly as written.",
+  "- Organize into short Markdown sections: one ## heading per topic (hours, location,",
+  "  menu, policies, contact), with a few plain sentences or a short list under each.",
+  "- Drop layout leftovers: page numbers, repeated headers or footers, tables of",
+  "  contents, decoration.",
+  "- Rewrite table fragments as plain sentences when the meaning is clear; if a fragment",
+  "  is unreadable, drop it rather than guess.",
+  "- Write in the same language as the source text.",
+  "- Reply with ONLY the Markdown document: no preamble, no commentary, no code fences.",
+].join("\n");
+
+export async function polishKbTextAction(tenantId: string, _prev: unknown, formData: FormData) {
+  const session = await requireAdmin();
+  const text = String(formData.get("text") ?? "").trim();
+  if (!text) return { error: "Nothing to tidy: the text box is empty." };
+  if (text.length > MAX_POLISH_CHARS) {
+    return {
+      error: `Too much text for one AI pass (${text.length.toLocaleString()} characters; the limit is ${MAX_POLISH_CHARS.toLocaleString()}). Delete more below, or split it into one import per topic.`,
+    };
+  }
+
+  const [tenant] = await dbRoot
+    .select({ model: tenants.model })
+    .from(tenants)
+    .where(eq(tenants.id, tenantId));
+  if (!tenant) return { error: "Tenant not found." };
+  const model = tenant.model ?? process.env.CHAT_MODEL ?? "michi";
+
+  try {
+    const openai = new OpenAI({
+      baseURL: process.env.LITELLM_BASE_URL ?? "http://localhost:4000/v1",
+      apiKey: process.env.LITELLM_API_KEY ?? "sk-michi-dev",
+    });
+    const completion = await openai.chat.completions.create({
+      model,
+      temperature: 0.2,
+      // Runaway guard: cleanup output should be SMALLER than its input. On a provider
+      // that leaks thinking tokens this truncates into a visible error instead of a
+      // silent bill (prod's aliases carry enable_thinking:false in litellm config).
+      max_tokens: Math.min(16_384, estimateTokens(text.length) + 2_048),
+      messages: [
+        { role: "system", content: POLISH_SYSTEM_PROMPT },
+        { role: "user", content: text },
+      ],
+    });
+    let markdown = (completion.choices[0]?.message?.content ?? "").trim();
+    // Belt and braces: the prompt forbids fences, models add them anyway.
+    markdown = markdown.replace(/^```(?:markdown)?\s*\n?/, "").replace(/\n?```\s*$/, "").trim();
+    // House style, same as the chat route: no em/en dashes in anything the bot serves.
+    markdown = markdown.replaceAll("—", ", ").replaceAll(" – ", ", ").replaceAll("–", "-");
+    if (!markdown || looksLikeProviderError(markdown)) {
+      console.error("pdf polish returned error content:", markdown.slice(0, 300));
+      return { error: "The model could not process this text. Try a smaller piece." };
+    }
+    const tokensIn = completion.usage?.prompt_tokens ?? 0;
+    const tokensOut = completion.usage?.completion_tokens ?? 0;
+    logAudit(session, "kb.pdf-polish", `${text.length} chars, ${tokensIn}->${tokensOut} tokens`);
+    return { ok: true as const, markdown, tokensIn, tokensOut };
+  } catch (error) {
+    console.error("pdf polish failed", error);
+    return { error: "The AI pass failed. Is the model reachable through LiteLLM?" };
+  }
 }
 
 export async function importTenantAction(_prev: unknown, formData: FormData) {

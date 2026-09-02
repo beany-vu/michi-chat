@@ -3,6 +3,18 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.18 - 2026-09-02
+
+### Added
+
+- **PDF import for the knowledge base.** Staged so the free work happens first: analyze
+  (parse + strip repeated headers/page numbers/TOC dots, token estimate with a
+  green/yellow/red verdict, targeted suggestions - scanned files, table-heavy content,
+  oversize) → edit the extracted text → optional AI tidy-up with the price on the button
+  and actual usage reported after → title + Save & embed. The model pass is capped
+  (120k chars in, output token ceiling as a runaway guard) and audited
+  (`kb.pdf-polish`). New dep: `unpdf`.
+
 ## v0.2.17 - 2026-09-02
 
 ### Changed
