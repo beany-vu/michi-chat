@@ -3,6 +3,12 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.22 - no more feeling lost at the Slack field
+
+The Slack webhook field now teaches you how to get a webhook, right on the form: four
+steps, two minutes, free. The same walkthrough (with channel tips) is in
+[Running it day to day](./owner/day-to-day#get-pinged-when-it-matters).
+
 ## v0.2.21 - the owner's to-do list, and friends
 
 - **Unanswered** - a new page listing every question the bot admitted it couldn't
@@ -13,6 +19,12 @@ The headline changes, newest first. The full list lives in
 - **Retention**: "delete conversations after N days", per tenant, automatic.
 - **Failed turns show up** in transcripts as a `failed` label instead of a silent gap.
 - **The mobile admin got a burger menu** - the old horizontal strip was bursting.
+
+## v0.2.19 & v0.2.20 - design polish
+
+The "Choose File" chip on the PDF and CSV imports now matches the admin's own buttons,
+and each step of the PDF import shows exactly one primary button, so the next action is
+always obvious. Small AI tidy-ups also got headroom on providers that "think" out loud.
 
 ## v0.2.18 - PDFs into the knowledge base
 

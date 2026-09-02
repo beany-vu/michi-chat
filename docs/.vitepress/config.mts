@@ -20,13 +20,17 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: "What\u2019s new", link: "/whats-new" },
+      { text: "Articles", link: "/articles" },
       { text: "Guide", link: "/guide/quickstart" },
       { text: "GitHub", link: "https://github.com/beany-vu/michi-chat" },
     ],
     sidebar: [
       {
         text: "Release notes",
-        items: [{ text: "What\u2019s new", link: "/whats-new" }],
+        items: [
+          { text: "What\u2019s new", link: "/whats-new" },
+          { text: "Articles", link: "/articles" },
+        ],
       },
       {
         text: "For business owners",
