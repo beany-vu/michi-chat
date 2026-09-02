@@ -34,6 +34,7 @@ export default defineConfig({
           { text: "Meet your assistant", link: "/owner/meet-your-assistant" },
           { text: "Set it up, step by step", link: "/owner/setup" },
           { text: "Running it day to day", link: "/owner/day-to-day" },
+          { text: "Turn a PDF into knowledge", link: "/owner/import-a-pdf" },
         ],
       },
       {

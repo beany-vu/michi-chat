@@ -9,7 +9,8 @@ Upload a PDF on the knowledge-base page and the analysis is free: it reads the t
 strips page numbers and repeated headers at no cost, flags scanned files and table-heavy
 content, and shows what an AI tidy-up would cost **before** you run it. Delete what
 customers don't need, run the tidy-up (or skip it), review, save. The actual token usage
-is reported after, so the estimate earns its keep. Full walkthrough in
+is reported after, so the estimate earns its keep. Owners: the step-by-step tutorial is
+[Turn a PDF into knowledge](./owner/import-a-pdf); the reference lives in
 [Knowledge base → Import from a PDF](./guide/knowledge-base#import-from-a-pdf).
 
 ![PDF import: free analysis with a token estimate](/screenshots/pdf-import-triage.png)

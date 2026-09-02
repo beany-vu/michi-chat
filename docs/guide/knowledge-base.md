@@ -41,6 +41,8 @@ free work happens first:
 A green estimate means "about one conversation's worth" - just go ahead. The gauge exists
 to catch the accidental 300-page upload, not to make small imports feel expensive.
 
+Owner-friendly, screen-by-screen version: [Turn a PDF into knowledge](../owner/import-a-pdf).
+
 ## Wiring it to the bot
 
 Enable the **`search_kb`** tool pack on the tenant page. Without it, the documents exist but the bot never reads them.
