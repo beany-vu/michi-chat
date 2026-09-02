@@ -332,6 +332,24 @@
   background: var(--surface);
 }
 
+/* Native file inputs (PDF and CSV import): the browser's default grey chip clashes with
+   the system, so restyle it as the ghost button it functionally is. */
+.admin input[type="file"]::file-selector-button {
+  padding: 6px 14px;
+  margin-right: 12px;
+  border: 1px solid var(--muted);
+  border-radius: 2px;
+  background: var(--soft);
+  color: var(--fg);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.admin input[type="file"]::file-selector-button:hover {
+  border-color: var(--fg);
+  background: var(--surface);
+}
+
 .row-form {
   display: flex;
   gap: 16px;
