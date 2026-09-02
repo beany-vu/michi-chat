@@ -272,9 +272,18 @@ export function TenantForm({
           placeholder="https://hooks.slack.com/services/T…/B…/…"
         />
         <small>
-          Notifies this tenant&apos;s Slack when a new conversation starts and when the daily
-          cap is reached. Must be exactly a hooks.slack.com/services/ URL; nothing else is
-          accepted. Leave blank to disable.
+          Notifies this tenant&apos;s Slack when a new conversation starts (with the first
+          message) and when the daily cap is reached. Leave blank to disable. Don&apos;t
+          have a webhook yet? Free, about two minutes: 1) go to{" "}
+          <a href="https://api.slack.com/apps" target="_blank" rel="noopener noreferrer">
+            api.slack.com/apps
+          </a>{" "}
+          and create an app (any name, your workspace) → 2) open{" "}
+          <strong>Incoming Webhooks</strong>, switch it on → 3){" "}
+          <strong>Add New Webhook to Workspace</strong> and pick the channel that should
+          get the pings → 4) copy the URL that starts with hooks.slack.com/services/ and
+          paste it here. Only that exact kind of URL is accepted; that restriction is a
+          security boundary, not fussiness.
         </small>
       </fieldset>
 

@@ -60,6 +60,20 @@ With a Slack webhook configured, each new conversation lands in your Slack as it
 the visitor's first message - nice for hopping in personally during opening hours. You'll
 also get one alert if the daily cap is reached.
 
+Never made a webhook? It's free and takes about two minutes:
+
+1. Go to [api.slack.com/apps](https://api.slack.com/apps) and click **Create New App** →
+   *From scratch*. Any name ("Cafe pings" is fine), pick your workspace.
+2. In the app's menu, open **Incoming Webhooks** and switch the toggle on.
+3. Click **Add New Webhook to Workspace** and choose the channel that should receive the
+   pings (a private `#cafe-chat` channel works well).
+4. Copy the URL Slack shows you - it starts with `https://hooks.slack.com/services/` -
+   and paste it into **Tenant → Notifications**. Save, and the next conversation pings you.
+
+Only that exact kind of URL is accepted; anything else is rejected on purpose (it's a
+security boundary). To stop the pings, clear the field; to change channels, make a new
+webhook and paste the new URL.
+
 ## The habit that compounds
 
 Once a week, skim the conversations and add one knowledge-base fact for anything the
