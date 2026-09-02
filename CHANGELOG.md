@@ -3,6 +3,13 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.19 - 2026-09-02
+
+### Changed
+
+- **Native file-input chip restyled.** The browser-default "Choose File" button on the
+  PDF and CSV imports now matches the admin's ghost buttons.
+
 ## v0.2.18 - 2026-09-02
 
 ### Added
