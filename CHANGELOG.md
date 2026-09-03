@@ -3,15 +3,6 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
-## v0.2.22 - 2026-09-02
-
-### Changed
-
-- **The Slack webhook field teaches you how to get one.** Inline four-step mini-guide on
-  the tenant form (create app → Incoming Webhooks → pick channel → paste URL), and the
-  same walkthrough in the owner docs. The hooks.slack.com-only restriction is explained
-  as the security boundary it is.
-
 ## v0.2.24 - 2026-09-02
 
 ### Changed
@@ -35,6 +26,15 @@ This project is versioned by git tags (`v*`), which trigger the GHCR image build
 
 - **Head-link chips were missing exactly their bottom border** - a higher-specificity
   underline-reset rule ate it. All four sides are back.
+
+## v0.2.22 - 2026-09-02
+
+### Changed
+
+- **The Slack webhook field teaches you how to get one.** Inline four-step mini-guide on
+  the tenant form (create app → Incoming Webhooks → pick channel → paste URL), and the
+  same walkthrough in the owner docs. The hooks.slack.com-only restriction is explained
+  as the security boundary it is.
 
 ## v0.2.21 - 2026-09-02
 
