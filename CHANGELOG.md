@@ -12,6 +12,13 @@ This project is versioned by git tags (`v*`), which trigger the GHCR image build
   same walkthrough in the owner docs. The hooks.slack.com-only restriction is explained
   as the security boundary it is.
 
+## v0.2.24 - 2026-09-02
+
+### Changed
+
+- **Nav rail items are fully square** (radius removed, not just reduced) - edge-to-edge
+  rail items read sharper without it.
+
 ## v0.2.23 - 2026-09-02
 
 ### Changed
