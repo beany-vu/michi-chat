@@ -12,6 +12,23 @@ This project is versioned by git tags (`v*`), which trigger the GHCR image build
   same walkthrough in the owner docs. The hooks.slack.com-only restriction is explained
   as the security boundary it is.
 
+## v0.2.23 - 2026-09-02
+
+### Changed
+
+- **The cobalt roofline.** Every structure (cards, fieldsets, tables, login) wears a 2px
+  cobalt top edge - the owner's brief was Danish architecture: calm brown walls, one
+  precise detail on the roof. Active states (nav bar, filter chips, input focus) borrow
+  the same color; oak keeps the warm statics.
+- **Radius unified to 2px everywhere** (the 6px nav experiment is gone); hairlines
+  darkened a step so panels stop reading faded; inputs got a firmer bottom "writing
+  line".
+
+### Fixed
+
+- **Head-link chips were missing exactly their bottom border** - a higher-specificity
+  underline-reset rule ate it. All four sides are back.
+
 ## v0.2.21 - 2026-09-02
 
 ### Added

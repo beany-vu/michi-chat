@@ -1,13 +1,22 @@
 /* Admin styling, Danish modern: paper and ink, hairlines instead of boxes, black
-   functionalist buttons, one quiet oak accent, and air. Ornament is what got removed. */
+   functionalist buttons, one quiet oak accent, a single cobalt roofline on every
+   structure, and air. Ornament is what got removed; the roofline is what remained -
+   like a brown-brick Copenhagen street where the one painted roof edge is the detail
+   that makes the calm read as intent. Radius is 2px, everywhere, always (the chat
+   bubbles in transcripts are the lone exception: they speak the widget's language). */
 
 .admin {
   --bg: #fbfaf8;
   --surface: #ffffff;
   --fg: #161513;
   --muted: #7a746b;
-  --line: #e8e4dd;
+  --line: #ddd6c9;
   --accent: #9a7b52;
+  /* The cobalt roofline. Danish brick architecture: calm brown walls, one precise
+     colored detail on the roof edge. Structure (cards, fieldsets, tables) wears it as
+     a 2px top edge; interaction (active nav, active filter, focus) borrows it. Never
+     used for text or fills bigger than a tint. */
+  --roof: #2b4a8c;
   --danger: #b5342c;
   --okay: #3d6b35;
   --soft: #f4f1ec;
@@ -30,8 +39,9 @@
     --surface: #1d1c1a;
     --fg: #edeae4;
     --muted: #a09a91;
-    --line: #3a3731;
+    --line: #46413a;
     --accent: #c2a077;
+    --roof: #94aede;
     --danger: #d98a84;
     --okay: #9dc18d;
     --soft: #211f1d;
@@ -95,7 +105,7 @@
   color: var(--muted);
   padding: 9px 12px;
   margin: 0 -12px;
-  border-radius: 6px;
+  border-radius: 2px;
   transition: background 120ms ease, color 120ms ease;
 }
 .admin-side nav a svg {
@@ -127,8 +137,9 @@
 .admin a:hover {
   border-bottom-color: var(--accent);
 }
-.admin nav a,
-.admin .head-links a {
+/* Only nav here. .head-links chips define their OWN full border below - listing them
+   in this rule used to out-specify it and eat exactly the chips' bottom border. */
+.admin nav a {
   border-bottom: none;
 }
 
@@ -161,13 +172,13 @@
   border-color: var(--fg);
   text-decoration: none;
 }
-/* .admin prefix on purpose: it must outrank `.admin a`'s ink color. Oak tint rather
-   than solid ink, so the active state belongs to the palette instead of shouting. */
+/* .admin prefix on purpose: it must outrank `.admin a`'s ink color. Cobalt tint rather
+   than solid ink: active states wear the roofline color. */
 .admin .filter-active,
 .admin .filter-active:hover {
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  background: color-mix(in srgb, var(--roof) 12%, transparent);
   color: var(--fg);
-  border-color: var(--accent);
+  border-color: var(--roof);
   font-weight: 600;
 }
 
@@ -191,7 +202,7 @@
   color: var(--muted);
   flex-wrap: wrap;
 }
-.head-links a {
+.admin .head-links a {
   color: var(--fg);
   font-size: 12px;
   text-transform: uppercase;
@@ -212,6 +223,7 @@
   margin-bottom: 36px;
   background: var(--surface);
   border: 1px solid var(--line);
+  border-top: 2px solid var(--roof);
 }
 .admin th,
 .admin td {
@@ -262,7 +274,8 @@
 
 .card {
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-top: 2px solid var(--roof);
+  border-radius: 2px;
   padding: var(--card-pad-y) var(--card-pad-x);
   background: var(--surface);
   margin-bottom: 24px;
@@ -288,6 +301,8 @@
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--line);
+  /* Functionalist emphasis: the writing line is the strongest edge of the field. */
+  border-bottom-color: var(--muted);
   border-radius: 2px;
   background: var(--surface);
   color: var(--fg);
@@ -297,7 +312,7 @@
 .admin textarea:focus-visible,
 .admin select:focus-visible {
   outline: none;
-  border-color: var(--fg);
+  border-color: var(--roof);
 }
 .admin textarea {
   resize: vertical;
@@ -377,7 +392,8 @@
 }
 .editor fieldset {
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-top: 2px solid var(--roof);
+  border-radius: 2px;
   padding: 8px var(--card-pad-x) var(--card-pad-y);
   background: var(--surface);
 }
@@ -429,7 +445,8 @@
   padding: 32px;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-top: 2px solid var(--roof);
+  border-radius: 2px;
 }
 .login h1 {
   font-size: 20px;
@@ -593,11 +610,11 @@
   color: var(--fg);
   font-weight: 600;
   background: var(--soft);
-  box-shadow: inset 2.5px 0 0 var(--accent);
+  box-shadow: inset 2.5px 0 0 var(--roof);
 }
 .admin-side nav a.active svg {
   opacity: 1;
-  color: var(--accent);
+  color: var(--roof);
 }
 
 .admin-guide {
@@ -697,7 +714,7 @@
     height: 38px;
     padding: 0;
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: 2px;
     background: var(--surface);
     color: var(--fg);
   }

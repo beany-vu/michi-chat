@@ -9,6 +9,15 @@ The Slack webhook field now teaches you how to get a webhook, right on the form:
 steps, two minutes, free. The same walkthrough (with channel tips) is in
 [Running it day to day](./owner/day-to-day#get-pinged-when-it-matters).
 
+## v0.2.22 & v0.2.23 - guidance and the cobalt roofline
+
+The Slack webhook field now teaches you how to get a webhook (four steps, right under
+the input). And the admin's look sharpened, on the owner's own brief - Danish
+architecture, calm walls with one precise roof detail: every panel wears a thin cobalt
+top edge, active items carry the same cobalt, corners are square everywhere, and a
+missing bottom border on the header chips (a real bug) is fixed, so the console reads
+crisp instead of faded.
+
 ## v0.2.21 - the owner's to-do list, and friends
 
 - **Unanswered** - a new page listing every question the bot admitted it couldn't
