@@ -146,6 +146,7 @@ body {
 
 .bubble {
   padding: 0.65rem 0.95rem;
+  font-size: max(14px, 0.8em);
   border-radius: 16px;
   box-shadow: var(--shadow);
   overflow-wrap: anywhere;
@@ -257,6 +258,7 @@ body {
   border-radius: 12px;
   padding: 0.65rem 0.9rem;
   font: inherit;
+  font-size: max(14px, 0.8em);
 }
 .composer input:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
 .composer button {
