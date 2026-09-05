@@ -19,7 +19,6 @@
 | Allowed origins | Which websites may embed this bot (one origin per line) |
 
 Three fields deserve a note:
-
 - **Daily message cap** is the control that actually protects your bill. The embed key is public by design, so assume anyone can call the API; the cap is what bounds the damage.
 - **Persona** is wrapped in delimiters below a fixed platform preamble it cannot override. Keep it to identity and voice; live facts belong in tools and the knowledge base.
 - **Slack webhook** must be exactly a `https://hooks.slack.com/services/…` URL. Nothing else is accepted - that restriction is a security boundary, not a bug.

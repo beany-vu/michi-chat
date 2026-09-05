@@ -15,6 +15,9 @@ services:
       CHAT_MODEL: "michi"
       EMBED_MODEL: "embed"
       ADMIN_PASSWORD: "${MICHI_ADMIN_PASSWORD:-change-me}"
+      # Tenant kinds offered in the admin form. "business" only by default; add "coach" for
+      # application-driven tenants (see docs: Extending > Tenant kinds).
+      MICHI_TENANT_KINDS: "${MICHI_TENANT_KINDS:-business}"
       DEFAULT_TENANT_SLUG: "${MICHI_DEFAULT_TENANT:-mugshot}"
       # GA4 measurement id ("G-…"). Empty = no analytics; visitor pages only.
       GA_MEASUREMENT_ID: "${MICHI_GA_ID:-}"

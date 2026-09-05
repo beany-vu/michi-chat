@@ -7,6 +7,8 @@
 // the rest of the window. The patterns are deliberately narrow - phrases with no honest
 // reason to appear in a cafe chat - because a false positive here blocks a customer.
 
+import type { TenantKind } from "./prompt";
+
 const BAIT_PATTERNS: RegExp[] = [
   /ignore (all|any|your|previous|prior|the) (instructions|rules|prompts?)/i,
   /disregard (your|all|the|previous) (instructions|rules|guidelines)/i,
@@ -37,6 +39,22 @@ export function looksLikeCommand(message: string): boolean {
 
 export const COMMAND_REFUSAL =
   "I don't run commands like that, so that message may have been a typo. I'm happy to answer questions about the business, like the menu, hours, or events.";
+
+const CANNED_REFUSAL =
+  "I can only help with questions about the business, like the menu, hours, or events. What can I help you find?";
+
+/** Model-free refusals, worded for what the tenant is (see TenantKind in prompt.ts). */
+export function baitRefusal(kind: TenantKind): string {
+  return kind === "coach"
+    ? "I can only help with your coaching session here. What would you like to work on?"
+    : CANNED_REFUSAL;
+}
+
+export function commandRefusal(kind: TenantKind): string {
+  return kind === "coach"
+    ? "I don't run commands like that, so that message may have been a typo. What would you like to look at?"
+    : COMMAND_REFUSAL;
+}
 
 /** Strikes allowed per session per window before the session is cut off. */
 export const BAIT_STRIKES_PER_HOUR = 3;

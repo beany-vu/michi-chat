@@ -52,6 +52,11 @@ export const tenants = pgTable("tenants", {
   status: text("status", { enum: ["active", "disabled"] })
     .notNull()
     .default("active"),
+  // What the tenant is: a business assistant (the default) or an application-embedded
+  // coach. Selects the L0 preamble, the message cap and whether the answer cache applies.
+  kind: text("kind", { enum: ["business", "coach"] })
+    .notNull()
+    .default("business"),
   // The L1 layer of the system prompt. Never the whole prompt: see src/lib/prompt.ts.
   persona: text("persona").notNull(),
   // Owner-written protection rules ("never quote rental prices", "no stories"), a second

@@ -17,6 +17,9 @@ services:
       CHAT_MODEL: "michi"
       EMBED_MODEL: "embed"
       ADMIN_PASSWORD: "${MICHI_ADMIN_PASSWORD:?set MICHI_ADMIN_PASSWORD in .env}"
+      # Tenant kinds offered in the admin form. "business" only by default; add "coach" for
+      # application-driven tenants (see docs: Extending > Tenant kinds).
+      MICHI_TENANT_KINDS: "${MICHI_TENANT_KINDS:-business}"
       DEFAULT_TENANT_SLUG: "mugshot"
     ports:
       - "127.0.0.1:${MICHI_PORT:-3001}:3000"

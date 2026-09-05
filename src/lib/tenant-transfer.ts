@@ -30,6 +30,8 @@ export interface TenantTransfer {
     name: string;
     persona: string;
     guardrails: string;
+    /** Absent in files from older instances: treated as "business". */
+    kind?: "business" | "coach";
     model: string | null;
     branding: Branding;
     toolConfig: ToolConfig;
@@ -57,6 +59,7 @@ export async function exportTenant(tenantId: string): Promise<TenantTransfer | n
       name: tenant.name,
       persona: tenant.persona,
       guardrails: tenant.guardrails,
+      kind: tenant.kind,
       model: tenant.model,
       branding: tenant.branding,
       toolConfig: tenant.toolConfig,
@@ -91,6 +94,7 @@ export async function previewTenantImport(payload: unknown): Promise<ImportPrevi
   const compare: [string, unknown, unknown][] = [
     ["name", existing.name, t.name],
     ["persona", existing.persona, t.persona],
+    ["kind", existing.kind, t.kind ?? "business"],
     ["model", existing.model, t.model ?? null],
     ["daily cap", existing.dailyMessageCap, Number(t.dailyMessageCap)],
     ["timezone", existing.timezone, t.timezone],
@@ -177,6 +181,7 @@ export async function importTenant(payload: unknown): Promise<string> {
     name: t.name.trim(),
     persona: t.persona.slice(0, 4000),
     guardrails: (t.guardrails ?? "").slice(0, 2000),
+    kind: t.kind === "coach" ? ("coach" as const) : ("business" as const),
     model: t.model || null,
     branding,
     toolConfig,

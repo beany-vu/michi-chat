@@ -9,11 +9,12 @@
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { forTenant } from "@/db/tenant-db";
-import { buildSystemPrompt, wrapToolResult } from "@/lib/prompt";
+import { buildSystemPrompt, maxMessageChars, wrapToolResult } from "@/lib/prompt";
 import {
   BAIT_STRIKES_PER_HOUR,
   BAIT_WINDOW_SECONDS,
-  COMMAND_REFUSAL,
+  baitRefusal,
+  commandRefusal,
   looksLikeBait,
   looksLikeCommand,
 } from "@/lib/guardrail";
@@ -21,14 +22,14 @@ import { lookupCachedAnswer, storeCachedAnswer } from "@/lib/rag/answer-cache";
 import { isRateLimited } from "@/lib/rate-limit";
 import { notifySlack } from "@/lib/slack";
 import { corsHeaders, corsJson, isOriginRegistered, normalizeOrigin, resolveTenant } from "@/lib/tenant";
-import { FRIENDLY_ERROR, looksLikeProviderError } from "@/lib/moderation";
+import { friendlyError, looksLikeProviderError } from "@/lib/moderation";
 import { buildTenantTools } from "@/lib/tools";
 
 const MAX_ROUNDS = 6;
 // App Router route handlers have NO built-in body limit, and the user turn is written to
 // the DB before the model ever sees it. History is replayed every turn, so one oversized
-// message would poison every later turn in that conversation. Cap it at both ends.
-const MAX_MESSAGE_CHARS = 2000;
+// message would poison every later turn in that conversation. Cap it at both ends; the
+// per-message cap depends on the tenant kind (see maxMessageChars).
 const MAX_BODY_BYTES = 16 * 1024;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -56,10 +57,6 @@ export async function OPTIONS(request: NextRequest) {
     },
   });
 }
-
-const CANNED_REFUSAL =
-  "I can only help with questions about the business, like the menu, hours, or events. What can I help you find?";
-
 
 /** A fixed decline streamed as a normal turn (no model call). Same SSE shape a real
  *  answer has, so the widget renders it as an ordinary reply. */
@@ -108,9 +105,10 @@ export async function POST(request: NextRequest) {
 
   const userText = typeof body.message === "string" ? body.message.trim() : "";
   if (!userText) return corsJson({ error: "message is required" }, 400, origin);
-  if (userText.length > MAX_MESSAGE_CHARS) {
+  const maxChars = maxMessageChars(tenant.kind);
+  if (userText.length > maxChars) {
     return corsJson(
-      { error: `message must be ${MAX_MESSAGE_CHARS} characters or fewer` },
+      { error: `message must be ${maxChars} characters or fewer` },
       413,
       origin,
     );
@@ -233,7 +231,7 @@ export async function POST(request: NextRequest) {
   // Detected probe: store the canned reply as a normal assistant turn, flag the
   // conversation for the admin's attention, and answer without ever calling the model.
   if (probe) {
-    const text = probe === "bait" ? CANNED_REFUSAL : COMMAND_REFUSAL;
+    const text = probe === "bait" ? baitRefusal(tenant.kind) : commandRefusal(tenant.kind);
     if (conversation) {
       try {
         await db.appendMessage({ conversationId: conversation.id, role: "assistant", content: text });
@@ -251,7 +249,9 @@ export async function POST(request: NextRequest) {
 
   // Semantic cache, first messages only (see answer-cache.ts for the full rules). A hit
   // skips the model entirely; a miss reuses this embedding when storing the new answer.
-  const cacheEligible = storing && history.length === 0;
+  // Never for coach tenants: two near-identical fact dumps about different positions would
+  // embed close together and serve the wrong answer.
+  const cacheEligible = storing && history.length === 0 && tenant.kind === "business";
   let cachedAnswer: string | null = null;
   let cachedModel: string | null = null;
   let questionEmbedding: number[] | null = null;
@@ -273,7 +273,7 @@ export async function POST(request: NextRequest) {
   const model = tenant.model ?? process.env.CHAT_MODEL ?? "michi";
 
   const turn: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-    { role: "system", content: buildSystemPrompt(tenant.persona, tenant.guardrails) },
+    { role: "system", content: buildSystemPrompt(tenant.persona, tenant.guardrails, tenant.kind) },
     ...history.map((m) => ({ role: m.role, content: m.content }) as const),
     { role: "user", content: userText },
   ];
@@ -377,12 +377,12 @@ export async function POST(request: NextRequest) {
         if (looksLikeProviderError(answer)) {
           console.error("provider returned error content:", answer.slice(0, 500));
           toolLog.push({ name: "provider_error", arguments: "", result: answer.slice(0, 8192) });
-          answer = FRIENDLY_ERROR;
+          answer = friendlyError(tenant.kind);
         }
 
         // If every round came back asking for more tools we fall out of the loop with
         // nothing to say. Without this the visitor just gets an empty bubble.
-        if (!answer.trim()) answer = FRIENDLY_ERROR;
+        if (!answer.trim()) answer = friendlyError(tenant.kind);
 
         // House style, enforced in code: models follow "no dashes" unreliably.
         answer = answer
@@ -410,7 +410,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Feed the semantic cache, but never with a fallback/error line.
-        if (cacheEligible && questionEmbedding && answer !== FRIENDLY_ERROR) {
+        if (cacheEligible && questionEmbedding && answer !== friendlyError(tenant.kind)) {
           void storeCachedAnswer({
             tenantId: tenant.id,
             question: userText,

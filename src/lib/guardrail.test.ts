@@ -2,7 +2,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { looksLikeBait, looksLikeCommand } from "./guardrail";
+import { looksLikeBait, looksLikeCommand, baitRefusal } from "./guardrail";
 
 test("flags explicit injection bait", () => {
   const bait = [
@@ -55,4 +55,10 @@ test("never flags a slash inside a real sentence", () => {
   for (const message of normal) {
     assert.equal(looksLikeCommand(message), false, message);
   }
+});
+
+test("the bait refusal is worded for the tenant kind", () => {
+  assert.ok(baitRefusal("business").includes("the business"));
+  assert.ok(!baitRefusal("coach").includes("the business"));
+  assert.ok(baitRefusal("coach").toLowerCase().includes("coaching"));
 });

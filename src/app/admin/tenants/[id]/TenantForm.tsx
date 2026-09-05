@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import type { tenants } from "@/db/schema";
+import type { TenantKind } from "@/lib/prompt";
 import type { ToolConfigField } from "@/lib/tools";
 import { saveTenantAction } from "../../actions";
 
@@ -21,9 +22,12 @@ const FAMILY_LABELS: Record<PackSummary["family"], string> = {
 export function TenantForm({
   tenant,
   packs,
+  kinds = ["business"],
 }: {
   tenant: typeof tenants.$inferSelect;
   packs: PackSummary[];
+  /** Tenant kinds this instance offers (MICHI_TENANT_KINDS). One kind = no field to show. */
+  kinds?: TenantKind[];
 }) {
   const [state, action, pending] = useActionState(
     saveTenantAction.bind(null, tenant.id),
@@ -50,6 +54,25 @@ export function TenantForm({
           <option value="disabled">disabled</option>
         </select>
         <small>Disabling is the only removal. Deleting a tenant cascades to every conversation.</small>
+
+        {kinds.length > 1 && (
+          <>
+            <label htmlFor="kind">Kind</label>
+            <select id="kind" name="kind" defaultValue={tenant.kind}>
+              {kinds.map((kind) => (
+                <option key={kind} value={kind}>
+                  {kind === "coach" ? "coach, driven by an application" : "business assistant"}
+                </option>
+              ))}
+            </select>
+            <small>
+              A business assistant answers customers about one business and declines everything
+              else. A coach is called by an application that sends it facts with every message
+              (chess-mate sends engine analysis) and may answer freely about its subject: no
+              off-topic refusal, no answer cache, messages up to 6000 characters.
+            </small>
+          </>
+        )}
 
         <label htmlFor="model">Model alias</label>
         <input id="model" name="model" defaultValue={tenant.model ?? ""} placeholder="michi" />

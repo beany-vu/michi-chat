@@ -5,6 +5,7 @@ import { dbRoot } from "@/db";
 import { tenants } from "@/db/schema";
 import { isAuthenticated } from "@/lib/admin-auth";
 import { TOOL_PACKS } from "@/lib/tools";
+import { enabledTenantKinds } from "@/lib/prompt";
 import { TenantForm } from "./TenantForm";
 
 export default async function TenantEditor({ params }: { params: Promise<{ id: string }> }) {
@@ -40,7 +41,7 @@ export default async function TenantEditor({ params }: { params: Promise<{ id: s
           <Link href="/admin">Back</Link>
         </div>
       </div>
-      <TenantForm tenant={tenant} packs={packs} />
+      <TenantForm tenant={tenant} packs={packs} kinds={enabledTenantKinds(process.env.MICHI_TENANT_KINDS)} />
     </>
   );
 }

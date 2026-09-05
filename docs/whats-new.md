@@ -3,6 +3,16 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.25 - a second kind of tenant: the coach
+
+Until now every tenant was a customer assistant for one business. There is now a second
+kind, **coach**: an application sends it facts with every message and it explains them to
+one learner, without the "I only answer questions about the business" reflex. The first
+one is Chess Mate, where Stockfish judges each move and the coach explains why in plain
+words. Nothing changes for a normal install: the Kind field only appears when the instance
+enables it (see Extending), and everything else (persona, keys, transcripts, usage) works
+exactly as before.
+
 ## v0.2.22 - no more feeling lost at the Slack field
 
 The Slack webhook field now teaches you how to get a webhook, right on the form: four

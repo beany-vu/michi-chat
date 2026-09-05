@@ -3,6 +3,27 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.25 - 2026-09-05
+
+### Added
+
+- **Tenant kind.** A tenant is now a `business` assistant (the default, unchanged) or a
+  `coach`: an application-driven tutor that receives facts with every message and may
+  answer freely about its subject. Coach tenants get their own platform preamble (same
+  safety rules, no business framing, no off-topic refusal), 6000-character messages, no
+  semantic answer cache, and kind-worded refusals and fallback lines. First coach:
+  chess-mate, whose Stockfish verdicts the coach explains. Migration `0013_tenant_kind`.
+  The Kind field only appears on the tenant form when the instance opts in with
+  `MICHI_TENANT_KINDS=business,coach`; a plain install looks exactly as before.
+- **`npm run tenant:import <file>`** imports a michi-tenant JSON from the command line and
+  prints the public key (same path as the admin upload).
+
+### Changed
+
+- Dev `litellm/config.yaml`: the `michi` alias sets `reasoning_effort: none`, so qwen3.5
+  answers instead of spending its whole budget thinking (the dev flavour of the
+  `enable_thinking` trap).
+
 ## v0.2.24 - 2026-09-02
 
 ### Changed

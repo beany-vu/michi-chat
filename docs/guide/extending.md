@@ -53,6 +53,29 @@ site: you set the base URL (hard-validated), a fixed path, a **field allowlist**
 else is dropped before the model sees it), and one sentence telling the model when to use it.
 Fork only when you need real logic - multiple calls, reshaping, math.
 
+## Tenant kinds: an application as the "visitor"
+
+Every tenant is a **business assistant** by default, and a normal install never needs anything
+else. There is a second kind, **coach**, for a tenant driven by *your own application* rather
+than by website visitors: the application sends the facts with every message and the coach
+explains them to one learner. The first one is [Chess Mate](https://github.com/beany-vu/chess-mate),
+where Stockfish judges each move and the coach explains why.
+
+A coach tenant keeps every platform protection (no prompt leaking, tool data is data, no
+dashes, refusals for abuse) but drops the business framing and the off-topic refusal, accepts
+messages up to 6000 characters (facts take room), and never uses the semantic answer cache
+(two fact dumps about different positions embed too close together).
+
+The kind is deliberately **off the admin form** unless the instance opts in:
+
+```
+MICHI_TENANT_KINDS=business,coach     # in .env; the form then shows a Kind select
+```
+
+Tenant import honours the kind in the file regardless, so an application can ship its tenant
+as a michi-tenant JSON (`npm run tenant:import -- file.json` prints the public key) without the
+concept ever appearing for shop owners on the same instance.
+
 ## Why there is no plugin system
 
 A runtime-loaded plugin is arbitrary code executing inside the container that can reach the database and the model host. The platform's security model rests on tenants supplying only *parameters* to trusted code. Fork-and-build gives you the same extensibility with every executing line reviewable - and the `ToolPack` interface keeps the cost of that to one file.

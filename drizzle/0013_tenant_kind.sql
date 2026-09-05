@@ -1,0 +1,1 @@
+ALTER TABLE "tenants" ADD COLUMN "kind" text DEFAULT 'business' NOT NULL;

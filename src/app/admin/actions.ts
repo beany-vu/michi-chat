@@ -19,7 +19,7 @@ import { logAudit } from "@/lib/audit";
 import { parseCsv } from "@/lib/csv";
 import { looksLikeProviderError } from "@/lib/moderation";
 import { MAX_PDF_BYTES, MAX_POLISH_CHARS, estimateTokens, triagePdf, type PdfTriage } from "@/lib/pdf-import";
-import { MAX_GUARDRAILS_CHARS, MAX_PERSONA_CHARS } from "@/lib/prompt";
+import { MAX_GUARDRAILS_CHARS, MAX_PERSONA_CHARS, tenantKindUpdate } from "@/lib/prompt";
 import { deleteDocument, ingestDocument } from "@/lib/rag";
 import { clearAnswerCache } from "@/lib/rag/answer-cache";
 import { validateSlackWebhookUrl } from "@/lib/slack";
@@ -178,6 +178,8 @@ export async function saveTenantAction(tenantId: string, _prev: unknown, formDat
     .set({
       name: String(formData.get("name") ?? "").trim(),
       status: formData.get("status") === "disabled" ? "disabled" : "active",
+      // Only a kind this instance offers may be set; a hidden field leaves the kind alone.
+      ...tenantKindUpdate(formData.get("kind"), process.env.MICHI_TENANT_KINDS),
       model: String(formData.get("model") ?? "").trim() || null,
       dailyMessageCap: Math.max(1, Number(formData.get("dailyMessageCap")) || 500),
       // Blank = keep forever (null). Anything else is clamped to at least one day.

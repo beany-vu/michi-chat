@@ -5,6 +5,9 @@ model_list:
     litellm_params:
       model: ollama_chat/qwen3.5:4b
       api_base: os.environ/OLLAMA_API_BASE
+      # qwen3.5 thinks by default and a short max_tokens then returns EMPTY content (the
+      # whole budget goes to reasoning). Same lesson as prod's enable_thinking:false.
+      reasoning_effort: none
 
   # A second, different model for judging/evals (never grade your own homework).
   # qwen3:8b after qwen2.5:7b proved too erratic on compound rubric facts.

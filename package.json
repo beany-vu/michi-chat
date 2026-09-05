@@ -16,7 +16,8 @@
     "kb:eval": "tsx scripts/kb-eval.ts",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs && cp llms.txt docs/.vitepress/dist/llms.txt",
-    "eval:answers": "tsx scripts/answers-eval.ts"
+    "eval:answers": "tsx scripts/answers-eval.ts",
+    "tenant:import": "tsx scripts/import-tenant.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
