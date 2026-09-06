@@ -13,8 +13,9 @@ import OpenAI from "openai";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
-import { adminUsers, answerCache, apiKeys, conversations, tenants, type Branding, type ToolConfig } from "@/db/schema";
+import { adminUserTenants, adminUsers, answerCache, apiKeys, conversations, tenants, type Branding, type ToolConfig } from "@/db/schema";
 import { hashPassword, login, logout, requireAdmin, requireOwner } from "@/lib/admin-auth";
+import { canSeeTenant } from "@/lib/tenant-scope";
 import { logAudit } from "@/lib/audit";
 import { parseCsv } from "@/lib/csv";
 import { looksLikeProviderError } from "@/lib/moderation";
@@ -222,6 +223,7 @@ const MAX_KB_DOC_CHARS = 100_000;
 
 export async function saveKbDocumentAction(tenantId: string, _prev: unknown, formData: FormData) {
   const session = await requireAdmin();
+  if (!canSeeTenant(session, tenantId)) redirect("/admin");
   const title = String(formData.get("title") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
   if (!title) return { error: "Title is required." };
@@ -247,6 +249,7 @@ export async function saveKbDocumentAction(tenantId: string, _prev: unknown, for
 
 export async function deleteKbDocumentAction(tenantId: string, documentId: string) {
   const session = await requireAdmin();
+  if (!canSeeTenant(session, tenantId)) redirect("/admin");
   await deleteDocument(tenantId, documentId);
   logAudit(session, "kb.delete", documentId);
   revalidatePath(`/admin/tenants/${tenantId}/kb`);
@@ -277,19 +280,58 @@ export async function createAdminUserAction(_prev: unknown, formData: FormData) 
   if (!name) return { error: "Name is required." };
   if (password.length < 10) return { error: "Password must be at least 10 characters." };
 
+  const tenantIds = tenantIdsFromForm(formData);
+
+  let userId: string;
   try {
-    await dbRoot.insert(adminUsers).values({
-      email,
-      name,
-      role,
-      passwordHash: await hashPassword(password),
-    });
+    const [created] = await dbRoot
+      .insert(adminUsers)
+      .values({
+        email,
+        name,
+        role,
+        passwordHash: await hashPassword(password),
+      })
+      .returning({ id: adminUsers.id });
+    userId = created.id;
   } catch {
     return { error: "That email already has an account." };
   }
-  logAudit(session, "user.create", `${email} (${role})`);
+  // Assignments only mean something for staff; owners are unscoped regardless.
+  if (role === "staff" && tenantIds.length > 0) {
+    await dbRoot.insert(adminUserTenants).values(tenantIds.map((tenantId) => ({ userId, tenantId })));
+  }
+  logAudit(session, "user.create", `${email} (${role}, ${tenantIds.length} tenants)`);
   revalidatePath("/admin/users");
   return { ok: true as const };
+}
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** The checked `tenants` boxes of an account form, validated as uuids and de-duplicated. */
+function tenantIdsFromForm(formData: FormData): string[] {
+  return [
+    ...new Set(
+      formData
+        .getAll("tenants")
+        .map((v) => String(v))
+        .filter((v) => UUID_PATTERN.test(v)),
+    ),
+  ];
+}
+
+/** Replace a staff account's tenant assignments. Takes effect on their next request. */
+export async function setAdminUserTenantsAction(userId: string, formData: FormData) {
+  const session = await requireOwner();
+  const tenantIds = tenantIdsFromForm(formData);
+  await dbRoot.transaction(async (tx) => {
+    await tx.delete(adminUserTenants).where(eq(adminUserTenants.userId, userId));
+    if (tenantIds.length > 0) {
+      await tx.insert(adminUserTenants).values(tenantIds.map((tenantId) => ({ userId, tenantId })));
+    }
+  });
+  logAudit(session, "user.tenants", `${userId} -> ${tenantIds.length} tenants`);
+  revalidatePath("/admin/users");
 }
 
 export async function setAdminUserStatusAction(userId: string, status: "active" | "disabled") {
@@ -308,6 +350,12 @@ export async function setConversationFlagAction(conversationId: string, flagged:
   // Staff can flag too: spotting a malicious chat is day-to-day conversation reading,
   // not tenant administration.
   const session = await requireAdmin();
+  const [target] = await dbRoot
+    .select({ tenantId: conversations.tenantId })
+    .from(conversations)
+    .where(eq(conversations.id, conversationId))
+    .limit(1);
+  if (!target || !canSeeTenant(session, target.tenantId)) redirect("/admin");
   await dbRoot
     .update(conversations)
     .set(flagged ? { flaggedAt: new Date(), flagReason: "manual" } : { flaggedAt: null, flagReason: null })
@@ -331,6 +379,7 @@ const MAX_KB_IMPORT_ROWS = 200;
 
 export async function importKbCsvAction(tenantId: string, _prev: unknown, formData: FormData) {
   const session = await requireAdmin();
+  if (!canSeeTenant(session, tenantId)) redirect("/admin");
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { error: "Choose a CSV file first." };
   if (file.size > 5_000_000) return { error: "CSV is larger than 5 MB." };
@@ -377,6 +426,7 @@ export async function importKbCsvAction(tenantId: string, _prev: unknown, formDa
 
 export async function clearTenantCacheAction(tenantId: string) {
   const session = await requireAdmin();
+  if (!canSeeTenant(session, tenantId)) redirect("/admin");
   await clearAnswerCache(tenantId);
   logAudit(session, "cache.clear", tenantId);
   revalidatePath(`/admin/tenants/${tenantId}/cache`);
@@ -384,6 +434,7 @@ export async function clearTenantCacheAction(tenantId: string) {
 
 export async function deleteCachedAnswerAction(tenantId: string, cacheId: string) {
   const session = await requireAdmin();
+  if (!canSeeTenant(session, tenantId)) redirect("/admin");
   await dbRoot
     .delete(answerCache)
     .where(and(eq(answerCache.id, cacheId), eq(answerCache.tenantId, tenantId)));
@@ -452,6 +503,7 @@ const POLISH_SYSTEM_PROMPT = [
 
 export async function polishKbTextAction(tenantId: string, _prev: unknown, formData: FormData) {
   const session = await requireAdmin();
+  if (!canSeeTenant(session, tenantId)) redirect("/admin");
   const text = String(formData.get("text") ?? "").trim();
   if (!text) return { error: "Nothing to tidy: the text box is empty." };
   if (text.length > MAX_POLISH_CHARS) {

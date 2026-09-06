@@ -10,7 +10,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { conversations, messages, tenants } from "@/db/schema";
-import { getAdminSession } from "@/lib/admin-auth";
+import { getAdminSession, assertTenantVisible } from "@/lib/admin-auth";
 import { deleteConversationAction, setConversationFlagAction } from "../../actions";
 import { LocalTime } from "../../LocalTime";
 
@@ -99,6 +99,7 @@ export default async function TranscriptPage({ params }: { params: Promise<{ id:
     .where(eq(conversations.id, id))
     .limit(1);
   if (!conversation) notFound();
+  assertTenantVisible(session, conversation.tenantId);
 
   const turns = await dbRoot
     .select()

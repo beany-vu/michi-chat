@@ -9,7 +9,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { conversations, messages, tenants } from "@/db/schema";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { assertTenantVisible, getAdminSession } from "@/lib/admin-auth";
 import { describeTool } from "@/lib/tools/describe";
 
 const WINDOW_DAYS = 30;
@@ -28,8 +28,10 @@ function top<T extends string>(counts: Map<T, number>, n: number): [T, number][]
 }
 
 export default async function AnalyticsPage({ params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  const session = await getAdminSession();
+  if (!session) redirect("/admin/login");
   const { id } = await params;
+  assertTenantVisible(session, id);
 
   const [tenant] = await dbRoot.select().from(tenants).where(eq(tenants.id, id)).limit(1);
   if (!tenant) notFound();

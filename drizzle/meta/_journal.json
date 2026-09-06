@@ -99,6 +99,13 @@
       "when": 1788600474211,
       "tag": "0013_tenant_kind",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1788696609135,
+      "tag": "0014_staff_tenants",
+      "breakpoints": true
     }
   ]
 }

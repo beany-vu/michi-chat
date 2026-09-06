@@ -3,7 +3,12 @@
 import { useActionState } from "react";
 import { createAdminUserAction } from "../actions";
 
-export function UserForm() {
+export interface TenantOption {
+  id: string;
+  name: string;
+}
+
+export function UserForm({ tenants }: { tenants: TenantOption[] }) {
   const [state, action, pending] = useActionState(createAdminUserAction, null);
   return (
     <section className="card">
@@ -25,6 +30,14 @@ export function UserForm() {
             <option value="staff">staff - conversations, usage, knowledge base</option>
             <option value="owner">owner - everything, including this page</option>
           </select>
+
+          <label>Tenants a staff account may see</label>
+          <TenantChecks tenants={tenants} />
+          <small>
+            Staff see only the tenants ticked here, nowhere else in the admin; with none
+            ticked they see nothing until you assign some. Owners always see everything, so
+            this is ignored for an owner.
+          </small>
         </fieldset>
         <div className="actions">
           <button type="submit" disabled={pending}>
@@ -35,5 +48,26 @@ export function UserForm() {
         </div>
       </form>
     </section>
+  );
+}
+
+/** One checkbox per tenant, shared by the create form and the per-row assignment form. */
+export function TenantChecks({
+  tenants,
+  checked = [],
+}: {
+  tenants: TenantOption[];
+  checked?: string[];
+}) {
+  if (tenants.length === 0) return <small>No tenants yet.</small>;
+  return (
+    <div className="tenant-checks">
+      {tenants.map((tenant) => (
+        <label className="check" key={tenant.id}>
+          <input type="checkbox" name="tenants" value={tenant.id} defaultChecked={checked.includes(tenant.id)} />
+          <span>{tenant.name}</span>
+        </label>
+      ))}
+    </div>
   );
 }

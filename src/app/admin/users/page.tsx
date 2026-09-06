@@ -5,10 +5,10 @@
 import { desc } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
-import { adminUsers } from "@/db/schema";
+import { adminUserTenants, adminUsers, tenants } from "@/db/schema";
 import { getAdminSession } from "@/lib/admin-auth";
-import { setAdminUserStatusAction } from "../actions";
-import { UserForm } from "./UserForm";
+import { setAdminUserStatusAction, setAdminUserTenantsAction } from "../actions";
+import { TenantChecks, UserForm } from "./UserForm";
 import { LocalTime } from "../LocalTime";
 
 export default async function UsersPage() {
@@ -17,6 +17,13 @@ export default async function UsersPage() {
   if (session.role !== "owner") redirect("/admin");
 
   const users = await dbRoot.select().from(adminUsers).orderBy(desc(adminUsers.createdAt));
+  const allTenants = await dbRoot
+    .select({ id: tenants.id, name: tenants.name })
+    .from(tenants)
+    .orderBy(tenants.name);
+  const assignments = await dbRoot.select().from(adminUserTenants);
+  const assignedTo = (userId: string) =>
+    assignments.filter((a) => a.userId === userId).map((a) => a.tenantId);
 
   return (
     <>
@@ -26,9 +33,10 @@ export default async function UsersPage() {
 
       <p className="note">
         <strong>owner</strong> can do everything. <strong>staff</strong> can read
-        conversations and usage and manage knowledge-base documents - the day-to-day  - 
-        but cannot touch tenants, embed keys, origins, tools, or this page. The operator
-        password from the environment always works as a break-glass owner login.
+        conversations and usage and manage knowledge-base documents - the day-to-day -
+        but only for the tenants assigned to them, and cannot touch tenants, embed keys,
+        origins, tools, or this page. A staff account with no tenants sees nothing. The
+        operator password from the environment always works as a break-glass owner login.
       </p>
 
       {users.length > 0 && (
@@ -38,6 +46,7 @@ export default async function UsersPage() {
               <th>Name</th>
               <th>Email</th>
               <th>Role</th>
+              <th>Tenants</th>
               <th>Status</th>
               <th>Last login</th>
               <th />
@@ -50,6 +59,20 @@ export default async function UsersPage() {
                 <td>{user.email}</td>
                 <td>
                   <span className={`pill ${user.role === "owner" ? "active" : ""}`}>{user.role}</span>
+                </td>
+                <td>
+                  {user.role === "owner" ? (
+                    <span className="pill">all</span>
+                  ) : (
+                    // Ticking a box and pressing Save is the whole assignment UI; it
+                    // applies on the account's next request (scope is read live).
+                    <form action={setAdminUserTenantsAction.bind(null, user.id)} className="tenant-assign">
+                      <TenantChecks tenants={allTenants} checked={assignedTo(user.id)} />
+                      <button type="submit" className="ghost">
+                        Save
+                      </button>
+                    </form>
+                  )}
                 </td>
                 <td>
                   <span className={`pill ${user.status === "active" ? "active" : "disabled"}`}>
@@ -76,7 +99,7 @@ export default async function UsersPage() {
         </table>
       )}
 
-      <UserForm />
+      <UserForm tenants={allTenants} />
     </>
   );
 }

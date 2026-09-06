@@ -3,7 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { conversations, messages, tenants } from "@/db/schema";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { getAdminSession } from "@/lib/admin-auth";
+import { tenantScope, visibleTenants } from "@/lib/tenant-scope";
 import { LocalTime } from "../LocalTime";
 
 const PAGE_SIZE = 50;
@@ -23,16 +24,20 @@ export default async function ConversationsPage({
 }: {
   searchParams: Promise<{ tenant?: string; flagged?: string; page?: string }>;
 }) {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  const session = await getAdminSession();
+  if (!session) redirect("/admin/login");
   const params = await searchParams;
   const tenantSlug = params.tenant;
   const flaggedOnly = params.flagged === "1";
   const page = Math.max(1, Number(params.page) || 1);
 
-  const allTenants = await dbRoot
-    .select({ slug: tenants.slug, name: tenants.name })
-    .from(tenants)
-    .orderBy(tenants.name);
+  const allTenants = visibleTenants(
+    session,
+    await dbRoot
+      .select({ id: tenants.id, slug: tenants.slug, name: tenants.name })
+      .from(tenants)
+      .orderBy(tenants.name),
+  );
 
   const rows = await dbRoot
     .select({
@@ -53,6 +58,7 @@ export default async function ConversationsPage({
     .innerJoin(tenants, eq(tenants.id, conversations.tenantId))
     .where(
       and(
+        tenantScope(session, conversations.tenantId),
         tenantSlug ? eq(tenants.slug, tenantSlug) : undefined,
         flaggedOnly ? isNotNull(conversations.flaggedAt) : undefined,
       ),

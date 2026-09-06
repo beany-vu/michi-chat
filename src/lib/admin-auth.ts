@@ -16,9 +16,10 @@ import { randomBytes, scrypt as scryptCb, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 import { and, eq, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { dbRoot } from "@/db";
-import { adminSessions, adminUsers, auditLog } from "@/db/schema";
+import { canSeeTenant } from "@/lib/tenant-scope";
+import { adminSessions, adminUsers, auditLog, adminUserTenants } from "@/db/schema";
 import { isRateLimited } from "./rate-limit";
 import { hashToken } from "./tenant";
 
@@ -38,6 +39,9 @@ export interface AdminSession {
   userId: string | null;
   /** The account email, or "operator" for the env-password owner. */
   label: string;
+  /** Tenants this session may see: null = all (owner), an array for staff, empty =
+   *  nothing. See src/lib/tenant-scope.ts. */
+  tenantIds: string[] | null;
 }
 
 /** "scrypt:<saltHex>:<hashHex>" with a per-user random salt. */
@@ -143,7 +147,25 @@ export async function getAdminSession(): Promise<AdminSession | null> {
     .limit(1);
   if (!row) return null;
   if (row.userId && row.userStatus !== "active") return null;
-  return { role: row.role, userId: row.userId, label: row.email ?? "operator" };
+  // Staff scope is read live, not snapshotted like the role: an owner narrowing an
+  // account must bite on the next request, not after a 12h session expires.
+  const tenantIds =
+    row.role === "owner"
+      ? null
+      : row.userId
+        ? (
+            await dbRoot
+              .select({ tenantId: adminUserTenants.tenantId })
+              .from(adminUserTenants)
+              .where(eq(adminUserTenants.userId, row.userId))
+          ).map((r) => r.tenantId)
+        : [];
+  return { role: row.role, userId: row.userId, label: row.email ?? "operator", tenantIds };
+}
+
+/** Pages addressed by tenant id: a tenant outside the session's scope does not exist. */
+export function assertTenantVisible(session: AdminSession, tenantId: string): void {
+  if (!canSeeTenant(session, tenantId)) notFound();
 }
 
 export async function isAuthenticated(): Promise<boolean> {

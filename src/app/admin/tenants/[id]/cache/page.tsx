@@ -9,13 +9,15 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { answerCache, tenants } from "@/db/schema";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { assertTenantVisible, getAdminSession } from "@/lib/admin-auth";
 import { clearTenantCacheAction, deleteCachedAnswerAction } from "../../../actions";
 import { LocalTime } from "../../../LocalTime";
 
 export default async function CachePage({ params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  const session = await getAdminSession();
+  if (!session) redirect("/admin/login");
   const { id } = await params;
+  assertTenantVisible(session, id);
 
   const [tenant] = await dbRoot
     .select({ id: tenants.id, name: tenants.name })

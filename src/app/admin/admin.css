@@ -422,6 +422,35 @@
 .check input {
   width: auto;
 }
+/* Tenant assignment on Accounts: a tight column of checkboxes, both in the create form
+   and inline in the table, with the row's Save as a quiet ghost under it. */
+.tenant-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 6px;
+}
+.tenant-checks .check {
+  /* .admin label (0,1,1) turns .check (0,1,0) into a block inside a cell; restate flex. */
+  display: flex;
+  margin: 0;
+  font-size: 13px;
+}
+/* Inside a table the generic label rule uppercases text; these are names, not headers. */
+.tenant-checks .check span {
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.tenant-assign {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+.tenant-assign button.ghost {
+  padding: 4px 10px;
+  font-size: 12px;
+}
 .actions {
   display: flex;
   gap: 16px;

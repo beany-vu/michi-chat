@@ -50,6 +50,7 @@ knowledge is re-embedded on arrival, so transfers work across different embeddin
 ## Roles and privacy
 
 **Accounts** (owner only) adds staff logins: conversations/usage reading plus knowledge-base
-editing, nothing else. The env `ADMIN_PASSWORD` stays a break-glass owner login. Each tenant
+editing, nothing else, and only for the tenants you tick on the account. A staff account with
+no tenants ticked sees nothing until an owner assigns some; owners always see everything. The env `ADMIN_PASSWORD` stays a break-glass owner login. Each tenant
 also has a **Store conversations** switch - off means nothing is written to the database at
 all, at the cost of multi-turn memory (the daily cap still applies via a separate counter).

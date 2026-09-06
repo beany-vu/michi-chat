@@ -9,7 +9,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { tenants } from "@/db/schema";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { getAdminSession } from "@/lib/admin-auth";
+import { tenantScopeRaw, visibleTenants } from "@/lib/tenant-scope";
 import { FRIENDLY_ERROR } from "@/lib/moderation";
 import { UNANSWERED_SQL_REGEX } from "@/lib/unanswered";
 import { LocalTime } from "../LocalTime";
@@ -36,15 +37,19 @@ export default async function UnansweredPage({
 }: {
   searchParams: Promise<{ tenant?: string }>;
 }) {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  const session = await getAdminSession();
+  if (!session) redirect("/admin/login");
   const { tenant: tenantSlug } = await searchParams;
 
   // Same tenant chips as Conversations: with several tenants the gap list otherwise
   // interleaves businesses and the reader loses track of whose KB needs the fact.
-  const allTenants = await dbRoot
-    .select({ slug: tenants.slug, name: tenants.name })
-    .from(tenants)
-    .orderBy(tenants.name);
+  const allTenants = visibleTenants(
+    session,
+    await dbRoot
+      .select({ id: tenants.id, slug: tenants.slug, name: tenants.name })
+      .from(tenants)
+      .orderBy(tenants.name),
+  );
 
   // The preceding user turn is the interesting half: that's the question to answer in
   // the KB. Correlated subquery keeps this one round-trip.
@@ -66,6 +71,7 @@ export default async function UnansweredPage({
       and m.created_at > now() - interval '${sql.raw(String(WINDOW_DAYS))} days'
       and (m.content ~* ${UNANSWERED_SQL_REGEX} or m.content = ${FRIENDLY_ERROR})
       ${tenantSlug ? sql`and t.slug = ${tenantSlug}` : sql``}
+      and ${tenantScopeRaw(session, "t.id")}
     order by m.created_at desc
     limit ${MAX_ROWS}
   `)) as unknown as GapRow[];

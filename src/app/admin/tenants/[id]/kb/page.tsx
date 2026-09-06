@@ -7,7 +7,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { kbDocuments, tenants } from "@/db/schema";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { assertTenantVisible, getAdminSession } from "@/lib/admin-auth";
 import { deleteKbDocumentAction } from "../../../actions";
 import { KbImport } from "./KbImport";
 import { PdfImport } from "./PdfImport";
@@ -21,8 +21,10 @@ export default async function KbPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ doc?: string }>;
 }) {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  const session = await getAdminSession();
+  if (!session) redirect("/admin/login");
   const { id } = await params;
+  assertTenantVisible(session, id);
   const { doc } = await searchParams;
 
   const [tenant] = await dbRoot.select().from(tenants).where(eq(tenants.id, id)).limit(1);

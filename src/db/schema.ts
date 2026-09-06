@@ -218,6 +218,22 @@ export const adminUsers = pgTable("admin_users", {
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
 });
 
+// Which tenants a STAFF account may see (owners are unscoped). No rows = sees nothing:
+// a fresh staff login is safe until an owner assigns it. Read live on every request
+// (src/lib/admin-auth.ts), so an assignment change applies without a re-login.
+export const adminUserTenants = pgTable(
+  "admin_user_tenants",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => adminUsers.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.tenantId] })],
+);
+
 // Sessions for /admin. userId is null for env-password (break-glass owner) sessions;
 // the role is snapshotted at login so every request costs one lookup, and disabling a
 // user still bites within a session's 12h TTL via the join check in getAdminSession.

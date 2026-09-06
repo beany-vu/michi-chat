@@ -8,6 +8,7 @@ import type { NextRequest } from "next/server";
 import { dbRoot } from "@/db";
 import { kbDocuments, tenants } from "@/db/schema";
 import { getAdminSession } from "@/lib/admin-auth";
+import { canSeeTenant } from "@/lib/tenant-scope";
 import { logAudit } from "@/lib/audit";
 import { toCsv } from "@/lib/csv";
 
@@ -26,7 +27,9 @@ export async function GET(request: NextRequest) {
     .from(tenants)
     .where(eq(tenants.id, tenantId))
     .limit(1);
-  if (!tenant) return Response.json({ error: "not found" }, { status: 404 });
+  if (!tenant || !canSeeTenant(session, tenantId)) {
+    return Response.json({ error: "not found" }, { status: 404 });
+  }
 
   const documents = await dbRoot
     .select({ title: kbDocuments.title, content: kbDocuments.content })

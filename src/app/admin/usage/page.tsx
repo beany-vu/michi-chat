@@ -9,11 +9,13 @@ import { desc, sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { messages, tenants } from "@/db/schema";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { getAdminSession } from "@/lib/admin-auth";
+import { tenantScope } from "@/lib/tenant-scope";
 import { estimateCost } from "@/lib/pricing";
 
 export default async function UsagePage() {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  const session = await getAdminSession();
+  if (!session) redirect("/admin/login");
 
   const rows = await dbRoot
     .select({
@@ -27,7 +29,7 @@ export default async function UsagePage() {
     })
     .from(messages)
     .innerJoin(tenants, sql`${tenants.id} = ${messages.tenantId}`)
-    .where(sql`${messages.createdAt} > now() - interval '30 days'`)
+    .where(sql`${messages.createdAt} > now() - interval '30 days' and ${tenantScope(session, messages.tenantId)}`)
     .groupBy(sql`date_trunc('day', ${messages.createdAt})`, tenants.name)
     .orderBy(desc(sql`date_trunc('day', ${messages.createdAt})`), tenants.name);
 

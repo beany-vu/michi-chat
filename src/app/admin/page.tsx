@@ -5,13 +5,15 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { apiKeys, conversations, messages, tenants } from "@/db/schema";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { getAdminSession } from "@/lib/admin-auth";
+import { tenantScope } from "@/lib/tenant-scope";
 import { NewTenantForm } from "./NewTenantForm";
 import { TenantImport } from "./TenantImport";
 import { LocalTime } from "./LocalTime";
 
 export default async function AdminHome() {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  const session = await getAdminSession();
+  if (!session) redirect("/admin/login");
 
   const rows = await dbRoot
     .select({
@@ -33,6 +35,7 @@ export default async function AdminHome() {
       )`,
     })
     .from(tenants)
+    .where(tenantScope(session, tenants.id))
     .orderBy(tenants.name);
 
   return (
