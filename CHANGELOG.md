@@ -3,6 +3,33 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.26 - 2026-09-06
+
+### Added
+
+- **Tappable contact details in answers.** Bare URLs, email addresses and Philippine
+  phone numbers in a bot reply render as https:, mailto: and tel: links, and every link
+  opens in a new tab so the widget iframe never navigates away from the conversation.
+  Prices and years never turn into phone links (digit-count guard, unit tested).
+- **Tool glossary on the analytics page.** Under "What visitors reach for", each function
+  in the mix is explained as a contract: chip label, description, inputs and what it
+  returns, read from the same definition the model receives. Every tool pack now declares
+  `returns` (a required field).
+- **Weather fallback.** `get_weather` no longer hands the model a bare error when the site
+  is unreachable or reports no reading; it says weather is unavailable and to suggest
+  from the specials or the menu. Readings the site serves from its own stored fallback
+  are flagged as "last saved reading".
+- Mugshot knowledge base: a Pets document, the published venue-rental and coffee-cart
+  pop-up packages with their terms, and FAQ entries for FoodPanda, coffee quality and
+  discounts. Eval golden sets grew accordingly.
+
+### Changed
+
+- Chat message text and the composer input are sized `max(14px, 0.8em)`; with the 15px
+  base they render at 14px.
+- Tenant editor: the page head (name, section links, Back) sticks to the top edge and the
+  Save bar to the bottom, compacted on phones.
+
 ## v0.2.25 - 2026-09-05
 
 ### Added

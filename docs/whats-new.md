@@ -3,6 +3,16 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.26 - links you can tap, and a glossary for the bars
+
+When the assistant gives an email, a phone number or a web address, it is now a real
+link: tap to mail, tap to call, tap to open the page in a new tab. On the Analytics page
+the "What visitors reach for" bars used to show bare function names; each one now comes
+with a plain-words card saying what it does, what goes in and what comes back. The
+tenant form keeps its name, links and Save button in view while you scroll. And when the
+cafe website cannot report the weather, the assistant suggests a drink from the specials
+or the menu instead of apologising.
+
 ## v0.2.25 - a second kind of tenant: the coach
 
 Until now every tenant was a customer assistant for one business. There is now a second
