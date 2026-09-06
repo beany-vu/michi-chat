@@ -8,6 +8,7 @@ import { sql } from "drizzle-orm";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
+import { tenants } from "@/db/schema";
 import { isAuthenticated } from "@/lib/admin-auth";
 import { FRIENDLY_ERROR } from "@/lib/moderation";
 import { UNANSWERED_SQL_REGEX } from "@/lib/unanswered";
@@ -26,8 +27,24 @@ interface GapRow {
   answer: string;
 }
 
-export default async function UnansweredPage() {
+function href(tenant?: string) {
+  return tenant ? `/admin/unanswered?tenant=${encodeURIComponent(tenant)}` : "/admin/unanswered";
+}
+
+export default async function UnansweredPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tenant?: string }>;
+}) {
   if (!(await isAuthenticated())) redirect("/admin/login");
+  const { tenant: tenantSlug } = await searchParams;
+
+  // Same tenant chips as Conversations: with several tenants the gap list otherwise
+  // interleaves businesses and the reader loses track of whose KB needs the fact.
+  const allTenants = await dbRoot
+    .select({ slug: tenants.slug, name: tenants.name })
+    .from(tenants)
+    .orderBy(tenants.name);
 
   // The preceding user turn is the interesting half: that's the question to answer in
   // the KB. Correlated subquery keeps this one round-trip.
@@ -48,14 +65,29 @@ export default async function UnansweredPage() {
     where m.role = 'assistant'
       and m.created_at > now() - interval '${sql.raw(String(WINDOW_DAYS))} days'
       and (m.content ~* ${UNANSWERED_SQL_REGEX} or m.content = ${FRIENDLY_ERROR})
+      ${tenantSlug ? sql`and t.slug = ${tenantSlug}` : sql``}
     order by m.created_at desc
     limit ${MAX_ROWS}
   `)) as unknown as GapRow[];
 
   return (
     <>
-      <div className="head">
+      <div className="head head-sticky">
         <h1>Unanswered</h1>
+        <div className="filters">
+          <Link className={`filter${!tenantSlug ? " filter-active" : ""}`} href={href()}>
+            All
+          </Link>
+          {allTenants.map((t) => (
+            <Link
+              key={t.slug}
+              className={`filter${tenantSlug === t.slug ? " filter-active" : ""}`}
+              href={href(t.slug)}
+            >
+              {t.name}
+            </Link>
+          ))}
+        </div>
       </div>
 
       <p className="note">
@@ -67,7 +99,10 @@ export default async function UnansweredPage() {
       </p>
 
       {rows.length === 0 ? (
-        <p className="note">Nothing in the window. The knowledge base is keeping up.</p>
+        <p className="note">
+          Nothing in the window{tenantSlug ? " for this tenant" : ""}. The knowledge base is
+          keeping up.
+        </p>
       ) : (
         <table>
           <thead>
