@@ -48,6 +48,18 @@ test("an unreachable upstream comes back as JSON for the model, not an exception
   assert.ok(result.error, "expected an error payload the model can apologize with");
 });
 
+test("get_weather degrades to a 'suggest from the menu' note when the site is unreachable", async () => {
+  const tools = buildTenantTools(
+    { get_weather: { enabled: true, baseUrl: "https://this-host-does-not-exist.invalid" } },
+    TENANT_ID,
+  );
+  const result = JSON.parse(await tools.execute("get_weather", "{}"));
+  assert.equal(result.error, undefined, "no bare error: the model must keep helping");
+  assert.equal(result.weatherAvailable, false);
+  assert.match(result.note, /get_specials/);
+  assert.match(result.note, /Do not guess/);
+});
+
 test("labels come from the pack, with the raw name as the fallback", () => {
   const tools = buildTenantTools(
     { get_menu: { enabled: true, baseUrl: "https://example.com" } },

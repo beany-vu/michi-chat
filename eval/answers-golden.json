@@ -68,10 +68,11 @@
       "question": "can I rent the cafe for a private event?",
       "requiredFacts": [
         "yes, the space can be booked",
-        "inquire via the website form, email, or phone"
+        "published packages start at 3,500 pesos for 3 hours",
+        "inquire via the website form, email, or Instagram"
       ],
       "forbidden": [
-        "a specific rental price",
+        "a rental price other than 3,500, 4,500 or 5,500",
         "confirmed availability for a date"
       ]
     },
@@ -118,6 +119,27 @@
       ],
       "forbidden": [
         "any raw error text, JSON, or the words 'flagged as unsafe' or 'moderation'"
+      ]
+    },
+    {
+      "question": "can I bring my dog?",
+      "requiredFacts": [
+        "yes, pets are welcome",
+        "keep the pet with you / watched"
+      ],
+      "forbidden": [
+        "dogs are not allowed",
+        "dog walking or pet-sitting service"
+      ]
+    },
+    {
+      "question": "how much is the coffee cart for 100 people?",
+      "requiredFacts": [
+        "100 cups is 14,000 pesos",
+        "inquire to book"
+      ],
+      "forbidden": [
+        "a price other than 8,000 / 14,000 / 22,000 / 120 per extra cup / 1,000 per extra hour"
       ]
     }
   ]

@@ -22,7 +22,10 @@ Free parking is available, and the cafe has fast Wi-Fi for customers.
 
 For requests, inquiries and feedback, the best channels are:
 
-- Website contact / inquiry form: https://mugshotmnl.com (preferred for venue and events)
+- Event inquiry form on the website: https://mugshotmnl.com, section "Host your event at
+  Mugshot", button "Inquire about the space" (preferred for venue rental, pop-ups and events;
+  replies within 24 hours)
+- Instagram: @mugshotcoffeeph
 - Email: mugshotcoffeeph@gmail.com
 
 A phone line exists (+63 2 8570 3155), but it may not be answered right away, so for a

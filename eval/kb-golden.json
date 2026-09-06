@@ -101,6 +101,22 @@
     {
       "question": "do you have pottery or art workshops?",
       "expectDoc": "Events and venue rental"
+    },
+    {
+      "question": "can I bring my dog",
+      "expectDoc": "Pets"
+    },
+    {
+      "question": "are cats allowed inside the cafe",
+      "expectDoc": "Pets"
+    },
+    {
+      "question": "how much does it cost to rent the venue",
+      "expectDoc": "Events and venue rental"
+    },
+    {
+      "question": "coffee cart price for 50 cups",
+      "expectDoc": "Events and venue rental"
     }
   ]
 }

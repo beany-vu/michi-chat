@@ -4,6 +4,11 @@
 
 import { getJson, type ToolPack } from "./registry";
 
+const WEATHER_UNAVAILABLE_NOTE =
+  "Weather is not available right now. Do not guess or describe the weather. " +
+  "For a drink suggestion, call get_specials for the seasonal specials or get_menu " +
+  "and recommend from what those return, mentioning that the weather could not be checked.";
+
 const weather: ToolPack = {
   id: "get_weather",
   family: "mugshot-cms",
@@ -25,20 +30,42 @@ const weather: ToolPack = {
   async run(config) {
     // The site's CMS-to-Postgres migration moved this from /api/weather/ and changed
     // the shape; `today` is what matters for "what should I drink" questions.
-    const data = (await getJson(`${config.baseUrl}/api/weather/forecast/`)) as {
-      today?: Record<string, unknown>;
-    };
-    const today = data.today ?? {};
+    let today: Record<string, unknown> = {};
+    try {
+      const data = (await getJson(`${config.baseUrl}/api/weather/forecast/`)) as {
+        today?: Record<string, unknown>;
+      };
+      today = data.today ?? {};
+    } catch {
+      // A dead upstream is not a failed turn: the visitor still wants a drink idea.
+      // The generic "tool unavailable" error made small models apologise and stop;
+      // an explicit instruction keeps the conversation useful.
+      return JSON.stringify({ weatherAvailable: false, note: WEATHER_UNAVAILABLE_NOTE });
+    }
+    // The site answers `available: false` (with null numbers) when its own weather
+    // provider is down and nothing recent is stored. Same fallback as an outage.
+    if (today.available === false || typeof today.temp !== "number") {
+      return JSON.stringify({ weatherAvailable: false, note: WEATHER_UNAVAILABLE_NOTE });
+    }
     // Two temperatures confuse small models into quoting the heat index as "the
     // temperature" (a visitor compared us to a weather app and saw a 10 degree gap).
     // Self-describing names + an explicit usage note keep the phrasing honest.
+    const fromCache = today.source === "cache";
     return JSON.stringify({
+      weatherAvailable: true,
       airTemperatureC: today.temp,
       heatIndexFeelsLikeC: today.feels_like,
       condition: today.description,
       rainChancePct: today.rain_chance,
       goodDayForACafeVisit: today.is_good_day,
-      note: "When stating the temperature, use airTemperatureC. heatIndexFeelsLikeC is the heat index; mention it only as 'feels like'.",
+      // The site serves its last stored reading (up to 2 hours old) when its weather
+      // provider is down; say "last reading" rather than "right now" in that case.
+      ...(fromCache ? { lastReadingAt: today.as_of, isLastSavedReading: true } : {}),
+      note:
+        "When stating the temperature, use airTemperatureC. heatIndexFeelsLikeC is the heat index; mention it only as 'feels like'." +
+        (fromCache
+          ? " This is the last saved reading, not live: say 'as of the last reading' and do not claim it is the current weather."
+          : ""),
     });
   },
 };
