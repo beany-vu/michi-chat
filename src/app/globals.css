@@ -285,7 +285,8 @@ body {
 }
 
 /* Tenant logo in the topbar; replaces the accent dot when set. */
-.brand-logo { height: 28px; width: 28px; border-radius: 6px; object-fit: cover; }
+/* Square marks and wide wordmarks both fit: fixed height, natural width, never cropped. */
+.brand-logo { height: 28px; width: auto; max-width: 180px; border-radius: 6px; object-fit: contain; }
 
 /* Attribution, deliberately quiet. */
 .topbar { display: flex; align-items: center; justify-content: space-between; }
