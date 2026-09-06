@@ -17,6 +17,14 @@ For the current bag price, ask at the counter or check FoodPanda.
 
 This is our only retail bean. We do not carry other single origins or varieties; do not expect a menu of bean origins.
 
+## What is your best seller?
+
+Our best seller is the Mugshot Special: our favourite drink, the one customers order
+and love most. It is our signature house blend with its own preparation, with a nutty,
+burnt-sugar taste and a hint of cinnamon. If someone asks what is popular or what to try
+first, the answer is the Mugshot Special. For a non-coffee favourite, the seasonal
+specials are the next thing to suggest.
+
 ## Seasonal drinks
 
 The seasonal lineup rotates (for example, an Iced Hojicha Latte). The live specials list is

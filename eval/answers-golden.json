@@ -161,6 +161,16 @@
         "a specific percentage or promo code",
         "a confident yes with a made-up promo"
       ]
+    },
+    {
+      "question": "what is your best seller?",
+      "requiredFacts": [
+        "the Mugshot Special is the best seller"
+      ],
+      "forbidden": [
+        "says it cannot name a best seller",
+        "names the retail beans as the best seller"
+      ]
     }
   ]
 }

@@ -132,6 +132,10 @@
     {
       "question": "do you have any discount or promo",
       "expectDoc": "Frequently asked questions"
+    },
+    {
+      "question": "what is your best seller",
+      "expectDoc": "Coffee and retail"
     }
   ]
 }
