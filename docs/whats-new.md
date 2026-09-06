@@ -3,6 +3,15 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.28 - staff see only their tenants
+
+On Accounts you now tick which tenants a staff account may see, and that is all they
+see anywhere in the admin: tenant list, conversations, Unanswered, Usage, analytics,
+knowledge base. A staff account with nothing ticked sees nothing until you assign it,
+so a new login is safe by default. Owners keep seeing everything. If you already have
+staff accounts, tick their tenants after this update, or they will find an empty admin.
+Unanswered also got the tenant chips from Conversations.
+
 ## v0.2.27 - the page head stays with you everywhere
 
 The sticky head from the tenant form now applies to every admin page that has something

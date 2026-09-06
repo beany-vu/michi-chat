@@ -3,6 +3,21 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.28 - 2026-09-06
+
+### Added
+
+- **Staff accounts scoped to tenants.** An owner ticks the tenants a staff account may
+  see, on the create form or inline on the Accounts table. A staff account with no
+  tenants ticked sees nothing until assigned; owners are unscoped. The scope is read
+  live with the session, so a change applies on the account's next request, and it is
+  enforced in the queries (tenant list, conversations and transcripts, Unanswered,
+  Usage, analytics, knowledge base and its actions, answer cache, embed keys, the tenant
+  editor, CSV export, flagging), not just the menu. Migration `0014_staff_tenants`.
+  **Existing staff accounts have no tenants assigned after this upgrade: assign them
+  on Accounts or they see an empty admin.**
+- Unanswered has the same tenant filter chips as Conversations.
+
 ## v0.2.27 - 2026-09-06
 
 ### Changed
