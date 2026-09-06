@@ -6,6 +6,7 @@ export default defineConfig({
   // Project pages live under https://<owner>.github.io/michi-chat/
   base: "/michi-chat/",
   head: [
+    ["link", { rel: "icon", type: "image/png", href: "/michi-chat/michi-shield-96.png" }],
     ["script", { async: "", src: "https://www.googletagmanager.com/gtag/js?id=G-7B9F6M4R26" }],
     [
       "script",
@@ -18,6 +19,8 @@ export default defineConfig({
   // localhost URLs in the quickstart are the point, not dead links.
   ignoreDeadLinks: [/^http:\/\/localhost/],
   themeConfig: {
+    // The michi shield, shared with the sister projects (michi-vz uses the same one).
+    logo: "/michi-shield-96.png",
     nav: [
       { text: "What\u2019s new", link: "/whats-new" },
       { text: "Articles", link: "/articles" },

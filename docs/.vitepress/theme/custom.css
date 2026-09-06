@@ -1,0 +1,15 @@
+.site-footer {
+  border-top: 1px solid var(--vp-c-divider);
+  padding: 32px 24px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--vp-c-text-2);
+  text-align: center;
+}
+.site-footer-inner { max-width: 72ch; margin: 0 auto; }
+.site-footer p { margin: 2px 0; }
+.site-footer-line { color: var(--vp-c-text-1); }
+.site-footer a { color: var(--vp-c-brand-1); text-decoration: none; }
+.site-footer a:hover { text-decoration: underline; }
+.site-footer .dot { margin: 0 6px; }
+.site-footer-copy { margin-top: 10px; }
