@@ -8,6 +8,9 @@ const year = new Date().getFullYear();
       <p class="site-footer-line">
         <span aria-hidden="true">&#10084;&#65039;</span> Open source and built with care
       </p>
+      <p class="site-footer-ask">
+        If it made you smile, a star on GitHub keeps the cat fed. Pull requests are welcome too; the cat reviews every one personally.
+      </p>
       <p class="site-footer-links">
         <a href="https://github.com/beany-vu/michi-chat" target="_blank" rel="noopener">Star on GitHub</a>
         <span class="dot">&middot;</span>

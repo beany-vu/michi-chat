@@ -9,6 +9,7 @@
 .site-footer-inner { max-width: 72ch; margin: 0 auto; }
 .site-footer p { margin: 2px 0; }
 .site-footer-line { color: var(--vp-c-text-1); }
+.site-footer-ask { max-width: 60ch; margin: 4px auto 8px; }
 .site-footer a { color: var(--vp-c-brand-1); text-decoration: none; }
 .site-footer a:hover { text-decoration: underline; }
 .site-footer .dot { margin: 0 6px; }
