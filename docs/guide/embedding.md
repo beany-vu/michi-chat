@@ -1,3 +1,7 @@
+---
+description: "Put the michi-chat assistant on a website: the public embed key, allowed origins, the iframe widget, and what the key does and does not authorise."
+---
+
 # Embedding on a website
 
 Every tenant is reachable at `/t/<slug>` - a full-page chat with the tenant's branding. Getting that chat *onto the business's own website* takes two pieces of configuration and one piece of HTML.

@@ -1,3 +1,7 @@
+---
+description: "Extend michi-chat with tool packs: one TypeScript file per capability, config fields that grow the admin form, and why there is no runtime plugin system."
+---
+
 # Extending with tool packs
 
 A tool is what lets the bot fetch live facts - a menu, the weather, stock. In michi-chat, tools are **code packs**: the platform owns the code; a tenant enables a pack and fills in parameters through the admin form. There is deliberately no runtime plugin system (see why below).

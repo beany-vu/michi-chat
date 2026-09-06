@@ -1,3 +1,7 @@
+---
+description: "What your customers see when michi-chat answers for your business, what it will and will not do, and what running it looks like."
+---
+
 # Meet your assistant
 
 This is what your customers see: a chat on your website that answers questions about **your

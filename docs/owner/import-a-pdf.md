@@ -1,3 +1,7 @@
+---
+description: "Turn a PDF into michi-chat knowledge: free analysis, a priced AI tidy-up, and a clean document the assistant can answer from."
+---
+
 # Turn a PDF into knowledge
 
 Your facts probably already live in a PDF - a customer handbook, a policy sheet, an

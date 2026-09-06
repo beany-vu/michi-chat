@@ -1,3 +1,7 @@
+---
+description: "Longer reads about michi-chat from the maker's blog: the reasoning behind the features, written for curious readers."
+---
+
 # Articles
 
 Longer reads about michi-chat from the maker's blog - the story and the reasoning behind

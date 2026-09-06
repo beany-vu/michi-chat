@@ -1,3 +1,7 @@
+---
+description: "Point michi-chat at any model provider through LiteLLM: local Ollama, hosted APIs, the three aliases the app knows, and the traps to avoid."
+---
+
 # Model backends
 
 The app never names a real model. It asks LiteLLM for three **aliases**:

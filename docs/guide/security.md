@@ -1,3 +1,7 @@
+---
+description: "The michi-chat security model: untrusted public traffic, origin allowlists, server-minted sessions, rate limits, daily caps, prompt hardening and no visitor IPs."
+---
+
 # Security model
 
 The design assumption everywhere: the chat endpoint faces **strangers**. The embed key is public, the Origin header is forgeable off-browser, and the visitor is anonymous. Every control is chosen to hold under those conditions.

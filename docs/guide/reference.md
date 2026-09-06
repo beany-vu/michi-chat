@@ -1,3 +1,7 @@
+---
+description: "Every environment variable michi-chat reads, with defaults and what each one controls."
+---
+
 # Environment reference
 
 ## Quickstart `.env` (compose-level)

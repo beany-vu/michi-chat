@@ -1,3 +1,7 @@
+---
+description: "What changed in michi-chat, release by release, in plain words for business owners."
+---
+
 # What's new
 
 The headline changes, newest first. The full list lives in

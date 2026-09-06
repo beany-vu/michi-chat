@@ -14,3 +14,34 @@
 .site-footer a:hover { text-decoration: underline; }
 .site-footer .dot { margin: 0 6px; }
 .site-footer-copy { margin-top: 10px; }
+
+/* The cat behind the name: a small aside on the home page, just above the footer. */
+.michi-note {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  max-width: 720px;
+  margin: 56px auto 8px;
+  padding: 20px 24px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background: var(--vp-c-bg-soft);
+}
+.michi-note img {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex: 0 0 auto;
+}
+.michi-note p { margin: 0; line-height: 1.6; color: var(--vp-c-text-1); }
+.michi-note-kicker {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vp-c-text-2);
+  margin-bottom: 6px !important;
+}
+@media (max-width: 640px) {
+  .michi-note { flex-direction: column; text-align: center; margin-left: 24px; margin-right: 24px; }
+}

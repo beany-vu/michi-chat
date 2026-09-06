@@ -1,3 +1,7 @@
+---
+description: "Running a michi-chat assistant in ten minutes a week: analytics, staff accounts, reading conversations, fixing unanswered questions, Slack pings."
+---
+
 # Running it day to day
 
 Ten minutes a week, honestly.

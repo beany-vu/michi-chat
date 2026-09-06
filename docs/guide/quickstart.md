@@ -1,3 +1,7 @@
+---
+description: "Run michi-chat in minutes from the prebuilt image: one docker compose file, a model backend of your choice, and your first tenant."
+---
+
 # Quickstart
 
 You need Docker and about five minutes. No clone, no Node toolchain, no account anywhere:

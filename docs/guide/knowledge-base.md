@@ -1,3 +1,7 @@
+---
+description: "How the michi-chat knowledge base works: markdown facts, heading-aware chunking, pgvector retrieval, CSV and PDF import, and the recall eval."
+---
+
 # Knowledge base
 
 Each tenant can have a set of markdown documents the bot searches when a visitor asks a factual question - hours, policies, FAQs, product details. Retrieval is grounded: when nothing relevant is found, the bot says it doesn't know instead of guessing.

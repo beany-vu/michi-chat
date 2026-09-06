@@ -1,3 +1,7 @@
+---
+description: "Set up your michi-chat assistant step by step: sign in, create your business, write its persona and facts, and put it on your website."
+---
+
 # Set it up, step by step
 
 Fifteen minutes from login to a working assistant. (Someone technical installs the platform

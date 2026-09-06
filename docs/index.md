@@ -29,3 +29,11 @@ features:
   - title: Grounded answers
     details: A pgvector knowledge base with heading-aware chunking and a measured recall@k eval. The bot says "I don't know" instead of inventing facts or prices.
 ---
+
+<div class="michi-note">
+  <img src="/michi.jpg" alt="Michi, an orange cat, asleep on the floor" loading="lazy">
+  <div>
+    <p class="michi-note-kicker">Good to know</p>
+    <p>There is indeed a cat in Geneva named Michi. Every project in this workshop is named after Michi, and this is Michi's contribution: sleeping through the code review, then taking the credit.</p>
+  </div>
+</div>

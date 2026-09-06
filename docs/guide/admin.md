@@ -1,3 +1,7 @@
+---
+description: "The michi-chat admin: tenants, the tenant form, tools, embed keys, conversations, usage, analytics, moving tenants between instances, roles and privacy."
+---
+
 # The admin UI
 
 `/admin`, protected by `MICHI_ADMIN_PASSWORD`. This is the single-operator control panel: every bot on the platform is configured here, and nowhere else.
