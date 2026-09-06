@@ -39,7 +39,12 @@ export function TenantImport() {
             {pending ? "Working…" : "Import tenant"}
           </button>
           {state?.error && <span className="error">{state.error}</span>}
-          {state?.ok && <span className="ok">{state.info}</span>}
+          {state?.ok && (
+            <span className="ok">
+              {state.info}{" "}
+              {state.tenantId && <a href={`/admin/tenants/${state.tenantId}`}>Open the tenant</a>}
+            </span>
+          )}
         </div>
       </form>
     </section>

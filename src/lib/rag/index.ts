@@ -19,11 +19,14 @@ export const contentHash = (content: string) =>
  * the title is the operator-facing identity of a document. Returns the number of chunks
  * written, or -1 when the content was unchanged and nothing was re-embedded.
  */
-export async function ingestDocument(input: {
-  tenantId: string;
-  title: string;
-  content: string;
-}): Promise<number> {
+export async function ingestDocument(
+  input: {
+    tenantId: string;
+    title: string;
+    content: string;
+  },
+  options: { onProgress?: (done: number, total: number) => void | Promise<void> } = {},
+): Promise<number> {
   const hash = contentHash(input.content);
 
   // Cached answers are downstream of the knowledge; stale beats slow, never the reverse.
@@ -40,7 +43,10 @@ export async function ingestDocument(input: {
   if (chunks.length === 0) throw new Error("document produced no chunks");
   // Embed BEFORE touching the tables: if the embedding service is down, the old chunks
   // keep serving and the document row never drifts from its chunks.
-  const embeddings = await embedTexts(chunks.map((c) => `${c.heading}\n${c.content}`));
+  const embeddings = await embedTexts(
+    chunks.map((c) => `${c.heading}\n${c.content}`),
+    options.onProgress,
+  );
 
   return dbRoot.transaction(async (tx) => {
     let documentId = existing?.id;

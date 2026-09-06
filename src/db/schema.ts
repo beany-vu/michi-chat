@@ -341,6 +341,37 @@ export const kbDocuments = pgTable(
   ],
 );
 
+/** One row per tenant import (admin upload or CLI). The import writes progress here
+ *  OUTSIDE the per-document transactions, so the admin can show "8 of 9 documents,
+ *  3,210 of 7,412 chunks" while a big document is still embedding, and refuse a second
+ *  import for the same tenant while one runs. */
+export const importJobs = pgTable(
+  "import_jobs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    /** "admin" (upload in /admin) or "cli" (npm run tenant:import). */
+    source: text("source").notNull(),
+    /** running | done | failed */
+    status: text("status").notNull().default("running"),
+    docsTotal: integer("docs_total").notNull().default(0),
+    docsDone: integer("docs_done").notNull().default(0),
+    chunksTotal: integer("chunks_total").notNull().default(0),
+    chunksDone: integer("chunks_done").notNull().default(0),
+    /** Title of the document being embedded right now, null between documents. */
+    currentTitle: text("current_title"),
+    /** Human summary when done, the error message when failed. */
+    message: text("message"),
+    startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+    /** Bumped on every progress write; a "running" job with a stale heartbeat is dead. */
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+  },
+  (t) => [index("import_jobs_tenant_idx").on(t.tenantId, desc(t.startedAt))],
+);
+
 export const kbChunks = pgTable(
   "kb_chunks",
   {

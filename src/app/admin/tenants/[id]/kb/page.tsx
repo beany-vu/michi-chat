@@ -13,6 +13,8 @@ import { KbImport } from "./KbImport";
 import { PdfImport } from "./PdfImport";
 import { KbForm } from "./KbForm";
 import { LocalTime } from "../../../LocalTime";
+import { ImportStatus } from "../../../ImportStatus";
+import { latestImportJob } from "@/lib/import-jobs";
 
 export default async function KbPage({
   params,
@@ -29,6 +31,8 @@ export default async function KbPage({
 
   const [tenant] = await dbRoot.select().from(tenants).where(eq(tenants.id, id)).limit(1);
   if (!tenant) notFound();
+  const importJob = await latestImportJob(id);
+  const embeddingNow = importJob?.status === "running" ? importJob.currentTitle : null;
 
   const documents = await dbRoot
     .select({
@@ -65,6 +69,8 @@ export default async function KbPage({
         </div>
       </div>
 
+      <ImportStatus job={importJob} />
+
       <p className="note">
         This is where the facts live: every <code>##</code> heading section in a document is
         one retrievable fact, and the <code>search_kb</code> tool answers from them. Enable
@@ -79,7 +85,7 @@ export default async function KbPage({
         than a raw dump; split big files into one document per topic.
       </p>
 
-      {documents.length > 0 && (
+      {(documents.length > 0 || embeddingNow) && (
         <table>
           <thead>
             <tr>
@@ -90,6 +96,16 @@ export default async function KbPage({
             </tr>
           </thead>
           <tbody>
+            {embeddingNow && !documents.some((document) => document.title === embeddingNow) && (
+              <tr className="pending-row">
+                <td>{embeddingNow}</td>
+                <td>
+                  <span className="spinner-inline" aria-hidden /> embedding
+                </td>
+                <td>now</td>
+                <td />
+              </tr>
+            )}
             {documents.map((document) => (
               <tr key={document.id}>
                 <td>{document.title}</td>

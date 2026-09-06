@@ -7,6 +7,8 @@ import { assertTenantVisible, getAdminSession } from "@/lib/admin-auth";
 import { TOOL_PACKS } from "@/lib/tools";
 import { enabledTenantKinds } from "@/lib/prompt";
 import { TenantForm } from "./TenantForm";
+import { ImportStatus } from "../../ImportStatus";
+import { latestImportJob } from "@/lib/import-jobs";
 
 export default async function TenantEditor({ params }: { params: Promise<{ id: string }> }) {
   const session = await getAdminSession();
@@ -16,6 +18,7 @@ export default async function TenantEditor({ params }: { params: Promise<{ id: s
 
   const [tenant] = await dbRoot.select().from(tenants).where(eq(tenants.id, id)).limit(1);
   if (!tenant) notFound();
+  const importJob = await latestImportJob(id);
 
   // The pack list is passed down as plain data so the form can render a field set per
   // pack: adding a pack file grows this UI with no edit here.
@@ -43,6 +46,7 @@ export default async function TenantEditor({ params }: { params: Promise<{ id: s
           <Link href="/admin">Back</Link>
         </div>
       </div>
+      <ImportStatus job={importJob} />
       <TenantForm tenant={tenant} packs={packs} kinds={enabledTenantKinds(process.env.MICHI_TENANT_KINDS)} />
     </>
   );

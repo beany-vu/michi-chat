@@ -11,6 +11,7 @@ import { randomBytes } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import OpenAI from "openai";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { adminUserTenants, adminUsers, answerCache, apiKeys, conversations, tenants, type Branding, type ToolConfig } from "@/db/schema";
@@ -24,7 +25,7 @@ import { MAX_GUARDRAILS_CHARS, MAX_PERSONA_CHARS, tenantKindUpdate } from "@/lib
 import { deleteDocument, ingestDocument } from "@/lib/rag";
 import { clearAnswerCache } from "@/lib/rag/answer-cache";
 import { validateSlackWebhookUrl } from "@/lib/slack";
-import { exportTenant, importTenant, previewTenantImport } from "@/lib/tenant-transfer";
+import { exportTenant, prepareTenantImport, previewTenantImport } from "@/lib/tenant-transfer";
 import { normalizeOrigin } from "@/lib/tenant";
 import { validateBaseUrl, validatePath } from "@/lib/validate";
 import { TOOL_PACKS } from "@/lib/tools";
@@ -569,10 +570,32 @@ export async function importTenantAction(_prev: unknown, formData: FormData) {
     if (preview.exists && formData.get("confirm") !== "on") {
       return { preview: preview.changes };
     }
-    const summary = await importTenant(payload);
-    logAudit(session, "tenant.import", summary);
+    // Settings apply now; the slow part (embedding every changed document) runs after
+    // this response is sent, so a big knowledge base never holds the browser's request
+    // open until a proxy cuts it. The tenant page shows the progress banner meanwhile.
+    const prepared = await prepareTenantImport(payload, "admin");
+    logAudit(
+      session,
+      "tenant.import",
+      `${prepared.created ? "created" : "updated"} '${prepared.slug}': settings applied, ${prepared.docsTotal} documents queued (${prepared.chunksTotal} chunks to embed)`,
+    );
+    after(async () => {
+      try {
+        await prepared.run();
+      } catch (error) {
+        console.error("tenant import failed:", error);
+      }
+    });
     revalidatePath("/admin");
-    return { ok: true as const, info: summary };
+    const work =
+      prepared.chunksTotal > 0
+        ? `${prepared.docsTotal} documents, ${prepared.chunksTotal.toLocaleString("en-US")} chunks to embed`
+        : `${prepared.docsTotal} documents, nothing to re-embed`;
+    return {
+      ok: true as const,
+      info: `Import started for '${prepared.slug}' (${work}). The tenant's page shows the progress.`,
+      tenantId: prepared.tenantId,
+    };
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Import failed." };
   }

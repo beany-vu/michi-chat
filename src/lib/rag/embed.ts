@@ -15,7 +15,12 @@ const EMBED_MODEL = process.env.EMBED_MODEL ?? "embed";
 // Ollama embeds serially anyway; small batches keep one failed request small.
 const BATCH_SIZE = 16;
 
-export async function embedTexts(texts: string[]): Promise<number[][]> {
+/** Embeds in batches. `onProgress(done, total)` fires after every batch so a long
+ *  document (thousands of chunks) can report where it is. */
+export async function embedTexts(
+  texts: string[],
+  onProgress?: (done: number, total: number) => void | Promise<void>,
+): Promise<number[][]> {
   const out: number[][] = [];
   for (let i = 0; i < texts.length; i += BATCH_SIZE) {
     const batch = texts.slice(i, i + BATCH_SIZE);
@@ -39,6 +44,7 @@ export async function embedTexts(texts: string[]): Promise<number[][]> {
       }
       out.push(item.embedding);
     }
+    if (onProgress) await onProgress(out.length, texts.length);
   }
   return out;
 }

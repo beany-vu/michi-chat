@@ -871,3 +871,31 @@
     flex: 0 0 auto;
   }
 }
+
+/* ---------- import progress banner ---------- */
+.import-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--accent-soft, #e7efe3);
+  color: var(--ink, #232820);
+  font-size: 0.95rem;
+}
+.import-status.done { background: #eaf2e6; }
+.import-status.failed { background: #f7e9e9; color: #a04545; }
+.spinner-inline {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: import-spin 0.8s linear infinite;
+  flex: none;
+  vertical-align: -2px;
+}
+.pending-row td { color: var(--ink-soft, #5b6354); font-style: italic; }
+@keyframes import-spin { to { transform: rotate(360deg); } }

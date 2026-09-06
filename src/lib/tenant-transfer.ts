@@ -14,6 +14,8 @@ import { dbRoot } from "@/db";
 import { apiKeys, tenants, kbDocuments, type Branding, type ToolConfig } from "@/db/schema";
 import { clearAnswerCache } from "@/lib/rag/answer-cache";
 import { contentHash, ingestDocument } from "@/lib/rag";
+import { chunkMarkdown } from "@/lib/rag/chunk";
+import { createImportJob, finishImportJob, progressLine, runningImportJob, touchImportJob } from "@/lib/import-jobs";
 import { validateSlackWebhookUrl } from "@/lib/slack";
 import { normalizeOrigin } from "@/lib/tenant";
 import { TOOL_PACKS } from "@/lib/tools";
@@ -125,8 +127,33 @@ export async function previewTenantImport(payload: unknown): Promise<ImportPrevi
   return { exists: true, changes };
 }
 
-/** Upserts by slug. Returns a human summary or throws with a human reason. */
-export async function importTenant(payload: unknown): Promise<string> {
+export type ImportSource = "admin" | "cli";
+
+/** What prepareTenantImport hands back: the tenant is already created/updated, the job
+ *  row exists, and `run()` does the slow part (embedding) and closes the job. */
+export interface PreparedImport {
+  tenantId: string;
+  slug: string;
+  created: boolean;
+  jobId: string;
+  docsTotal: number;
+  /** Chunks that will actually be embedded (unchanged documents are skipped by hash). */
+  chunksTotal: number;
+  run: () => Promise<string>;
+}
+
+/** Upserts by slug and embeds the knowledge base. Returns a human summary or throws with
+ *  a human reason. The CLI uses this; the admin prepares, answers, then runs after the
+ *  response so a big knowledge base never holds the browser's request open. */
+export async function importTenant(payload: unknown, source: ImportSource = "cli"): Promise<string> {
+  const prepared = await prepareTenantImport(payload, source);
+  return prepared.run();
+}
+
+/** Validates the file, applies the settings, plans the documents and opens the job row.
+ *  Throws (with a human reason) before changing anything when the file is bad or when an
+ *  import for this tenant is already running. */
+export async function prepareTenantImport(payload: unknown, source: ImportSource): Promise<PreparedImport> {
   const data = payload as TenantTransfer;
   if (data?.format !== TRANSFER_FORMAT || data.version !== TRANSFER_VERSION) {
     throw new Error("Not a michi tenant file (or a newer version than this instance).");
@@ -202,6 +229,12 @@ export async function importTenant(payload: unknown): Promise<string> {
   let tenantId: string;
   let created = false;
   if (existing) {
+    const live = await runningImportJob(existing.id);
+    if (live) {
+      throw new Error(
+        `An import for '${t.slug}' is already running (${progressLine(live)}) Wait for it to finish, then try again.`,
+      );
+    }
     tenantId = existing.id;
     await dbRoot.update(tenants).set(fields).where(eq(tenants.id, tenantId));
   } else {
@@ -220,13 +253,59 @@ export async function importTenant(payload: unknown): Promise<string> {
     });
   }
 
-  let kbCount = 0;
-  for (const doc of (data.kb ?? []).slice(0, 200)) {
-    if (!doc?.title?.trim() || !doc?.content?.trim()) continue;
-    await ingestDocument({ tenantId, title: doc.title.trim(), content: doc.content });
-    kbCount += 1;
-  }
-  await clearAnswerCache(tenantId);
+  // --- plan the documents: which ones change, and how many chunks that is ---------------
+  // Unchanged documents (same content hash) are skipped by ingestDocument; knowing that up
+  // front makes the progress numbers honest ("3,210 of 7,412 chunks" counts real work).
+  const docs = (data.kb ?? [])
+    .slice(0, 200)
+    .filter((doc) => doc?.title?.trim() && doc?.content?.trim())
+    .map((doc) => ({ title: doc.title.trim(), content: doc.content }));
+  const existingHashes = new Map(
+    (
+      await dbRoot
+        .select({ title: kbDocuments.title, contentHash: kbDocuments.contentHash })
+        .from(kbDocuments)
+        .where(eq(kbDocuments.tenantId, tenantId))
+    ).map((row) => [row.title, row.contentHash]),
+  );
+  const plan = docs.map((doc) => {
+    const unchanged = existingHashes.get(doc.title) === contentHash(doc.content);
+    return { ...doc, chunks: unchanged ? 0 : chunkMarkdown(doc.content, doc.title).length };
+  });
+  const chunksTotal = plan.reduce((sum, doc) => sum + doc.chunks, 0);
+  const jobId = await createImportJob({ tenantId, source, docsTotal: plan.length, chunksTotal });
 
-  return `${created ? "Created" : "Updated"} '${t.slug}': settings applied, ${kbCount} KB documents re-embedded.`;
+  const run = async (): Promise<string> => {
+    let docsDone = 0;
+    let chunksBefore = 0;
+    let current: string | null = null;
+    try {
+      for (const doc of plan) {
+        current = doc.title;
+        await touchImportJob(jobId, { docsDone, currentTitle: doc.title });
+        if (doc.chunks > 0) {
+          const before = chunksBefore;
+          await ingestDocument(
+            { tenantId, title: doc.title, content: doc.content },
+            { onProgress: (done) => touchImportJob(jobId, { chunksDone: before + done }) },
+          );
+          chunksBefore += doc.chunks;
+        }
+        docsDone += 1;
+        if (source === "cli") console.log(`  ${docsDone}/${plan.length} ${doc.title}: ${doc.chunks > 0 ? `${doc.chunks} chunks` : "unchanged"}`);
+      }
+      current = null;
+      await clearAnswerCache(tenantId);
+      const summary = `${created ? "Created" : "Updated"} '${t.slug}': settings applied, ${plan.length} KB documents (${chunksTotal.toLocaleString("en-US")} chunks embedded, unchanged ones skipped).`;
+      await finishImportJob(jobId, { status: "done", message: summary, docsDone, chunksDone: chunksTotal });
+      return summary;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      await touchImportJob(jobId, { currentTitle: current });
+      await finishImportJob(jobId, { status: "failed", message, docsDone, chunksDone: chunksBefore });
+      throw error;
+    }
+  };
+
+  return { tenantId, slug: t.slug, created, jobId, docsTotal: plan.length, chunksTotal, run };
 }
