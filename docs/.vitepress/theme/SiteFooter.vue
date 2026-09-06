@@ -23,7 +23,7 @@ const year = new Date().getFullYear();
         <span class="dot">&middot;</span>
         <a href="https://hoang.body-and-binary.net/" target="_blank" rel="noopener">the maker's site</a>
       </p>
-      <p class="site-footer-copy">MIT licensed &middot; &copy; {{ year }} Hoang Vu</p>
+      <p class="site-footer-copy">MIT licensed &middot; &copy; {{ year }} <a href="https://hoang.body-and-binary.net/" target="_blank" rel="noopener">Hoang Vu</a></p>
     </div>
   </footer>
 </template>

@@ -5,6 +5,9 @@ hero:
   name: michi-chat
   text: A chat assistant platform for small businesses
   tagline: Multi-tenant, tool-calling, RAG-ready. Small enough to read in an afternoon, hardened enough to face the public internet.
+  image:
+    src: /michi-shield.png
+    alt: The michi shield
   actions:
     - theme: brand
       text: Quickstart
