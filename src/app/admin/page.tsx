@@ -20,6 +20,7 @@ export default async function AdminHome() {
       id: tenants.id,
       slug: tenants.slug,
       name: tenants.name,
+      kind: tenants.kind,
       status: tenants.status,
       cap: tenants.dailyMessageCap,
       messages7d: sql<number>`(
@@ -69,6 +70,13 @@ export default async function AdminHome() {
             <tr key={row.id}>
               <td>
                 <Link href={`/admin/tenants/${row.id}`}>{row.name}</Link>
+                {/* Only a non-default kind earns a badge: a plain install (all business)
+                    keeps looking exactly as it did before kinds existed. */}
+                {row.kind !== "business" && (
+                  <span className="pill kind" title="Driven by an application, not a customer assistant">
+                    {row.kind}
+                  </span>
+                )}
               </td>
               <td>
                 <code>{row.slug}</code>

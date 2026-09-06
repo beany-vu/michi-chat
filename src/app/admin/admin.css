@@ -271,6 +271,11 @@
 .pill.disabled {
   color: var(--muted);
 }
+.pill.kind {
+  margin-left: 8px;
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
 
 .card {
   border: 1px solid var(--line);
