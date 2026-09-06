@@ -427,9 +427,11 @@
   gap: 16px;
   align-items: center;
 }
-/* The tenant editor is long; its head (name, section links, Back) sticks to the top
-   edge and Save to the bottom, so navigation never needs a scroll. The mobile block
-   makes the sidebar static, so a top-stuck head never overlaps it. */
+/* Every head that carries something actionable (section links, Back, filters, the
+   flag/export buttons on a transcript) sticks to the top edge, and long editors stick
+   Save to the bottom, so navigation never needs a scroll. Heads that are only a title
+   stay in flow. The mobile block makes the sidebar static, so a top-stuck head never
+   overlaps it. */
 .head-sticky {
   position: sticky;
   top: 0;
@@ -809,14 +811,17 @@
   .head-sticky h1 {
     font-size: 18px;
   }
-  .head-sticky .head-links {
+  .head-sticky .head-links,
+  .head-sticky .filters {
     flex-wrap: nowrap;
     overflow-x: auto;
     gap: 8px;
     padding-bottom: 2px;
     scrollbar-width: none;
   }
-  .head-sticky .head-links a {
+  .head-sticky .head-links a,
+  .head-sticky .head-links form,
+  .head-sticky .filters a {
     white-space: nowrap;
     flex: 0 0 auto;
   }

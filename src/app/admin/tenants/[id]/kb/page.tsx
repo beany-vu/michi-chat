@@ -55,7 +55,7 @@ export default async function KbPage({
 
   return (
     <>
-      <div className="head">
+      <div className="head head-sticky">
         <h1>{tenant.name}: knowledge base</h1>
         <div className="head-links">
           <a href={`/admin/kb-csv?tenant=${id}`}>Export CSV</a>

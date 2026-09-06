@@ -40,7 +40,7 @@ export default async function CachePage({ params }: { params: Promise<{ id: stri
 
   return (
     <>
-      <div className="head">
+      <div className="head head-sticky">
         <h1>{tenant.name}: answer cache</h1>
         <div className="head-links">
           {rows.length > 0 && (

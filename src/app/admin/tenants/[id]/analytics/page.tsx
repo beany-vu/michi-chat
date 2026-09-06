@@ -128,7 +128,7 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ id: 
 
   return (
     <>
-      <div className="head">
+      <div className="head head-sticky">
         <h1>{tenant.name}: analytics</h1>
         <div className="head-links">
           <Link href={`/admin/tenants/${id}`}>Back to tenant</Link>

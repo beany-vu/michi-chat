@@ -108,7 +108,7 @@ export default async function TranscriptPage({ params }: { params: Promise<{ id:
 
   return (
     <>
-      <div className="head">
+      <div className="head head-sticky">
         <h1>{conversation.tenantName}</h1>
         <div className="head-links">
           <span>{conversation.originHost ?? "direct"}</span>

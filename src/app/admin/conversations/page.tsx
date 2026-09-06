@@ -66,7 +66,7 @@ export default async function ConversationsPage({
 
   return (
     <>
-      <div className="head">
+      <div className="head head-sticky">
         <h1>Conversations</h1>
         <div className="filters">
           <Link
