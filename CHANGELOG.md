@@ -3,6 +3,22 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.29 - 2026-09-06
+
+### Fixed
+
+- Admin: forms that post more than 1 MB, such as a whole-tenant import or Save & embed on
+  a very large knowledge document, no longer fail with "This page couldn't load". The
+  Server Action body limit is now 8 MB. Very large tenant files are still best imported
+  with `npm run tenant:import`, which has no body limit and no proxy timeout.
+- Widget: a wide logo (a wordmark) in the chat header is shown whole instead of being
+  cropped to a square.
+
+### Added
+
+- Admin: a small coach badge after non-business tenants in the tenant list; business
+  tenants look exactly as before.
+
 ## v0.2.28 - 2026-09-06
 
 ### Added

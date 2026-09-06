@@ -3,6 +3,13 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.29 - big imports and wide logos
+
+Two things stopped saying "This page couldn't load": importing a large tenant file and
+saving a very large knowledge document. Both used to hit a hidden 1 MB limit; it is now
+8 MB. And a tenant whose logo is a wide wordmark, not a square mark, now sees it whole in
+the chat header instead of cropped. In the tenant list, coach tenants carry a small badge.
+
 ## v0.2.28 - staff see only their tenants
 
 On Accounts you now tick which tenants a staff account may see, and that is all they
