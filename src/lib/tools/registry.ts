@@ -54,6 +54,9 @@ export interface ToolPack {
   definitionFor?(config: Record<string, string>): OpenAI.Chat.Completions.ChatCompletionTool;
   /** Shown to the visitor as a live chip, e.g. "Checking the menu". */
   label: string;
+  /** One admin-facing sentence: what the model gets back. Shown in the analytics
+   *  glossary next to the inputs, so an operator can read a tool like a contract. */
+  returns: string;
   /** Drives the admin form, so adding a pack grows the UI automatically. */
   configFields: ToolConfigField[];
   run(config: Record<string, string>, args: string, ctx: ToolContext): Promise<string>;

@@ -325,7 +325,7 @@ export function TenantForm({
         </small>
       </fieldset>
 
-      <div className="actions">
+      <div className="actions actions-sticky">
         <button type="submit" disabled={pending}>
           {pending ? "Saving…" : "Save"}
         </button>

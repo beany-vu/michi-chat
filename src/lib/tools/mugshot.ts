@@ -14,6 +14,9 @@ const weather: ToolPack = {
   family: "mugshot-cms",
   description: "Live weather at the cafe, for drink suggestions. Needs a site with the /api/weather/forecast endpoint.",
   label: "Checking the weather",
+  returns:
+    "Today's air temperature, feels-like temperature, condition, rain chance and whether it " +
+    "is a good cafe day; or a note that weather is unavailable and to suggest from the menu.",
   definition: {
     type: "function",
     function: {
@@ -75,6 +78,7 @@ const menu: ToolPack = {
   family: "mugshot-cms",
   description: "The live standing menu. Needs a site exposing /api/menu/ in the Mugshot CMS shape.",
   label: "Checking the menu",
+  returns: "The standing menu as a list of item names with category and description, plus the price note.",
   definition: {
     type: "function",
     function: {
@@ -120,6 +124,7 @@ const specials: ToolPack = {
   family: "mugshot-cms",
   description: "Seasonal specials and retail products, live from /api/products/.",
   label: "Checking the specials",
+  returns: "Seasonal specials and retail products: name, description and category.",
   definition: {
     type: "function",
     function: {
@@ -156,6 +161,7 @@ const events: ToolPack = {
   family: "mugshot-cms",
   description: "Upcoming events with dates and capacity, live from /api/events/.",
   label: "Checking upcoming events",
+  returns: "Upcoming events (and recent past ones, labeled) with date, time, capacity and a short description, computed in the cafe's timezone.",
   definition: {
     type: "function",
     function: {

@@ -10,6 +10,7 @@ import { notFound, redirect } from "next/navigation";
 import { dbRoot } from "@/db";
 import { conversations, messages, tenants } from "@/db/schema";
 import { isAuthenticated } from "@/lib/admin-auth";
+import { describeTool } from "@/lib/tools/describe";
 
 const WINDOW_DAYS = 30;
 
@@ -179,6 +180,48 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ id: 
           ))}
           {toolMix.size === 0 && <p className="note">No tool calls in the window.</p>}
         </div>
+        {toolMix.size > 0 && (
+          // The bar names are function ids the model calls. The glossary reads them as a
+          // contract (what goes in, what comes back), from the same definition the model
+          // gets, so an owner does not have to open the code to know what a call did.
+          <dl className="tool-glossary">
+            {top(toolMix, 8).map(([name]) => {
+              const tool = describeTool(name);
+              return (
+                <div key={name}>
+                  <dt>
+                    <code>{name}</code>
+                    {tool && <span>{tool.label}</span>}
+                  </dt>
+                  <dd>
+                    {tool ? (
+                      <>
+                        <p>{tool.description}</p>
+                        <p>
+                          <b>Input:</b>{" "}
+                          {tool.inputs.length === 0
+                            ? "none, the tool takes no arguments."
+                            : tool.inputs.map((input, i) => (
+                                <span key={input.name}>
+                                  {i > 0 && "; "}
+                                  <code>{input.name}</code>
+                                  {input.required ? "" : " (optional)"}: {input.description}
+                                </span>
+                              ))}
+                        </p>
+                        <p>
+                          <b>Returns:</b> {tool.returns}
+                        </p>
+                      </>
+                    ) : (
+                      <p>Not in this platform&apos;s catalog (a name the model made up, refused at call time).</p>
+                    )}
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+        )}
       </section>
 
       <section className="card">

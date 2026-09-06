@@ -427,6 +427,18 @@
   gap: 16px;
   align-items: center;
 }
+/* The tenant editor is long; Save stays in view at the bottom edge instead of asking
+   for a scroll past every fieldset. Same surface and hairline as the sidebar so it reads
+   as a fixed part of the page, not a floating widget. */
+.actions-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin: -12px 0 0;
+  padding: 14px 0;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+}
 .error {
   color: var(--danger);
 }
@@ -566,6 +578,37 @@
 }
 .query-list .pill {
   margin-left: 8px;
+}
+
+.tool-glossary {
+  margin: 22px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 14px;
+  max-width: 72ch;
+}
+.tool-glossary dt {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+}
+.tool-glossary dt span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.tool-glossary dd {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.tool-glossary dd p {
+  margin: 2px 0;
+}
+.tool-glossary dd b {
+  color: var(--fg);
+  font-weight: 600;
 }
 
 .hour-strip {

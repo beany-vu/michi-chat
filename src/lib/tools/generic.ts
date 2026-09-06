@@ -35,6 +35,7 @@ const fetchJson: ToolPack = {
     "Read one JSON endpoint of the business's own website and hand the model only the " +
     "fields you allowlist. For businesses whose API no ready-made pack fits.",
   label: "Checking our website",
+  returns: "The endpoint's JSON reduced to the allowlisted fields (arrays capped per item).",
   definition: {
     type: "function",
     function: {

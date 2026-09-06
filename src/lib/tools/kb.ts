@@ -17,6 +17,7 @@ const searchKbPack: ToolPack = {
   family: "generic",
   description: "Answers from this tenant's own Facts & knowledge documents. Fits every business; enable it once there are documents.",
   label: "Checking our info",
+  returns: "Up to five matching passages from the knowledge base with their document titles, or a note that nothing relevant was found.",
   definition: {
     type: "function",
     function: {
