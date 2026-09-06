@@ -189,24 +189,67 @@ const events: ToolPack = {
     } catch {
       today = new Intl.DateTimeFormat("en-CA", { timeZone: "UTC" }).format(new Date());
     }
-    const trim = (event: Record<string, unknown>) => ({
-      title: event.title,
-      date: event.date,
-      startTime: event.startTime,
-      endTime: event.endTime,
-      type: event.type,
-      description: typeof event.description === "string" ? event.description.slice(0, 200) : undefined,
-      capacity: event.capacity,
-    });
-    const dated = payload
-      .filter((event) => typeof event.date === "string")
-      .sort((a, b) => String(a.date).localeCompare(String(b.date)));
-    // Split around today so the model never has to do date math: the API returns the
-    // full history oldest-first, and slicing it blind used to serve only past events.
-    const upcoming = dated.filter((event) => String(event.date) >= today).slice(0, 8).map(trim);
-    const recentPast = dated.filter((event) => String(event.date) < today).slice(-3).reverse().map(trim);
-    return JSON.stringify({ today, upcoming, recentPast });
+    return JSON.stringify(bucketEvents(payload, today));
   },
 };
+
+interface EventBuckets {
+  today: string;
+  upcoming: Record<string, unknown>[];
+  ongoing: Record<string, unknown>[];
+  recentPast: Record<string, unknown>[];
+  note: string;
+}
+
+/**
+ * Split the API's full history around "today" so the model never does date math.
+ * Exported for tests. Three buckets, each self-describing, because a visitor who saw a
+ * past event announced as "the next one" (a real complaint, 2026-09-06) is the failure
+ * this guards against: recentPast entries carry `status: "already happened"` and the
+ * note spells out the empty case instead of leaving the model to improvise.
+ */
+export function bucketEvents(payload: Record<string, unknown>[], today: string): EventBuckets {
+  const trim = (event: Record<string, unknown>) => ({
+    title: event.title,
+    date: event.date,
+    endDate: typeof event.endDate === "string" ? event.endDate : undefined,
+    startTime: event.startTime,
+    endTime: event.endTime,
+    type: event.type,
+    description: typeof event.description === "string" ? event.description.slice(0, 200) : undefined,
+    capacity: event.capacity,
+  });
+  const dated = payload
+    .filter((event) => typeof event.date === "string")
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const upcoming = dated
+    .filter((event) => String(event.date) >= today)
+    .slice(0, 8)
+    .map((event) => ({ ...trim(event), status: "upcoming" }));
+  // Multi-day events (an exhibition that runs until endDate) count as happening now.
+  const ongoing = dated
+    .filter(
+      (event) =>
+        String(event.date) < today &&
+        typeof event.endDate === "string" &&
+        String(event.endDate) >= today,
+    )
+    .map((event) => ({ ...trim(event), status: "ongoing, runs until endDate" }));
+  const recentPast = dated
+    .filter(
+      (event) =>
+        String(event.date) < today &&
+        !(typeof event.endDate === "string" && String(event.endDate) >= today),
+    )
+    .slice(-3)
+    .reverse()
+    .map((event) => ({ ...trim(event), status: "already happened, do not present as upcoming" }));
+  const note =
+    upcoming.length === 0 && ongoing.length === 0
+      ? "No upcoming events are listed right now. Say so plainly, mention that new events are announced on the events page and social media, and never present a past event as the next one."
+      : "Only `upcoming` and `ongoing` are current. `recentPast` is history for context; never announce those as next.";
+  return { today, upcoming, ongoing, recentPast, note };
+}
+
 
 export const MUGSHOT_PACKS = [weather, menu, specials, events];

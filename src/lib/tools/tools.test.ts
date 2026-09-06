@@ -68,3 +68,21 @@ test("labels come from the pack, with the raw name as the fallback", () => {
   assert.equal(tools.labelFor("get_menu"), "Checking the menu");
   assert.equal(tools.labelFor("mystery"), "mystery");
 });
+
+test("get_events never presents a past event as the next one", async () => {
+  const { bucketEvents } = await import("./mugshot");
+  const payload = [
+    { title: "Sunday Funday", date: "2026-08-24", startTime: "10:00" },
+    { title: "Wired to bloom", date: "2026-08-19", endDate: "2026-09-11" },
+    { title: "Five more minutes", date: "2026-09-11" },
+  ];
+  const b = bucketEvents(payload, "2026-09-06");
+  assert.deepEqual(b.upcoming.map((e) => e.title), ["Five more minutes"]);
+  assert.deepEqual(b.ongoing.map((e) => e.title), ["Wired to bloom"]);
+  assert.deepEqual(b.recentPast.map((e) => e.title), ["Sunday Funday"]);
+  assert.match(String(b.recentPast[0].status), /already happened/);
+  assert.match(b.note, /never announce those as next/);
+  const empty = bucketEvents([{ title: "Sunday Funday", date: "2026-08-24" }], "2026-09-06");
+  assert.deepEqual(empty.upcoming, []);
+  assert.match(empty.note, /No upcoming events/);
+});
