@@ -59,7 +59,8 @@ proxy sets that header. The per-tenant daily message cap is what bounds the bill
 
 - **Customize (no code):** everything a tenant is lives in the admin UI - persona, branding,
   which tool packs are enabled, knowledge-base documents, allowed origins, Slack notifications.
-  Model routing lives in `litellm.config.yaml`.
+  Staff accounts are scoped to the tenants an owner ticks for them. Model routing lives in
+  `litellm.config.yaml`.
 - **Extend (fork + build):** a new capability is one file implementing the `ToolPack` interface
   in `src/lib/tools/` plus one line in `src/lib/tools/index.ts`. Its `configFields` auto-grow
   the admin form. Then `docker build -t my-michi .` and set `MICHI_IMAGE=my-michi` in the

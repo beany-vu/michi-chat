@@ -36,8 +36,12 @@ Tools are **code packs**: the platform owns the code, a tenant enables a pack an
 **Admin → Conversations** shows every transcript (rendered as plain text deliberately);
 owners can export any transcript as JSON or delete it outright. **Admin → Usage** aggregates
 messages, tokens and latency per tenant per day. **Tenant → Analytics** breaks down the last
-30 days: volume, tool mix, the actual knowledge-base queries visitors triggered, busy hours,
-origins, and (behind Cloudflare) country-level location - never IPs.
+30 days: volume, tool mix (each tool in the mix explained as a contract: chip label,
+description, inputs, what it returns - read from the same definition the model gets), the
+actual knowledge-base queries visitors triggered, busy hours, origins, and (behind
+Cloudflare) country-level location - never IPs. **Admin → Unanswered** lists the turns where
+the assistant admitted not knowing, with tenant filter chips. Every page head that carries
+links or actions stays pinned while you scroll, and the tenant editor keeps Save in view.
 
 ## Moving a tenant between instances
 

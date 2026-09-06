@@ -10,6 +10,10 @@ frequent query with a weak answer is your next document to write), busy hours, a
 conversations come from. Country-level location appears when the platform runs behind
 Cloudflare - IPs are never stored.
 
+The "What visitors reach for" bars name the lookups by their function id; under the bars,
+each one is explained in plain words - what it does, what goes in, what comes back - so
+you never need the code to understand what the assistant did.
+
 ![The analytics page](/screenshots/analytics.png)
 
 ## Let staff help
@@ -17,6 +21,15 @@ Cloudflare - IPs are never stored.
 **Accounts** (owner only) creates staff logins: staff can read conversations and usage and
 maintain the knowledge base, but cannot touch tenants, embed keys, or settings. The
 day-to-day loop below is exactly what staff accounts are for.
+
+Staff see only the tenants you tick for them - on the form when you create the account,
+or later with the checkboxes on their row and that row's **Save**. A staff account with
+nothing ticked sees an empty admin until you assign it, so a new login is safe by default.
+Changes apply on the account's next page load, no re-login needed. To try it yourself,
+create a test staff account, tick one tenant, sign out and log in as it; **Disable** the
+row when you are done.
+
+![The accounts page with per-tenant checkboxes on a staff row](/screenshots/accounts.png)
 
 ## Read what customers ask
 
@@ -41,8 +54,11 @@ The very next question uses the new answer. No restarts, no waiting.
 
 **Unanswered** does the spotting for you: it lists every turn where the assistant
 admitted it didn't know, with the visitor question that caused it and an **Add fact**
-shortcut. Working that list weekly is the highest-leverage habit in the admin - every
-row you fix is a question answered properly forever after.
+shortcut. With several businesses on one instance, the tenant chips at the top narrow the
+list to one of them. Working that list weekly is the highest-leverage habit in the admin -
+every row you fix is a question answered properly forever after.
+
+![The unanswered report with tenant chips](/screenshots/unanswered.png)
 
 ## Watch the numbers
 

@@ -3,7 +3,7 @@
 This is what your customers see: a chat on your website that answers questions about **your
 business** - opening hours, the menu, delivery, policies - in your voice, any time of day.
 
-![The visitor chat answering an opening-hours question](/screenshots/visitor-chat.png)
+![The visitor chat answering a booking question, with a tappable email and phone number](/screenshots/visitor-chat.png)
 
 A few things to notice in that picture:
 
@@ -12,6 +12,8 @@ A few things to notice in that picture:
   points people to your staff.
 - **It never invents prices or availability.** If you don't publish prices, it directs
   customers to the counter or your delivery app - that behavior is built in.
+- **Contact details are tappable.** An email, a phone number or a web address in an answer
+  is a real link: tap to mail, tap to call, tap to open the page in a new tab.
 - **The small notice at the bottom** asks visitors not to share personal or sensitive
   information, and explains that the assistant only handles questions about your business.
   You write that text yourself, so it can match your tone (and your local privacy rules).
