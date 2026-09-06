@@ -3,6 +3,15 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.27 - 2026-09-06
+
+### Changed
+
+- Admin: every page head that carries links, filters or actions now sticks to the top
+  edge while scrolling: transcripts (flag, export, delete, back), knowledge base, embed
+  keys, answer cache, analytics and the conversations list. On phones the stuck head is
+  compact, with the links in one sideways-scrolling row.
+
 ## v0.2.26 - 2026-09-06
 
 ### Added

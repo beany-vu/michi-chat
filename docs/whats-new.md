@@ -3,6 +3,13 @@
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.27 - the page head stays with you everywhere
+
+The sticky head from the tenant form now applies to every admin page that has something
+to press up there: a transcript's Flag, Export, Delete and Back, the knowledge base and
+analytics links, the tenant filters on Conversations. Scroll as far as you like; the way
+back is always at the top.
+
 ## v0.2.26 - links you can tap, and a glossary for the bars
 
 When the assistant gives an email, a phone number or a web address, it is now a real
