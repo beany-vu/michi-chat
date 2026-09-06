@@ -3,6 +3,20 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.30 - 2026-09-06
+
+### Added
+
+- **Imports run in the background, with a live progress banner.** A tenant import now
+  applies the settings, answers "Import started" at once, and embeds the documents after
+  the response, so a big knowledge base never holds the browser open until a proxy cuts
+  it. The tenant page and the knowledge page show "Importing: 7 of 9 documents, 3,120 of
+  7,003 chunks, embedding …" with a spinner, refreshing every few seconds, then the
+  summary or the error. Unchanged documents are skipped and not counted as work. A
+  second import for the same tenant is refused while one runs; a job with no heartbeat
+  for ten minutes counts as dead. The CLI import (`npm run tenant:import`) shares the
+  code and prints per-document progress. Migration `0015_import_jobs`.
+
 ## v0.2.29 - 2026-09-06
 
 ### Fixed

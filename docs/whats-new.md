@@ -7,6 +7,16 @@ description: "What changed in michi-chat, release by release, in plain words for
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.30 - you can watch an import happen
+
+Importing a tenant used to mean staring at a spinning button and, for a big knowledge
+base, an error page when the connection gave up. Now the import starts and the page
+answers right away; the tenant page and the knowledge page show a banner that counts up,
+"7 of 9 documents, 3,120 of 7,003 chunks, embedding HS 2022 product codes", and ends with
+"Imported 9 documents in 70s" or the reason it failed. Documents that did not change are
+skipped. If someone starts a second import of the same tenant while one is running, they
+get a polite no with the current progress.
+
 ## v0.2.29 - big imports and wide logos
 
 Two things stopped saying "This page couldn't load": importing a large tenant file and
