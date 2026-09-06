@@ -7,6 +7,14 @@ description: "What changed in michi-chat, release by release, in plain words for
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.31 - no more "next event" that already happened
+
+If the assistant was asked what is coming up and named an event from last month, that
+is fixed: the events lookup now tells the assistant plainly which events are upcoming,
+which are still running, and which are over, and says "nothing is scheduled right now"
+when that is the truth. Also fixed: the michi shield in the admin was missing on
+production.
+
 ## v0.2.30 - you can watch an import happen
 
 Importing a tenant used to mean staring at a spinning button and, for a big knowledge

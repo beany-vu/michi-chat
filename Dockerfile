@@ -24,6 +24,9 @@ RUN addgroup -S michi && adduser -S michi -G michi
 # imports only.
 COPY --from=build --chown=michi:michi /app/.next/standalone ./
 COPY --from=build --chown=michi:michi /app/.next/static ./.next/static
+# Standalone output does not include public/; without this line every file under
+# public/ (the michi shield, for one) is a 404 in production while it works in dev.
+COPY --from=build --chown=michi:michi /app/public ./public
 
 # The entrypoint imports drizzle-orm's migrator, which the app itself never imports, so
 # standalone tracing omits it. Both packages are dependency-free; copy them whole.

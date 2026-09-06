@@ -3,6 +3,20 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.31 - 2026-09-06
+
+### Fixed
+
+- **Files under `public/` were missing from the production image.** The standalone
+  build does not include that folder and the Dockerfile never copied it, so the michi
+  shield in the admin was a 404 on prod while it worked in dev. The image now carries
+  `public/`.
+- **The events tool no longer lets a past event pass as the next one.** Every entry is
+  labelled: upcoming, ongoing until its end date, or already happened; and when nothing
+  is upcoming the tool says so instead of leaving the model to improvise. Bucketing is
+  unit-tested against the real case (a community day from August announced as "next" in
+  September).
+
 ## v0.2.30 - 2026-09-06
 
 ### Added
