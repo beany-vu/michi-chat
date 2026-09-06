@@ -26,7 +26,12 @@ export function AdminSide({ isOwner }: { isOwner: boolean }) {
   return (
     <aside className={`admin-side${open ? " admin-side-open" : ""}`}>
       <div className="admin-side-top">
-        <div className="admin-logo">michi-chat</div>
+        <div className="admin-logo">
+          {/* The michi shield, shared with @michi-vz: one mark across the workshop. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/michi-shield.png" alt="" width={22} height={30} />
+          michi-chat
+        </div>
         <button
           type="button"
           className="admin-burger"

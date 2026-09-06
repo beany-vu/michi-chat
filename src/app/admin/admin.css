@@ -82,14 +82,25 @@
   font-weight: 600;
   letter-spacing: 0.04em;
 }
-/* The same ● mark the visitor page uses, in oak: one brand across both surfaces. */
-.admin-logo::before {
-  content: "";
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--accent);
+/* The michi shield (shared with @michi-vz) as the mark; the visitor page keeps the
+   tenant's own accent dot, because that surface is the tenant's brand, not ours. */
+.admin-logo img {
+  width: 22px;
+  height: auto;
   flex: 0 0 auto;
+}
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.login-brand img {
+  width: 26px;
+  height: auto;
+}
+.login-brand h1 {
+  margin: 0;
 }
 .admin-side nav {
   display: flex;

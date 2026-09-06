@@ -1,3 +1,5 @@
+<p align="center"><img src="public/michi-shield.png" width="72" alt="michi shield"></p>
+
 # michi-chat
 
 **Documentation: <https://beany-vu.github.io/michi-chat/>** - quickstart, admin guide, extending.
