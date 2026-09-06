@@ -27,7 +27,7 @@ export default async function TenantEditor({ params }: { params: Promise<{ id: s
 
   return (
     <>
-      <div className="head">
+      <div className="head head-sticky">
         <h1>{tenant.name}</h1>
         <div className="head-links">
           <Link href={`/admin/tenants/${tenant.id}/keys`}>Embed keys</Link>

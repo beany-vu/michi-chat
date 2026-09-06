@@ -427,8 +427,19 @@
   gap: 16px;
   align-items: center;
 }
-/* The tenant editor is long; Save stays in view at the bottom edge instead of asking
-   for a scroll past every fieldset. Same surface and hairline as the sidebar so it reads
+/* The tenant editor is long; its head (name, section links, Back) sticks to the top
+   edge and Save to the bottom, so navigation never needs a scroll. The mobile block
+   makes the sidebar static, so a top-stuck head never overlaps it. */
+.head-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin: calc(-1 * var(--page-pad-y)) 0 20px;
+  padding: 18px 0 12px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+/* Save stays in view at the bottom edge instead of asking for a scroll past every fieldset. Same surface and hairline as the sidebar so it reads
    as a fixed part of the page, not a floating widget. */
 .actions-sticky {
   position: sticky;
@@ -786,5 +797,27 @@
   }
   .admin-side-open .admin-side-foot button {
     width: 100%;
+  }
+
+  /* A stuck head on a phone must not cost a third of the screen: smaller title, links in
+     one row that scrolls sideways (Back is the last chip; a swipe reaches it). */
+  .head-sticky {
+    padding: 12px 0 10px;
+    margin-bottom: 14px;
+    gap: 8px;
+  }
+  .head-sticky h1 {
+    font-size: 18px;
+  }
+  .head-sticky .head-links {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .head-sticky .head-links a {
+    white-space: nowrap;
+    flex: 0 0 auto;
   }
 }
