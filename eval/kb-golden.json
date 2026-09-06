@@ -117,6 +117,21 @@
     {
       "question": "coffee cart price for 50 cups",
       "expectDoc": "Events and venue rental"
+    },
+    {
+      "question": "what is foodpanda",
+      "expectDoc": "Frequently asked questions"
+    },
+    {
+      "question": "is your coffee good",
+      "expectDoc": [
+        "Frequently asked questions",
+        "Coffee and retail"
+      ]
+    },
+    {
+      "question": "do you have any discount or promo",
+      "expectDoc": "Frequently asked questions"
     }
   ]
 }

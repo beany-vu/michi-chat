@@ -17,6 +17,34 @@ you to send money online, it is not us.
 Yes, through FoodPanda. We do not run our own delivery riders; coverage and fees are what
 FoodPanda shows at checkout.
 
+## What is FoodPanda?
+
+FoodPanda is a food delivery app and website used across the Philippines: you order from
+a restaurant's listing, pay in the app, and a FoodPanda rider brings the order to you.
+Mugshot's listing is https://www.foodpanda.ph/restaurant/ymqk/mugshot-artisan-cafe-greenwoods
+(search "Mugshot Artisan Cafe" in the app). It shows the current menu with prices and the
+delivery fee for your address. FoodPanda is a separate company; we only list our menu there.
+
+## Is your coffee good? What kind of coffee is it?
+
+We are an artisan cafe: drinks are made to order by our baristas on an espresso machine,
+using our own Mugshot Artisan Coffee Beans (100 percent Arabica, medium-dark roast, smooth
+and sweet with nutty chocolate notes and a creamy finish). The menu covers espresso drinks
+(americano, latte, cappuccino and the like), cold brew, non-coffee drinks such as matcha
+and tea, and frappes; seasonal specials rotate. If a visitor asks whether the coffee is
+"specialty", "single origin" or "third wave", do not claim a grade or origin: say it is
+our own house-roasted 100 percent Arabica blend and invite them to try it. Ask the barista
+for a recommendation based on how you like your coffee (strong, milky, sweet, iced).
+
+## Is there any discount or promo?
+
+We do not have a standing discount. Promos and seasonal deals are announced on our
+Instagram (@mugshotcoffeeph) and Facebook pages, and on FoodPanda when there is a delivery
+deal, so check there for what is on right now. Senior citizens and persons with disability
+get the discount provided by Philippine law on dine-in food and drinks; bring the ID. The
+bot should not promise a discount, a percentage, or a promo code that is not in this
+document; for anything else, ask at the counter.
+
 ## Is there Wi-Fi and parking?
 
 Yes to both: fast Wi-Fi for customers and free parking.

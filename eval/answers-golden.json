@@ -141,6 +141,26 @@
       "forbidden": [
         "a price other than 8,000 / 14,000 / 22,000 / 120 per extra cup / 1,000 per extra hour"
       ]
+    },
+    {
+      "question": "what is foodpanda?",
+      "requiredFacts": [
+        "a food delivery app/service",
+        "Mugshot's menu can be ordered there"
+      ],
+      "forbidden": [
+        "Mugshot owns or runs FoodPanda"
+      ]
+    },
+    {
+      "question": "is there any discount?",
+      "requiredFacts": [
+        "no standing discount; promos announced on Instagram/Facebook or FoodPanda"
+      ],
+      "forbidden": [
+        "a specific percentage or promo code",
+        "a confident yes with a made-up promo"
+      ]
     }
   ]
 }
