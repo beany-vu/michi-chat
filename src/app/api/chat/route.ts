@@ -23,6 +23,7 @@ import { isRateLimited } from "@/lib/rate-limit";
 import { notifySlack } from "@/lib/slack";
 import { corsHeaders, corsJson, isOriginRegistered, normalizeOrigin, resolveTenant } from "@/lib/tenant";
 import { friendlyError, looksLikeProviderError } from "@/lib/moderation";
+import { ANSWER_FROM_WHAT_YOU_HAVE, DO_IT_NOW, isPreambleOnly } from "@/lib/preamble";
 import { buildTenantTools } from "@/lib/tools";
 
 const MAX_ROUNDS = 6;
@@ -324,6 +325,7 @@ export async function POST(request: NextRequest) {
         // The loop: while the model asks for tools, run them and resend; the first
         // plain-text response is the answer.
         let answer = "";
+        let nudged = false;
         for (let round = 0; round < MAX_ROUNDS; round++) {
           const completion = await openai.chat.completions.create({
             model,
@@ -337,6 +339,14 @@ export async function POST(request: NextRequest) {
           const toolCalls = (choice.tool_calls ?? []).filter((c) => c.type === "function");
           if (toolCalls.length === 0) {
             answer = choice.content ?? "";
+            // "Let me check the coverage for Austria." with no tool call is a promise, not an
+            // answer. Give it one nudge to act; a second preamble is returned as is.
+            if (isPreambleOnly(answer) && !nudged && round < MAX_ROUNDS - 1) {
+              nudged = true;
+              turn.push(choice);
+              turn.push({ role: "user", content: DO_IT_NOW });
+              continue;
+            }
             break;
           }
 
@@ -381,7 +391,23 @@ export async function POST(request: NextRequest) {
         }
 
         // If every round came back asking for more tools we fall out of the loop with
-        // nothing to say. Without this the visitor just gets an empty bubble.
+        // nothing to say (seen on prod for a product the nomenclature does not name: six
+        // rounds of search_kb, then silence). One last completion WITHOUT tools turns what
+        // was found into an answer; only if that is empty too does the visitor see the
+        // friendly line.
+        if (!answer.trim()) {
+          try {
+            const last = await openai.chat.completions.create({
+              model,
+              messages: [...turn, { role: "user", content: ANSWER_FROM_WHAT_YOU_HAVE }],
+            });
+            tokensIn += last.usage?.prompt_tokens ?? 0;
+            tokensOut += last.usage?.completion_tokens ?? 0;
+            answer = last.choices[0].message.content ?? "";
+          } catch (error) {
+            console.error("final no-tools completion failed:", error);
+          }
+        }
         if (!answer.trim()) answer = friendlyError(tenant.kind);
 
         // House style, enforced in code: models follow "no dashes" unreliably.
