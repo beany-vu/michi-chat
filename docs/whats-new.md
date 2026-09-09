@@ -7,6 +7,15 @@ description: "What changed in michi-chat, release by release, in plain words for
 The headline changes, newest first. The full list lives in
 [CHANGELOG.md](https://github.com/beany-vu/michi-chat/blob/master/CHANGELOG.md).
 
+## v0.2.32 - no more empty-handed answers
+
+When the assistant said "let me check" and then went quiet, or searched and searched and
+ended with "Sorry, I could not answer that one", it was the loop giving up, not the
+knowledge. Both now get a second chance: an announced lookup is nudged to actually happen,
+and a search that runs out of rounds is turned into an answer from what it found. The
+persona also has more room, six thousand characters, for the rules that keep a
+conversation on track.
+
 ## v0.2.31 - no more "next event" that already happened
 
 If the assistant was asked what is coming up and named an event from last month, that

@@ -3,6 +3,23 @@
 All notable changes to michi-chat. Dates are the release/tag date.
 This project is versioned by git tags (`v*`), which trigger the GHCR image build.
 
+## v0.2.32 - 2026-09-10
+
+### Fixed
+
+- Chat: two ways a tool-using model could hand back a non-answer are closed. A reply that only
+  announces a lookup ("Let me check the coverage for Austria.") with no tool call now gets one
+  nudge to do it; and when the tool loop runs out of rounds, one last completion without tools
+  turns what was found into an answer before the friendly line is considered. Both were seen
+  on prod: a product the nomenclature does not name made the model search six rounds and say
+  nothing.
+
+### Changed
+
+- The persona may now be up to 6,000 characters (was 4,000), so a tenant can carry
+  conversation-flow rules: keep the thread across turns, search on every turn, destination
+  reminders.
+
 ## v0.2.31 - 2026-09-06
 
 ### Fixed
