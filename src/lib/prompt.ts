@@ -12,7 +12,7 @@
 // matters ever enters the model context - no keys, no internal hostnames, no other
 // tenant's data. Assume the full prompt is public, because effectively it is.
 
-export const MAX_PERSONA_CHARS = 4000;
+export const MAX_PERSONA_CHARS = 6000;
 
 /** What a tenant IS. "business" is the customer assistant this platform was built for;
  *  "coach" is an application-embedded tutor (first user: chess-mate) that must answer

@@ -18,6 +18,7 @@ import { chunkMarkdown } from "@/lib/rag/chunk";
 import { createImportJob, finishImportJob, progressLine, runningImportJob, touchImportJob } from "@/lib/import-jobs";
 import { validateSlackWebhookUrl } from "@/lib/slack";
 import { normalizeOrigin } from "@/lib/tenant";
+import { MAX_PERSONA_CHARS } from "@/lib/prompt";
 import { TOOL_PACKS } from "@/lib/tools";
 import { validateBaseUrl, validatePath } from "@/lib/validate";
 
@@ -206,7 +207,7 @@ export async function prepareTenantImport(payload: unknown, source: ImportSource
 
   const fields = {
     name: t.name.trim(),
-    persona: t.persona.slice(0, 4000),
+    persona: t.persona.slice(0, MAX_PERSONA_CHARS),
     guardrails: (t.guardrails ?? "").slice(0, 2000),
     kind: t.kind === "coach" ? ("coach" as const) : ("business" as const),
     model: t.model || null,
