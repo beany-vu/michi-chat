@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://beany-vu.github.io/michi-chat/sitemap.xml
+
+# AI-facing docs: https://beany-vu.github.io/michi-chat/llms.txt
