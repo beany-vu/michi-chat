@@ -28,7 +28,7 @@ You only touch these when deploying without the provided compose file.
 | `ADMIN_PASSWORD` | - (login impossible if unset) | Operator password |
 | `CHAT_MODEL` | `michi` | Default chat alias (a tenant's model override wins) |
 | `EMBED_MODEL` | `embed` | Embedding alias |
-| `DEFAULT_TENANT_SLUG` | `mugshot` | Which tenant `/` redirects to |
+| `DEFAULT_TENANT_SLUG` | `example-cafe` | Which tenant `/` redirects to |
 
 ## Ports
 

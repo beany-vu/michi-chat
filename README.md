@@ -135,8 +135,8 @@ cp .env.example .env
 docker compose up -d                              # app :3001 · LiteLLM :4000 · Postgres :5435
 docker compose exec app npm test                  # prompt assembly, origin matching, tool packs, chunking, slack pin
 docker compose exec app npm run test:isolation    # cross-tenant guarantees, needs the DB
-docker compose exec app npm run kb:ingest -- mugshot   # (re)embed kb/mugshot/*.md
-docker compose exec app npm run kb:eval -- mugshot     # recall@k over eval/kb-golden.json
+docker compose exec app npm run kb:ingest -- example-cafe  # (re)embed kb/example-cafe/*.md
+docker compose exec app npm run kb:eval -- example-cafe    # recall@k over eval/kb-golden.json
 ```
 
 The isolation suite asserts on the constraint *name*, so it proves the composite foreign key is

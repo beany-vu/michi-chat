@@ -1,21 +1,22 @@
 {
-  "_comment": "Golden set for the ANSWERS eval (scripts/answers-eval.ts). Each case sends a real chat turn, then the judge model checks the reply: every requiredFacts item must be conveyed (meaning, not exact words), no forbidden item may be claimed. Grows with the KB; questions stay in visitor voice.",
+  "_comment": "Golden set for the ANSWERS eval (scripts/answers-eval.ts). Each case sends a real chat turn, then the judge model checks the reply: every requiredFacts item must be conveyed (meaning, not exact words), no forbidden item may be claimed. Written against the example-cafe demo tenant in kb/example-cafe/, which is invented sample data. Grows with the KB; questions stay in visitor voice.",
   "cases": [
     {
       "question": "what time do you open?",
       "requiredFacts": [
-        "open every day",
-        "10 in the morning until 10 at night"
+        "open from 8 in the morning until 9 at night",
+        "open every day except Tuesday"
       ],
       "forbidden": [
-        "opens at 8",
+        "opens at 10",
         "closed on Mondays"
       ]
     },
     {
       "question": "are you open on monday?",
       "requiredFacts": [
-        "yes, open on Mondays (open every day)"
+        "yes, open on Mondays",
+        "the weekly closed day is Tuesday"
       ],
       "forbidden": [
         "closed on Mondays"
@@ -24,14 +25,14 @@
     {
       "question": "where exactly are you located?",
       "requiredFacts": [
-        "Greenwoods Executive Village, Pasig"
+        "12 Sample Street, Barangay Testville, Quezon City"
       ],
       "forbidden": []
     },
     {
       "question": "do you deliver?",
       "requiredFacts": [
-        "delivery is through FoodPanda"
+        "delivery is through Foodpanda and/or Grab Food"
       ],
       "forbidden": [
         "own delivery riders"
@@ -40,7 +41,7 @@
     {
       "question": "can I pay you here in the chat?",
       "requiredFacts": [
-        "no payment in chat; pay at the counter or through FoodPanda"
+        "no payment in chat; pay at the counter or through a delivery app"
       ],
       "forbidden": [
         "yes, you can pay here",
@@ -50,17 +51,18 @@
     {
       "question": "how much is a latte?",
       "requiredFacts": [
-        "no exact latte price stated; instead points to the counter and/or FoodPanda, and/or mentions coffee starting from ₱99 (also written P99 or PHP 99)"
+        "150 pesos hot (also written P150 or PHP 150)",
+        "165 pesos iced"
       ],
       "forbidden": [
-        "a specific price for the latte itself (e.g. 'a latte costs 150')"
+        "a latte price other than 150 hot or 165 iced"
       ]
     },
     {
       "question": "do you sell coffee beans to take home?",
       "requiredFacts": [
         "yes, retail beans",
-        "100% Arabica, 250g"
+        "250 gram bags at 480 pesos"
       ],
       "forbidden": []
     },
@@ -68,11 +70,11 @@
       "question": "can I rent the cafe for a private event?",
       "requiredFacts": [
         "yes, the space can be booked",
-        "published packages start at 3,500 pesos for 3 hours",
-        "inquire via the website form, email, or Instagram"
+        "packages start at 4,000 pesos for 3 hours",
+        "enquire via the website form or email"
       ],
       "forbidden": [
-        "a rental price other than 3,500, 4,500 or 5,500",
+        "a rental price other than 4,000, 5,200 or 6,500",
         "confirmed availability for a date"
       ]
     },
@@ -96,20 +98,21 @@
     {
       "question": "do you sell coffee beans? what origins do you have?",
       "requiredFacts": [
-        "one house bean, Mugshot Artisan Coffee Beans, 100% Arabica, medium-dark, 250g"
+        "three options: House Blend (medium), Morning Light (light single origin), Deep Lane (dark)",
+        "sold in 250 gram bags"
       ],
       "forbidden": [
-        "other bean origins or single origins such as Sidamo, Nyeri, Tarrazu, Antigua",
-        "a menu of multiple bean origins"
+        "bean origins that are not listed, such as Sidamo, Nyeri, Tarrazu or Antigua"
       ]
     },
     {
       "question": "do you sell merch or t-shirts?",
       "requiredFacts": [
-        "we do not sell merchandise other than our coffee beans (or: we do not carry that)"
+        "mugs, tote bags and some brewing gear are sold",
+        "does not claim t-shirts specifically are sold"
       ],
       "forbidden": [
-        "a list of merch items we sell"
+        "a confident yes to t-shirts or apparel"
       ]
     },
     {
@@ -124,48 +127,50 @@
     {
       "question": "can I bring my dog?",
       "requiredFacts": [
-        "yes, pets are welcome",
-        "keep the pet with you / watched"
+        "yes, dogs are welcome in the outdoor seating area",
+        "on a lead"
       ],
       "forbidden": [
-        "dogs are not allowed",
+        "dogs are allowed in the indoor dining area",
         "dog walking or pet-sitting service"
       ]
     },
     {
       "question": "how much is the coffee cart for 100 people?",
       "requiredFacts": [
-        "100 cups is 14,000 pesos",
-        "inquire to book"
+        "100 cups is 21,000 pesos",
+        "enquire to book"
       ],
       "forbidden": [
-        "a price other than 8,000 / 14,000 / 22,000 / 120 per extra cup / 1,000 per extra hour"
+        "a price other than 12,000 or 21,000",
+        "a confirmed booking"
       ]
     },
     {
       "question": "what is foodpanda?",
       "requiredFacts": [
         "a food delivery app/service",
-        "Mugshot's menu can be ordered there"
+        "the cafe's menu can be ordered there"
       ],
       "forbidden": [
-        "Mugshot owns or runs FoodPanda"
+        "the cafe owns or runs Foodpanda"
       ]
     },
     {
       "question": "is there any discount?",
       "requiredFacts": [
-        "no standing discount; promos announced on Instagram/Facebook or FoodPanda"
+        "a loyalty card: buy nine drinks, the tenth is free",
+        "10 percent student discount before noon on weekdays with a valid ID"
       ],
       "forbidden": [
-        "a specific percentage or promo code",
-        "a confident yes with a made-up promo"
+        "a made-up promo code",
+        "a discount percentage that is not 10 percent"
       ]
     },
     {
       "question": "what is your best seller?",
       "requiredFacts": [
-        "the Mugshot Special is the best seller"
+        "the Salted Caramel Cold Brew is the best seller"
       ],
       "forbidden": [
         "says it cannot name a best seller",

@@ -33,4 +33,4 @@ export async function loadTenantBySlug(slug: string) {
   return { tenant, embedKey: key.publicKey };
 }
 
-export const DEFAULT_TENANT_SLUG = process.env.DEFAULT_TENANT_SLUG ?? "mugshot";
+export const DEFAULT_TENANT_SLUG = process.env.DEFAULT_TENANT_SLUG ?? "example-cafe";

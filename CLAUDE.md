@@ -83,9 +83,9 @@ docker compose exec app npm test                  # unit tests (no DB)
 docker compose exec app npm run test:isolation    # cross-tenant tests (needs the DB)
 docker compose exec app npx tsc --noEmit          # typecheck
 docker compose exec app npm run db:generate       # after editing schema.ts
-docker compose exec app npm run kb:ingest -- mugshot   # (re)embed kb/mugshot/*.md
-docker compose exec app npm run kb:eval -- mugshot     # recall@k over eval/kb-golden.json
-docker compose exec app npm run eval:answers -- mugshot # judge-graded answers over eval/answers-golden.json
+docker compose exec app npm run kb:ingest -- example-cafe  # (re)embed kb/example-cafe/*.md
+docker compose exec app npm run kb:eval -- example-cafe    # recall@k over eval/kb-golden.json
+docker compose exec app npm run eval:answers -- example-cafe # judge-graded answers over eval/answers-golden.json
 docker build -t michi-chat:local .                     # the publishable image (standalone + migrate-on-boot)
 ```
 
@@ -107,9 +107,14 @@ faithfulness + completeness through the real chat API, semantic cache in the loo
 answer cache (answer_cache, first messages only, 0.05 cosine cutoff, 24h TTL, wiped on any
 KB/tenant change, off in privacy mode) is in src/lib/rag/answer-cache.ts.
 
-The kb/mugshot docs carry REAL facts harvested from mugshotmnl.com's live APIs on 2026-08-30
-(hours, address, contacts, beans, events, venue-rental channels, the from-₱99 price line);
-verify with the owner before launch, and prefer live tools over KB for anything that changes
-(events and specials already are).
+The kb/example-cafe docs are INVENTED sample data for the demo tenant, written so the two
+eval golden sets have something to grade. Real tenants' KBs are not in this repo: they
+describe actual businesses and people, so they live in the private deploy repo instead.
+Never commit a real tenant's KB, and never commit third parties' personal data (a venue's
+artist roster, say) anywhere in git: that belongs in the owning application's database,
+where consent gates it and a withdrawal actually takes effect.
+
+Prefer live tools over KB for anything that changes. Events and specials already work that
+way, and a roster must too: an embedded fact goes stale silently and answers confidently.
 Editing config.yaml needs `docker compose up -d --force-recreate litellm` (plain restart dies on
 the stale single-file bind mount under Docker Desktop/WSL).
